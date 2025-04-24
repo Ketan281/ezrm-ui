@@ -22,7 +22,7 @@ const Signup = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempted with:', { email, password });
+    console.log('Signup attempted with:', { name, email, password });
   };
 
   const handleTogglePasswordVisibility = () => {
@@ -30,11 +30,7 @@ const Signup = () => {
   };
 
   return (
-    <Container
-    maxWidth="lg"
-    sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}
-    suppressHydrationWarning
-  >
+    <Container maxWidth="lg" sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
       <Grid container spacing={2} alignItems="center" justifyContent="space-around" width="100%">
         <Grid>
           <Box sx={{ textAlign: 'center' }}>
@@ -47,21 +43,15 @@ const Signup = () => {
           </Box>
         </Grid>
         <Grid>
-          <Box
-            sx={{
-              maxWidth: 400,
-              margin: '0 auto',
-              padding: 3,
-            }}
-          >
+          <Box sx={{ maxWidth: 400, margin: '0 auto', padding: 3 }}>
             <Typography variant="h5" gutterBottom color="#333333" fontWeight="700">
-              Hello !
+              Hello!
             </Typography>
             <Typography variant="subtitle1" color="#333333" gutterBottom fontWeight="400">
               Sign Up to Get Started
             </Typography>
             <form onSubmit={handleSubmit}>
-            <TextField
+              <TextField
                 fullWidth
                 placeholder="Full Name"
                 variant="outlined"
@@ -74,7 +64,7 @@ const Signup = () => {
                     <InputAdornment position="start">
                       <Image
                         src="/user.png"
-                        alt="Mail Icon"
+                        alt="User Icon"
                         width={20}
                         height={20}
                       />
@@ -143,13 +133,13 @@ const Signup = () => {
                         edge="end"
                       >
                         <Image
-                          src="/eye.png" // Use the single eye icon
+                          src="/eye.png"
                           alt={showPassword ? 'Hide password' : 'Show password'}
                           width={20}
                           height={20}
-                        /> 
+                        />
                       </IconButton>
-                    </InputAdornment> 
+                    </InputAdornment>
                   ),
                   sx: {
                     '& fieldset': {
@@ -158,13 +148,13 @@ const Signup = () => {
                     },
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
-                        border: '1px solid #FFFFFF',
+                        border: '1px solid #e0e0e0', // Unified border color
                       },
                       '&:hover fieldset': {
-                        border: '1px solid #FFFFFF',
+                        border: '1px solid #e0e0e0',
                       },
                       '&.Mui-focused fieldset': {
-                        border: '1px solid #FFFFFF',
+                        border: '1px solid #e0e0e0',
                       },
                     },
                   },
@@ -189,6 +179,9 @@ const Signup = () => {
                 >
                   Sign Up
                 </Button>
+                <Link href="/login" color="error" sx={{ textDecoration: 'none', mt: 1 }}>
+                  Already have an account? Login
+                </Link>
               </Box>
             </form>
           </Box>

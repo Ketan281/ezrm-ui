@@ -164,7 +164,7 @@ const Login = () => {
                 >
                   Login
                 </Button>
-                <Link href="/forgot-password" color="error" sx={{ textDecoration: 'none' }}>
+                <Link href="/forgot" color="error" sx={{ textDecoration: 'none' }}>
                   Forgot Password?
                 </Link>
                 <Link href="/signup" color="primary" sx={{ textDecoration: 'none' }} mt={2}>
