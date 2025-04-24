@@ -11,6 +11,10 @@ import {
   Grid,
   InputAdornment,
   IconButton,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import Image from 'next/image';
 
@@ -18,11 +22,12 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [selectedOption, setSelectedOption] = useState(''); // State for dropdown
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Signup attempted with:', { name, email, password });
+    console.log('Signup attempted with:', { name, email, selectedOption, password });
   };
 
   const handleTogglePasswordVisibility = () => {
@@ -105,10 +110,58 @@ const Signup = () => {
                   },
                 }}
               />
+              
+              {/* New Dropdown Field */}
+              <FormControl fullWidth margin="normal">
+                <Select
+                  value={selectedOption}
+                  onChange={(e) => setSelectedOption(e.target.value)}
+                  displayEmpty
+                  inputProps={{
+                  
+                  }}
+                  sx={{
+                    borderRadius: '30px',
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                      borderRadius: '30px',
+                    },
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        border: '1px solid #e0e0e0',
+                      },
+                      '&:hover fieldset': {
+                        border: '1px solid #e0e0e0',
+                      },
+                      '&.Mui-focused fieldset': {
+                        border: '1px solid #e0e0e0',
+                      },
+                    },
+                  }}
+                //   startAdornment={
+                //     <InputAdornment position="start">
+                //       <Image
+                //         src="/dropdownIcon.png"
+                //         alt="Dropdown Icon"
+                //         width={20}
+                //         height={20}
+                //       />
+                //     </InputAdornment>
+                //   }
+                >
+                  <MenuItem value="" disabled>
+                    Select Role
+                  </MenuItem>
+                  <MenuItem value="aa">AA</MenuItem>
+                  <MenuItem value="bb">BB</MenuItem>
+                  <MenuItem value="cc">CC</MenuItem>
+                </Select>
+              </FormControl>
+
               <TextField
                 fullWidth
                 placeholder="Password"
-                type={showPassword ? 'text' : 'password'} // Toggle between text and password
+                type={showPassword ? 'text' : 'password'}
                 variant="outlined"
                 margin="normal"
                 value={password}
@@ -148,7 +201,7 @@ const Signup = () => {
                     },
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
-                        border: '1px solid #e0e0e0', // Unified border color
+                        border: '1px solid #e0e0e0',
                       },
                       '&:hover fieldset': {
                         border: '1px solid #e0e0e0',
