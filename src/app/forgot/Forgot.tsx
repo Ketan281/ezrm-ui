@@ -10,7 +10,6 @@ import {
   Container,
   Grid,
   InputAdornment,
-  IconButton,
 } from '@mui/material';
 import Image from 'next/image';
 

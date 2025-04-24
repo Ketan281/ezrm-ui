@@ -17,10 +17,10 @@ import Image from 'next/image';
 const Verify = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    
+
     // Ensure this only runs on client side
     const [isClient, setIsClient] = useState(false);
-    
+
     React.useEffect(() => {
         setIsClient(true);
     }, []);
@@ -39,9 +39,9 @@ const Verify = () => {
     return (
         <Container
             maxWidth="lg"
-            sx={{ 
-                height: '100vh', 
-                display: 'flex', 
+            sx={{
+                height: '100vh',
+                display: 'flex',
                 alignItems: 'center',
             }}
             suppressHydrationWarning
@@ -82,7 +82,7 @@ const Verify = () => {
                             Verify Code
                         </Typography>
                         <Typography variant="subtitle1" color="#333333" gutterBottom fontWeight="400" fontSize="14px" width="100%">
-                            Don't worry, happens to all of us. Enter your email below to recover your password
+                            Don&apos;t worry, happens to all of us. Enter your email below to recover your password
                         </Typography>
                         <form onSubmit={handleSubmit}>
                             <TextField
