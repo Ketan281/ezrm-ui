@@ -14,7 +14,6 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
 } from '@mui/material';
 import Image from 'next/image';
 
