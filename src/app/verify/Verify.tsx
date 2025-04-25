@@ -87,7 +87,7 @@ const Verify = () => {
                         <form onSubmit={handleSubmit}>
                             <TextField
                                 fullWidth
-                                placeholder="Password"
+                                placeholder="Enter code"
                                 type={showPassword ? 'text' : 'password'}
                                 variant="outlined"
                                 margin="normal"
