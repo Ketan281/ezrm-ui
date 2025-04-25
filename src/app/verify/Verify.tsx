@@ -143,9 +143,12 @@ const Verify = () => {
                                     },
                                 }}
                             />
+                            <Typography variant="subtitle1" color="#333333" gutterBottom fontWeight="400" fontSize="16px" width="100%">
+                            Didn&apos;t receive code,<span style={{color:"#FF8682",textDecoration:"underline"}}>resend</span> 
+                        </Typography>
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <Button
-                                    type="submit"
+                                    type="submit" 
                                     variant="contained"
                                     fullWidth
                                     sx={{
