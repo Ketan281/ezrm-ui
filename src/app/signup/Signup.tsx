@@ -26,7 +26,6 @@ const Signup = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Signup attempted with:', { name, email, selectedOption, password });
   };
 
   const handleTogglePasswordVisibility = () => {
@@ -137,16 +136,6 @@ const Signup = () => {
                       },
                     },
                   }}
-                //   startAdornment={
-                //     <InputAdornment position="start">
-                //       <Image
-                //         src="/dropdownIcon.png"
-                //         alt="Dropdown Icon"
-                //         width={20}
-                //         height={20}
-                //       />
-                //     </InputAdornment>
-                //   }
                 >
                   <MenuItem value="" disabled>
                     Select Role
