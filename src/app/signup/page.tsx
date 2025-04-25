@@ -1,4 +1,4 @@
-import Signup from './Signup'; // Updated path using @/* alias
+import Signup from './Signup'; 
 
 export default function SignupPage() {
   return <Signup/>;
