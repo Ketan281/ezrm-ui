@@ -33,6 +33,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname === '/admin' || pathname === '/admin/') {
       router.push('/admin/dashboard');
     }
+    
+    // Auto open inventory dropdown if on an inventory page
+    if (pathname.startsWith('/admin/inventory/')) {
+      setIsInventoryOpen(true);
+    }
   }, [pathname, router]);
 
   const handleInventoryClick = () => {
@@ -51,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       
-      {/* Navbar - unchanged */}
+      {/* Navbar */}
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#fff', color: '#333' }}>
         <Toolbar>
           <Image src="/Logo.png" alt="ERMM Logo" width={130} height={65} />
@@ -81,7 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             width: 240,
             boxSizing: 'border-box',
             borderRight: 'none',
-            overflowY: 'hidden',
+            overflowY: 'hidden', // Keep hidden as per your requirement
           },
         }}
       >
@@ -97,12 +102,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       selected={isItemActive(item)}
                       sx={{
                         mr: 3,
-                        ml: 3,
+                        ml: 4,
                         mt: item.text === "Dashboard" ? 2 : 0,
                         mb: 0,
-                        backgroundColor: isItemActive(item) ? '#f9a922' : 'transparent',
                         color: isItemActive(item) ? '#fff' : 'rgba(115, 119, 145, 1)',
                         borderRadius: "16px",
+                        border: isInventoryOpen ? '2px solid #f9a922' : 'none', // Add yellow border when dropdown is open
                         '&:hover': { backgroundColor: '#f9a922', color: '#fff' },
                         '&.Mui-selected': {
                           backgroundColor: '#f9a922',
@@ -130,48 +135,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </ListItemButton>
                     {isInventoryOpen && (
                       <Box sx={{ ml: 1, mt: 0, mb: 1, display: "grid", placeItems: "center" }}>
-                        {item.options.map((option) => (
-                          <ListItemButton
-                            key={option.text}
-                            href={option.path}
-                            selected={pathname === option.path}
-                            onClick={() => setIsInventoryOpen(false)} // Close dropdown on option click
-                            sx={{
-                              color: pathname === option.path ? '#f9a922' : "#333",
-                              '&:hover': { 
-                                backgroundColor: 'rgba(249, 169, 34, 0.1)', 
-                                color: '#f9a922' 
-                              },
-                              background: "rgba(249, 250, 251, 1)",
-                              mt: 0.5,
-                              textAlign: "center",
-                              width: '200px',
-                              minWidth: '180px',
-                              maxWidth: '180px',
-                              borderRadius: '0 0 20px 20px',
-                              '&.Mui-selected': {
-                                backgroundColor: 'rgba(249, 169, 34, 0.1)',
-                                color: '#f9a922',
-                              },
-                            }}
-                          >
-                            <ListItemText
-                              primary={option.text}
-                              primaryTypographyProps={{
-                                sx: {
-                                  fontSize: '11px',
-                                  color: 'inherit',
+                        {item.options.map((option, index) => {
+                          // Determine if this is the last option
+                          const isLastOption = index === item.options.length - 1;
+                          
+                          return (
+                            <ListItemButton
+                              key={option.text}
+                              onClick={() => {
+                                router.push(option.path);
+                              }}
+                              selected={pathname === option.path}
+                              sx={{
+                                color: pathname === option.path ? '#fff' : "#333",
+                                '&:hover': { 
+                                  backgroundColor: '#f9a922', 
+                                  color: '#fff' 
+                                },
+                                backgroundColor: pathname === option.path ? '#f9a922' : "rgba(249, 250, 251, 1)",
+                                mt: 0.5,
+                                textAlign: "center",
+                                width: '200px',
+                                minWidth: '180px',
+                                maxWidth: '180px',
+                                // Set specific border radius only for the last option
+                                borderRadius:'0 0 20px 20px',
+                                '&.Mui-selected': {
+                                  backgroundColor: '#f9a922',
+                                  color: '#fff',
                                 },
                               }}
-                            />
-                          </ListItemButton>
-                        ))}
+                            >
+                              <ListItemText
+                                primary={option.text}
+                                primaryTypographyProps={{
+                                  sx: {
+                                    fontSize: '11px',
+                                    color: 'inherit',
+                                  },
+                                }}
+                              />
+                            </ListItemButton>
+                          );
+                        })}
                       </Box>
                     )}
                   </>
                 ) : (
                   <ListItemButton
-                    href={item.path}
+                    onClick={() => router.push(item.path)}
                     selected={pathname === item.path}
                     sx={{
                       mr: 3,
@@ -209,7 +221,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Box>
       </Drawer>
 
-      {/* Main Content - unchanged */}
+      {/* Main Content */}
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, backgroundColor: "#F9FAFB", minHeight: "85vh" }}>
         {children}
       </Box>
