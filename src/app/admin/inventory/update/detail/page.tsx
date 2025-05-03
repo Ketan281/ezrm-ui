@@ -1,6 +1,6 @@
-
-import { useSearchParams } from 'next/navigation';
 'use client';
+import { useSearchParams } from 'next/navigation';
+
 
 import { Suspense } from 'react';
 import Detail from '../Detail';
