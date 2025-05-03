@@ -1,13 +1,14 @@
+
+import { useSearchParams } from 'next/navigation';
 'use client';
 
-// Import the Detail component from the same folder
+import { Suspense } from 'react';
 import Detail from '../Detail';
-import { useSearchParams } from 'next/navigation';
 
-export default function DetailPage() {
+// This component needs to be separate to use Suspense
+function DetailPageContent() {
   const searchParams = useSearchParams();
 
-  // Extract product details from query parameters
   const product = {
     id: searchParams.get('id') || '',
     name: searchParams.get('name') || '',
@@ -19,4 +20,12 @@ export default function DetailPage() {
   };
 
   return <Detail product={product} />;
+}
+
+export default function DetailPage() {
+  return (
+    <Suspense fallback={<div>Loading product details...</div>}>
+      <DetailPageContent />
+    </Suspense>
+  );
 }
