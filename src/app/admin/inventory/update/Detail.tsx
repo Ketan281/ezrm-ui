@@ -27,7 +27,7 @@ import Image from "next/image"
 import { useRouter } from 'next/navigation';
 
 // Create a custom styled Switch component that looks like the first image
-const CustomSwitch = styled(Switch)(({ theme }) => ({
+const CustomSwitch = styled(Switch)(() => ({
     width: 42,
     height: 22,
     padding: 0,
@@ -96,8 +96,20 @@ const theme = createTheme({
         },
     },
 });
+interface Product {
+    id: string;
+    name: string;
+    description: string;
+    inventory: string;
+    loreal: string;
+    price: string;
+    rating: string;
+}
 
-export default function Detail({ product }: any) {
+interface DetailProps {
+    product: Product;
+}
+export default function Detail({ product }: DetailProps) {
     const router = useRouter();
     const [tags, setTags] = useState<string[]>(["trend", "instagram"])
     const [tagInput, setTagInput] = useState("")

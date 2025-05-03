@@ -143,7 +143,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       <Box sx={{ ml: 1, mt: 0, mb: 1, display: "grid", placeItems: "center" }}>
                         {item.options.map((option, index) => {
                           // Determine if this is the last option
-                          const isLastOption = index === item.options.length - 1;
+                          // const isLastOption = index === item.options.length - 1;
                           const isActive = pathname === option.path;
                           
                           return (
