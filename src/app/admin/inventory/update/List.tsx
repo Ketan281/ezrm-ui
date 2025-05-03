@@ -224,8 +224,6 @@ export default function UpdateList() {
                   onChange={handlePageChange}
                   siblingCount={1} // Show 1 sibling on each side of the current page
                   boundaryCount={2} // Show 2 pages at the start and end
-                  showFirstButton
-                  showLastButton
                   sx={{
                     width: '90%', // Set the width of the entire Pagination component to 90%
                     '& .MuiPaginationItem-root': {
