@@ -141,7 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </ListItemButton>
                     {isInventoryOpen && (
                       <Box sx={{ ml: 1, mt: 0, mb: 1, display: "grid", placeItems: "center" }}>
-                        {item.options.map((option, index) => {
+                        {item.options.map((option) => {
                           // Determine if this is the last option
                           // const isLastOption = index === item.options.length - 1;
                           const isActive = pathname === option.path;

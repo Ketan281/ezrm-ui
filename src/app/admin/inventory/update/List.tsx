@@ -18,38 +18,38 @@ export default function UpdateList() {
   const router = useRouter();
 
   // State to manage the confirmation dialog's open/close status
-  const [openDialog, setOpenDialog] = useState(false);
+//   const [openDialog, setOpenDialog] = useState(false);
   const [filter, setFilter] = useState('');
   // State to manage the success dialog's open/close status
-  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
+//   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
   // State to manage the current page
   const [page, setPage] = useState(2); // Start on page 2 as per the screenshot
 
   // Function to open the confirmation dialog
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
+//   const handleOpenDialog = () => {
+//     setOpenDialog(true);
+//   };
 
-  // Function to close the confirmation dialog
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
+//   // Function to close the confirmation dialog
+//   const handleCloseDialog = () => {
+//     setOpenDialog(false);
+//   };
 
   // Function to close the success dialog
-  const handleCloseSuccessDialog = () => {
-    setOpenSuccessDialog(false);
+//   const handleCloseSuccessDialog = () => {
+//     setOpenSuccessDialog(false);
     // Navigate back after closing the success dialog
-    router.back();
-  };
+//     router.back();
+//   };
 
   // Function to handle the confirmed deletion
-  const handleDeleteConfirm = () => {
+//   const handleDeleteConfirm = () => {
     // Close the confirmation dialog
-    setOpenDialog(false);
+    // setOpenDialog(false);
     // Open the success dialog
-    setOpenSuccessDialog(true);
+    // setOpenSuccessDialog(true);
     // Optionally, add actual delete logic here (e.g., API call)
-  };
+//   };
 
   // Sample data for 10 rows with varied data, including an id for each product
   const tableData = [
@@ -70,7 +70,7 @@ export default function UpdateList() {
   const totalResults = 146;
 
   // Handle page change
-  const handlePageChange = (event: any, value: any) => {
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     console.log(event);
     setPage(value);
     // Optionally, fetch new data for the selected page
