@@ -51,81 +51,53 @@ export default function DeleteProductPage() {
 
   // Main container for the page, matching the layout's content area
   return (
-    <Box sx={{ p: 3, backgroundColor: '#F9FAFB', minHeight: '85vh' }}>
+    <Box sx={{ p: 1, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
       {/* Header Section with Back button and title */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         {/* Back button with arrow icon and text */}
         <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => router.back()}>
           <Image src="/backArrow.png" alt="Back" width={13} height={13} />
-          <Typography sx={{ ml: 1, color: '#737791', fontSize: '14px' }}>
+          <Typography sx={{ ml: 1, color: '#737791', fontSize: '14px', fontFamily: 'Poppins, sans-serif' }}>
             Back
           </Typography>
         </Box>
       </Box>
       {/* Page title */}
-      <Typography sx={{ fontSize: '24px', fontWeight: 'bold', color: '#1F2A44', mb: 2 }}>
+      <Typography sx={{ fontSize: '24px', fontWeight: 'bold', color: '#1F2A44', mb: 2, fontFamily: 'Poppins, sans-serif' }}>
         Delete Product
       </Typography>
 
       {/* Search Bar Section */}
-      <Box sx={{ mb: 3 }}>
-        <TextField
-          fullWidth
-          placeholder="Search the Product you want to delete"
-          variant="outlined"
-          InputProps={{
-            // Magnifying glass icon on the left
-            startAdornment: (
-              <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
-                <Image src="/magnifier.svg" alt="Search" width={16} height={16} />
-              </Box>
-            ),
-            // Clear icon on the right
-            endAdornment: (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Image src="/Delete.png" alt="Clear" width={16} height={16} />
-              </Box>
-            ),
-            // Styling for the search bar
-            sx: {
-              backgroundColor: '#F9FAFB',
-              borderRadius: '10px',
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: '#E5E7EB' },
-                '&:hover fieldset': { borderColor: '#E5E7EB' },
-                '&.Mui-focused fieldset': { borderColor: '#E5E7EB' },
-              },
-              '& .MuiInputBase-input': {
-                fontSize: '14px',
-                color: '#737791',
-              },
-            },
-          }}
-        />
+      <Box sx={{ mb: 3, backgroundColor: '#fff' }} width={"100%"} height={"8vh"} display={"flex"} alignItems={"center"} justifyContent={"center"} gap={2}>
+        <Image src="/magnifier.svg" alt="Search" width={16} height={16} />
+        <Typography color='rgba(16, 63, 90, 1)' fontWeight={"500"} sx={{ fontFamily: 'Poppins, sans-serif' }}>
+          Search the Product you want to delete
+        </Typography>
+        <Image src="/Delete.png" alt="Clear" width={16} height={16} />
       </Box>
 
       {/* Table Section */}
       <TableContainer component={Paper} sx={{ boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
         <Table>
           {/* Table Header */}
-          <TableHead>
+          <TableHead sx={{ borderBottom: "2px solid rgba(215, 219, 236, 1)" }}>
             <TableRow>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '5%' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '5%', fontFamily: 'Poppins, sans-serif' }}>
                 <Checkbox size="small" />
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '25%' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '25%', fontFamily: 'Poppins, sans-serif' }}>
                 Product
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '20%' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '20%', fontFamily: 'Poppins, sans-serif' }}>
                 Inventory
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '20%' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '20%', fontFamily: 'Poppins, sans-serif' }}>
                 Loreal
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '15%' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '15%', fontFamily: 'Poppins, sans-serif' }}>
                 Price
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '15%' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '15%', fontFamily: 'Poppins, sans-serif' }}>
                 Rating
               </TableCell>
             </TableRow>
@@ -141,31 +113,27 @@ export default function DeleteProductPage() {
                   {/* Placeholder for product image */}
                   <Box width={40} height={40} style={{ borderRadius: '5px', backgroundColor: "rgba(217, 217, 217, 1)" }} />
                   <Box sx={{ ml: 2 }}>
-                    <Typography sx={{ fontSize: '14px', fontWeight: 'bold', color: '#1F2A44' }}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 'bold', color: '#1F2A44', fontFamily: 'Poppins, sans-serif' }}>
                       vitamin
                     </Typography>
-                    <Typography sx={{ fontSize: '14px', color: '#737791' }}>
+                    <Typography sx={{ fontSize: '14px', color: '#737791', fontFamily: 'Poppins, sans-serif' }}>
                       loreal ipsum
                     </Typography>
                   </Box>
                 </Box>
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', fontFamily: 'Poppins, sans-serif' }}>
                 96 in stock
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', fontFamily: 'Poppins, sans-serif' }}>
                 Black
               </TableCell>
-              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB' }}>
+              <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', fontFamily: 'Poppins, sans-serif' }}>
                 $49.90
               </TableCell>
               <TableCell sx={{ borderBottom: '1px solid #E5E7EB' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Box sx={{
-                    fontSize: '14px',
-                    borderRadius: '20px',
-                    textAlign: 'center',
-                  }}>
+                  <Box sx={{ fontSize: '14px', borderRadius: '20px', textAlign: 'center', fontFamily: 'Poppins, sans-serif' }}>
                     5.0 (32 Votes)
                   </Box>
                 </Box>
@@ -183,6 +151,7 @@ export default function DeleteProductPage() {
             color: 'rgba(21, 27, 38, 1)',
             fontWeight: 600,
             textTransform: 'none',
+            fontFamily: 'Poppins, sans-serif',
           }}
           onClick={() => router.back()}
         >
@@ -202,6 +171,7 @@ export default function DeleteProductPage() {
             '&:hover': {
               backgroundColor: '#E55050',
             },
+            fontFamily: 'Poppins, sans-serif',
           }}
         >
           Delete
@@ -223,8 +193,8 @@ export default function DeleteProductPage() {
         }}
       >
         {/* Dialog Title with Close Icon */}
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 0, pb: 1 }}>
-          <Typography sx={{ fontSize: '16px', fontWeight: 'bold', color: '#1F2A44' }}>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 0, pb: 1, fontFamily: 'Poppins, sans-serif' }}>
+          <Typography sx={{ fontSize: '16px', fontWeight: 'bold', color: '#1F2A44', fontFamily: 'Poppins, sans-serif' }}>
             Delete Items
           </Typography>
           <IconButton onClick={handleCloseDialog} sx={{ p: 0 }} aria-label="Close dialog">
@@ -233,7 +203,7 @@ export default function DeleteProductPage() {
         </DialogTitle>
         {/* Dialog Content */}
         <DialogContent sx={{ p: 0, py: 2 }}>
-          <Typography sx={{ fontSize: '16px', color: 'rgba(19, 21, 35, 1)' }}>
+          <Typography sx={{ fontSize: '16px', color: 'rgba(19, 21, 35, 1)', fontFamily: 'Poppins, sans-serif' }}>
             Are you sure you want to delete selected items?
           </Typography>
         </DialogContent>
@@ -245,6 +215,7 @@ export default function DeleteProductPage() {
               fontSize: '16px',
               color: 'rgba(19, 21, 35, 1)',
               textTransform: 'none',
+              fontFamily: 'Poppins, sans-serif',
             }}
           >
             Cancel
@@ -262,6 +233,7 @@ export default function DeleteProductPage() {
               '&:hover': {
                 backgroundColor: '#E55050',
               },
+              fontFamily: 'Poppins, sans-serif',
             }}
           >
             Delete
@@ -302,9 +274,9 @@ export default function DeleteProductPage() {
               alignItems: 'center',
             }}
           >
-            <Image src="/deleteSuc.png" alt="Checkmark" width={24} height={24}  />
+            <Image src="/deleteSuc.png" alt="Checkmark" width={24} height={24} />
           </Box>
-          <Typography sx={{ fontSize: '16px', fontWeight: 'bold', color: '#1F2A44' }}>
+          <Typography sx={{ fontSize: '16px', fontWeight: 'bold', color: '#1F2A44', fontFamily: 'Poppins, sans-serif' }}>
             Deleted Successfully
           </Typography>
         </Box>

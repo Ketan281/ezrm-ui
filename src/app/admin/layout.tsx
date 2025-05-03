@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 const sidebarItems = [
-  { text: 'Dashboard', icon: '/dashbord.png', path: '/admin/dashboard' },
+  { text: 'Dashboard', icon: '/dashbord (2).png', path: '/admin/dashboard' },
   {
     text: 'Inventory',
     icon: '/inventory.png',
@@ -108,10 +108,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         color: isItemActive(item) ? '#fff' : 'rgba(115, 119, 145, 1)',
                         borderRadius: "16px",
                         border: isInventoryOpen ? '2px solid #f9a922' : 'none', // Add yellow border when dropdown is open
-                        '&:hover': { backgroundColor: '#f9a922', color: '#fff' },
+                        '&:hover': {
+                          backgroundColor: isItemActive(item) ? '#f9a922' : '#f9a922',
+                          color: '#fff'
+                        },
                         '&.Mui-selected': {
                           backgroundColor: '#f9a922',
                           color: '#fff',
+                          '&:hover': {
+                            backgroundColor: '#f9a922',
+                          }
                         },
                       }}
                     >
@@ -138,6 +144,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         {item.options.map((option, index) => {
                           // Determine if this is the last option
                           const isLastOption = index === item.options.length - 1;
+                          const isActive = pathname === option.path;
                           
                           return (
                             <ListItemButton
@@ -145,24 +152,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                               onClick={() => {
                                 router.push(option.path);
                               }}
-                              selected={pathname === option.path}
+                              selected={isActive}
                               sx={{
-                                color: pathname === option.path ? '#fff' : "#333",
+                                color: isActive ? '#fff' : "#333",
+                                fontFamily: 'Poppins, sans-serif',
                                 '&:hover': { 
-                                  backgroundColor: '#f9a922', 
+                                  backgroundColor: isActive ? '#f9a922' : '#f9a922', 
                                   color: '#fff' 
                                 },
-                                backgroundColor: pathname === option.path ? '#f9a922' : "rgba(249, 250, 251, 1)",
                                 mt: 0.5,
                                 textAlign: "center",
                                 width: '200px',
                                 minWidth: '180px',
                                 maxWidth: '180px',
-                                // Set specific border radius only for the last option
                                 borderRadius:'0 0 20px 20px',
                                 '&.Mui-selected': {
                                   backgroundColor: '#f9a922',
                                   color: '#fff',
+                                  '&:hover': {
+                                    backgroundColor: '#f9a922',
+                                  }
                                 },
                               }}
                             >
@@ -172,6 +181,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                   sx: {
                                     fontSize: '11px',
                                     color: 'inherit',
+                                    fontFamily: 'Poppins, sans-serif' 
                                   },
                                 }}
                               />
@@ -194,13 +204,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       color: pathname === item.path ? '#fff' : 'rgba(115, 119, 145, 1)',
                       borderRadius: "16px",
                       '&:hover': { 
-                        backgroundColor: '#f9a922', 
+                        backgroundColor: pathname === item.path ? '#f9a922' : '#f9a922', 
                         color: '#fff' 
                       },
                       '&.Mui-selected': { 
                         backgroundColor: '#f9a922', 
                         color: '#fff', 
-                        borderRadius: "16px" 
+                        borderRadius: "16px",
+                        '&:hover': {
+                          backgroundColor: '#f9a922',
+                        }
                       },
                     }}
                   >
