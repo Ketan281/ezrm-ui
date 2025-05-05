@@ -111,22 +111,21 @@ export default function ViewProductPage() {
               {/* Product Details */}
               
             </Paper>
-            <Box sx={{ p: 1, background: "#fff", mt: 1, borderRadius:"10px" }}>
+            <Box sx={{ p: 1, background: index === 0 ? '#F5A623' : 'transparent', mt: 1, borderRadius:"10px" }}>
               <Typography
                 sx={{
-                  fontSize: '14px',
+                  fontSize: '12px',
                   color: '#737791',
                   fontFamily: 'Poppins, sans-serif',
-                  backgroundColor: index % 4 === 0 ? '#F5A623' : 'transparent', 
-                  px: index % 4 === 0 ? 1 : 0, 
-                  py: index % 4 === 0 ? 0.5 : 0,
-                  display: 'inline-block',
+                  backgroundColor: index === 0 ? '#F5A623' : 'transparent', 
+                //   display: 'inline-block',
                   borderRadius: '4px', 
+                  textAlign:"center"
                 }}
               >
                 Product Id: {product.id}
               </Typography>
-              <Typography sx={{ fontSize: '14px', color: '#737791', fontFamily: 'Poppins, sans-serif', mt: 1 }}>
+              <Typography sx={{ fontSize: '12px', color: '#737791', fontFamily: 'Poppins, sans-serif', mt: 1 }}>
                 {product.description}
               </Typography>
             </Box>
