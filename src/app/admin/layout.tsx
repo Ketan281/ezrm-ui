@@ -5,15 +5,44 @@ import { Box, CssBaseline, AppBar, Toolbar, Typography, Drawer, List, ListItemBu
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-const sidebarItems = [
+// Define types for our sidebar items
+interface DropdownOption {
+  text: string;
+  path: string;
+}
+
+interface SidebarItem {
+  text: string;
+  icon: string;
+  path?: string;
+  hasDropdown?: boolean;
+  options?: DropdownOption[];
+}
+
+// Define dropdown state type
+interface DropdownState {
+  [key: string]: boolean;
+}
+
+const sidebarItems: SidebarItem[] = [
   { text: 'Dashboard', icon: '/dashbord (2).png', path: '/admin/dashboard' },
   {
     text: 'Inventory',
     icon: '/inventory.png',
+    hasDropdown: true,
     options: [
       { text: 'Delete Product/Category', path: '/admin/inventory/delete' },
       { text: 'Update Product', path: '/admin/inventory/update' },
       { text: 'View All Products', path: '/admin/inventory/view' },
+    ],
+  },
+  {
+    text: 'Orders',
+    icon: '/order.png',
+    hasDropdown: true,
+    options: [
+      { text: 'Orders', path: '/admin/orders' },
+      { text: 'RFQs', path: '/admin/orders/rfq' },
     ],
   },
   { text: 'Logistics', icon: '/logistics.png', path: '/admin/logistics' },
@@ -26,30 +55,59 @@ const sidebarItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  
+  // Add mounted state to prevent hydration issues
+  const [mounted, setMounted] = useState(false);
+  
+  // Create separate state for each dropdown
+  const [openDropdowns, setOpenDropdowns] = useState<DropdownState>({
+    Inventory: false,
+    Orders: false
+  });
 
-  // Set Dashboard as the default route on initial load
+  // Only execute client-side
   useEffect(() => {
+    setMounted(true);
+    
+    // Set Dashboard as the default route on initial load
     if (pathname === '/admin' || pathname === '/admin/') {
       router.push('/admin/dashboard');
     }
     
-    // Auto open inventory dropdown if on an inventory page
+    // Auto open appropriate dropdown based on current path
     if (pathname.startsWith('/admin/inventory/')) {
-      setIsInventoryOpen(true);
+      setOpenDropdowns(prev => ({ ...prev, Inventory: true }));
+    } else if (pathname.startsWith('/admin/orders')) {
+      setOpenDropdowns(prev => ({ ...prev, Orders: true }));
     }
   }, [pathname, router]);
 
-  const handleInventoryClick = () => {
-    setIsInventoryOpen(!isInventoryOpen);
+  const toggleDropdown = (dropdownName: string) => {
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [dropdownName]: !prev[dropdownName]
+    }));
   };
 
   // Function to determine if an item or its options are active
-  const isItemActive = (item: typeof sidebarItems[number]) => {
-    if (item.options) {
-      return item.options.some((option) => pathname === option.path) || pathname.startsWith('/admin/inventory');
+  const isItemActive = (item: SidebarItem): boolean => {
+    if (!mounted) return false;
+    
+    if (item.hasDropdown) {
+      if (item.text === 'Inventory') {
+        return pathname.startsWith('/admin/inventory');
+      } else if (item.text === 'Orders') {
+        return pathname.startsWith('/admin/orders');
+      }
+      return false;
     }
     return pathname === item.path;
+  };
+
+  // Check if dropdown is open
+  const isDropdownOpen = (itemText: string): boolean => {
+    if (!mounted) return false;
+    return openDropdowns[itemText] || false;
   };
 
   return (
@@ -86,7 +144,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             width: 240,
             boxSizing: 'border-box',
             borderRight: 'none',
-            overflowY: 'hidden', // Keep hidden as per your requirement
+            overflowY: 'hidden',
           },
         }}
       >
@@ -95,19 +153,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <List>
             {sidebarItems.map((item) => (
               <React.Fragment key={item.text}>
-                {item.options ? (
+                {item.hasDropdown ? (
                   <>
                     <ListItemButton
-                      onClick={handleInventoryClick}
+                      onClick={() => toggleDropdown(item.text)}
                       selected={isItemActive(item)}
                       sx={{
                         mr: 3,
-                        ml: 4,
-                        mt: item.text === "Dashboard" ? 2 : 0,
-                        mb: 0,
+                        ml: 3,
+                        mt: 1,
+                        mb: 1,
                         color: isItemActive(item) ? '#fff' : 'rgba(115, 119, 145, 1)',
                         borderRadius: "16px",
-                        border: isInventoryOpen ? '2px solid #f9a922' : 'none', // Add yellow border when dropdown is open
+                        border: isDropdownOpen(item.text) ? '2px solid #f9a922' : 'none',
                         '&:hover': {
                           backgroundColor: isItemActive(item) ? '#f9a922' : '#f9a922',
                           color: '#fff'
@@ -128,23 +186,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         primary={item.text}
                         sx={{ color: 'inherit' }}
                       />
-                      <Image
-                        src={'/down.png'}
-                        alt="Toggle Icon"
-                        width={12}
-                        height={8}
-                        style={{
-                          transition: 'transform 0.3s',
-                          transform: isInventoryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                        }}
-                      />
+                      {mounted && (
+                        <Image
+                          src={'/down.png'}
+                          alt="Toggle Icon"
+                          width={12}
+                          height={8}
+                          style={{
+                            transition: 'transform 0.3s',
+                            transform: isDropdownOpen(item.text) ? 'rotate(180deg)' : 'rotate(0deg)',
+                          }}
+                        />
+                      )}
                     </ListItemButton>
-                    {isInventoryOpen && (
+                    {isDropdownOpen(item.text) && item.options && (
                       <Box sx={{ ml: 1, mt: 0, mb: 1, display: "grid", placeItems: "center" }}>
                         {item.options.map((option) => {
-                          // Determine if this is the last option
-                          // const isLastOption = index === item.options.length - 1;
-                          const isActive = pathname === option.path;
+                          const isActive = mounted && pathname === option.path;
                           
                           return (
                             <ListItemButton
@@ -165,7 +223,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 width: '200px',
                                 minWidth: '180px',
                                 maxWidth: '180px',
-                                borderRadius:'0 0 20px 20px',
+                                borderRadius: '0 0 20px 20px',
                                 '&.Mui-selected': {
                                   backgroundColor: '#f9a922',
                                   color: '#fff',
@@ -193,18 +251,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </>
                 ) : (
                   <ListItemButton
-                    onClick={() => router.push(item.path)}
-                    selected={pathname === item.path}
+                    onClick={() => router.push(item.path || '')}
+                    selected={mounted && pathname === item.path}
                     sx={{
                       mr: 3,
                       ml: 3,
-                      mt: item.text === "Dashboard" ? 2 : 0,
-                      mb: 1,
-                      backgroundColor: pathname === item.path ? '#f9a922' : 'transparent',
-                      color: pathname === item.path ? '#fff' : 'rgba(115, 119, 145, 1)',
+                      mt: 1, // Consistent top margin for all items
+                      mb: 1, // Consistent bottom margin
+                      backgroundColor: mounted && pathname === item.path ? '#f9a922' : 'transparent',
+                      color: mounted && pathname === item.path ? '#fff' : 'rgba(115, 119, 145, 1)',
                       borderRadius: "16px",
                       '&:hover': { 
-                        backgroundColor: pathname === item.path ? '#f9a922' : '#f9a922', 
+                        backgroundColor: mounted && pathname === item.path ? '#f9a922' : '#f9a922', 
                         color: '#fff' 
                       },
                       '&.Mui-selected': { 
