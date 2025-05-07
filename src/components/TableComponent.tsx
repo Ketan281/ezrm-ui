@@ -22,16 +22,19 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button
+  Button,
+  TextField,
+  InputAdornment,
+  InputLabel
 } from '@mui/material';
 import Image from 'next/image';
-// import { useRouter } from 'next/navigation';
 
-interface TableColumn {
+export interface TableColumn {
   id: string;
   label: string;
   width?: string;
   align?: 'left' | 'center' | 'right';
+  type?: 'status' | 'link' | 'default';
 }
 
 interface TableRowData {
@@ -40,7 +43,6 @@ interface TableRowData {
 }
 
 interface TableComponentProps {
-//   title: string;
   columns: TableColumn[];
   data: TableRowData[];
   totalResults: number;
@@ -51,6 +53,12 @@ interface TableComponentProps {
     value: string;
     onChange: (value: string) => void;
     options: { value: string; label: string }[];
+    placeholder?: string;
+  };
+  searchOptions?: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
   };
   actionButtons?: React.ReactNode;
   showCheckboxes?: boolean;
@@ -59,7 +67,6 @@ interface TableComponentProps {
 }
 
 export const TableComponent: React.FC<TableComponentProps> = ({
-//   title,
   columns,
   data,
   totalResults,
@@ -67,20 +74,18 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   onPageChange,
   onRowClick,
   filterOptions,
+  searchOptions,
   actionButtons,
   showCheckboxes = true,
   showHeader = true,
   rowsPerPage = 9,
 }) => {
-  
   const [selected, setSelected] = useState<string[]>([]);
   const [internalPage, setInternalPage] = useState(1);
   
-  // Calculate total pages based on data length and rows per page
   const totalPages = Math.ceil(totalResults / rowsPerPage);
   const showPagination = totalResults > rowsPerPage;
 
-  // Use controlled pagination if onPageChange is provided, otherwise use internal state
   const page = onPageChange ? currentPage : internalPage;
   const handlePageChange = onPageChange || setInternalPage;
 
@@ -115,56 +120,145 @@ export const TableComponent: React.FC<TableComponentProps> = ({
 
   const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
+  const renderStatusCell = (value: string) => {
+    let bgColor = '#E5E7EB';
+    let textColor = '#737791';
+    
+    switch(value.toLowerCase()) {
+      case 'completed':
+        bgColor = 'rgba(6, 165, 97, 0.09)';
+        textColor = 'rgba(6, 165, 97, 1)';
+        break;
+      case 'pending':
+        bgColor = 'rgba(255, 244, 240, 1)';
+        textColor = 'rgba(255, 143, 107, 1)';
+        break;
+      case 'in-process':
+        bgColor = 'rgba(255, 247, 225, 1)';
+        textColor = 'rgba(255, 195, 39, 1)';
+        break;
+      case 'new order':
+        bgColor = 'rgba(239, 239, 255, 1)';
+        textColor = 'rgba(96, 91, 255, 1)';
+        break;
+    }
+    
+    return (
+      <Box 
+        sx={{
+          backgroundColor: bgColor,
+          borderRadius: '6px',
+          padding: '7px 10px',
+          minWidth: '100px',
+          height: '32px',
+          display: 'inline-block',
+          fontSize: '12px',
+          fontWeight: '500',
+          color: textColor,
+          textAlign: 'center',
+          maxWidth: 'fit-content'
+        }}
+      >
+        {value}
+      </Box>
+    );
+  };
+
+  const renderLinkCell = (value: string) => {
+    return (
+      <Typography 
+        sx={{ 
+          color: '#7C3AED',
+          fontWeight: '500',
+          cursor: 'pointer',
+          '&:hover': {
+            textDecoration: 'underline'
+          }
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          window.open(value, '_blank');
+        }}
+      >
+        View
+      </Typography>
+    );
+  };
+
   return (
     <Box sx={{ p: 1, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
-      {/* Header Section with Back button and title */}
-     
       <TableContainer component={Paper} sx={{ boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
         <Table>
           {/* Table Header */}
           {showHeader && (
             <TableHead sx={{ borderBottom: "2px solid rgba(215, 219, 236, 1)" }}>
-              {filterOptions && (
-                <Box mt={3} ml={3} mb={2}>
-                  <FormControl sx={{ minWidth: 150 }}>
-                    <Select
-                      value={filterOptions.value}
-                      onChange={(e) => filterOptions.onChange(e.target.value as string)}
-                      displayEmpty
-                      renderValue={(selected) => {
-                        if (!selected) {
-                          return <span style={{ color: '#737791', fontSize: '14px', fontFamily: 'Poppins, sans-serif' }}>FILTER</span>;
-                        }
-                        return selected;
-                      }}
-                      sx={{
-                        height: '40px',
-                        fontSize: '14px',
-                        color: '#737791',
-                        fontFamily: 'Poppins, sans-serif',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#E5E7EB',
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#E5E7EB',
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#E5E7EB',
-                        },
-                      }}
-                    >
-                      {filterOptions.options.map((option) => (
-                        <MenuItem key={option.value} value={option.value} sx={{ fontFamily: 'Poppins, sans-serif' }}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-              )}
+              <TableRow>
+                <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} sx={{ borderBottom: 'none', py: 2 }}>
+                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                    <Box display="flex" alignItems="center" gap={2}>
+                      {/* Search Bar First */}
+                      {searchOptions && (
+                        <TextField
+                          placeholder={searchOptions.placeholder || "Search"}
+                          value={searchOptions.value}
+                          onChange={(e) => searchOptions.onChange(e.target.value)}
+                          size="small"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Image src="/magnifier.svg" alt="Search" width={16} height={16} />
+                              </InputAdornment>
+                            ),
+                            sx: {
+                              height: '40px',
+                              width: '200px',
+                              fontSize: '14px',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#E5E7EB',
+                              },
+                            }
+                          }}
+                        />
+                      )}
+                      {/* Filter Dropdown Second */}
+                      {filterOptions && (
+                        <FormControl sx={{ minWidth: 150 }}>
+                          <Select
+                            value={filterOptions.value}
+                            onChange={(e) => filterOptions.onChange(e.target.value as string)}
+                            displayEmpty
+                            renderValue={(selected) => {
+                              if (!selected) {
+                                return <span style={{ color: '#737791', fontSize: '14px' }}>
+                                  {filterOptions.placeholder || "Status"}
+                                </span>;
+                              }
+                              return selected;
+                            }}
+                            sx={{
+                              height: '40px',
+                              fontSize: '14px',
+                              color: '#737791',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#E5E7EB',
+                              },
+                            }}
+                          >
+                            {filterOptions.options.map((option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    </Box>
+                  </Box>
+                </TableCell>
+              </TableRow>
               <TableRow>
                 {showCheckboxes && (
-                  <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '5%', fontFamily: 'Poppins, sans-serif' }}>
+                  <TableCell sx={{ fontSize: '14px', color: '#737791', borderBottom: '1px solid #E5E7EB', width: '5%' }}>
                     <Checkbox
                       size="small"
                       indeterminate={selected.length > 0 && selected.length < data.length}
@@ -181,8 +275,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       color: '#737791',
                       borderBottom: '1px solid #E5E7EB',
                       width: column.width || 'auto',
-                      textAlign: column.align || 'left',
-                      fontFamily: 'Poppins, sans-serif'
+                      textAlign:column.label === "Status" ? "center" : column.align || 'left',
                     }}
                   >
                     {column.label}
@@ -225,10 +318,13 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                         borderBottom: '1px solid #E5E7EB',
                         fontWeight: column.id === 'name' ? 'bold' : 'normal',
                         textAlign: column.align || 'left',
-                        fontFamily: 'Poppins, sans-serif'
                       }}
                     >
-                      {row[column.id]}
+                      {column.type === 'status' ? renderStatusCell(row[column.id]) :
+                       column.type === 'link' ? renderLinkCell(row[column.id]) :
+                       column.id === 'status' ? renderStatusCell(row[column.id]) :
+                       (typeof row[column.id] === 'string' && row[column.id].startsWith('http')) ? renderLinkCell(row[column.id]) :
+                       row[column.id]}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -236,72 +332,53 @@ export const TableComponent: React.FC<TableComponentProps> = ({
             })}
           </TableBody>
 
-          {/* Table Footer with Pagination */}
-          {(showPagination || actionButtons) && (
-            <TableFooter sx={{ backgroundColor: '#FFFFFF' }}>
-              <TableRow>
-                <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} sx={{ borderBottom: 'none', py: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    {showPagination && (
-                      <Pagination
-                        count={totalPages}
-                        page={page}
-                        onChange={(event, page) => handlePageChange(page)}
-                        siblingCount={1}
-                        boundaryCount={1}
-                        sx={{
-                          '& .MuiPaginationItem-root': {
-                            fontFamily: 'Poppins, sans-serif',
-                            fontSize: '12px',
-                            color: '#737791',
-                            minWidth: '24px',
-                            height: '24px',
-                            margin: '0 2px',
-                            padding: '0',
+          {/* Table Footer with Pagination - Modified to always show pagination when totalResults > rowsPerPage */}
+          <TableFooter sx={{ backgroundColor: '#FFFFFF' }}>
+            <TableRow>
+              <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} sx={{ borderBottom: 'none', py: 2 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  {showPagination && (
+                    <Pagination
+                      count={totalPages}
+                      page={page}
+                      onChange={(event, page) => handlePageChange(page)}
+                      siblingCount={1}
+                      boundaryCount={1}
+                      sx={{
+                        '& .MuiPaginationItem-root': {
+                          fontSize: '12px',
+                          color: '#737791',
+                          minWidth: '24px',
+                          height: '24px',
+                          margin: '0 2px',
+                          padding: '0',
+                        },
+                        '& .Mui-selected': {
+                          backgroundColor: '#3B82F6',
+                          color: '#FFFFFF',
+                          '&:hover': {
+                            backgroundColor: '#2563EB',
                           },
-                          '& .Mui-selected': {
-                            backgroundColor: '#3B82F6',
-                            color: '#FFFFFF',
-                            '&:hover': {
-                              backgroundColor: '#2563EB',
-                            },
-                          },
-                          '& .MuiPaginationItem-ellipsis': {
-                            fontFamily: 'Poppins, sans-serif',
-                            fontSize: '12px',
-                            color: '#737791',
-                            margin: '0 2px',
-                            height: '24px',
-                            display: 'flex',
-                            alignItems: 'center',
-                          },
-                          '& .MuiPaginationItem-previousNext': {
-                            fontSize: '14px',
-                            minWidth: '24px',
-                            height: '24px',
-                            margin: '0 2px',
-                          },
-                        }}
-                      />
-                    )}
-                    <Typography sx={{ fontSize: '14px', color: '#737791', fontFamily: 'Poppins, sans-serif' }}>
-                      {totalResults} Results
-                    </Typography>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          )}
+                        },
+                      }}
+                    />
+                  )}
+                  <Typography sx={{ fontSize: '14px', color: '#737791' }}>
+                    {totalResults} Results
+                  </Typography>
+                </Box>
+              </TableCell>
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
 
-      {/* Action Buttons - Now rendered after the table */}
       {actionButtons}
     </Box>
   );
 };
 
-// ... (keep the existing ConfirmationDialog and SuccessDialog components)
+
 
 // Confirmation Dialog Component
 interface ConfirmationDialogProps {
