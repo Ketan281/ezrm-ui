@@ -52,7 +52,7 @@ export default function DeleteProductPage() {
   return (
     <>
     <Box>
-     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3,mt:15 }}>
+     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3,mt:0}}>
         <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => router.back()}>
           <Image src="/backArrow.png" alt="Back" width={13} height={13} />
           <Typography sx={{ ml: 1, color: '#737791', fontSize: '14px', fontFamily: 'Poppins, sans-serif' }}>
