@@ -41,8 +41,8 @@ const sidebarItems: SidebarItem[] = [
     icon: '/order.png',
     hasDropdown: true,
     options: [
-      { text: 'Orders', path: '/admin/orders' },
-      { text: 'RFQs', path: '/admin/orders/rfq' },
+      { text: 'Orders', path: '/admin/order/orders' },
+      { text: 'RFQs', path: '/admin/order/rfq' },
     ],
   },
   { text: 'Logistics', icon: '/logistics.png', path: '/admin/logistics' },
