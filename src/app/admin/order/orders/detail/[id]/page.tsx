@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Box, Typography, Tabs, Tab, Paper, Button, Divider, Grid, styled, Avatar } from "@mui/material"
-import { LocalShipping, Receipt, CheckCircle } from "@mui/icons-material"
+import { LocalShipping, Receipt } from "@mui/icons-material"
 
 // Custom styled components
 const StyledTab = styled(Tab)({
@@ -18,29 +18,18 @@ const StyledTab = styled(Tab)({
 })
 
 // Use a prop that won't be passed to the DOM
-const StatusCircle = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "isActive",
-})<{ isActive: boolean }>(({ isActive }) => ({
-  width: 40,
-  height: 40,
+const StatusDot = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "isActive" && prop !== "isCompleted",
+})<{ isActive?: boolean; isCompleted?: boolean }>(({ isActive, isCompleted }) => ({
+  width: 12,
+  height: 12,
   borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: isActive ? "#4caf50" : "#e0e0e0",
-  color: isActive ? "white" : "#757575",
-}))
-
-const StatusLine = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "isActive",
-})<{ isActive: boolean }>(({ isActive }) => ({
-  height: 2,
-  backgroundColor: isActive ? "#4caf50" : "#e0e0e0",
-  flex: 1,
+  backgroundColor: isActive ? "#f5a623" : isCompleted ? "#667085" : "#e0e0e0",
+  border: isCompleted || isActive ? "none" : "2px solid #e0e0e0",
 }))
 
 interface OrderTrackingProps {
-  orderId?: string; // Make orderId optional with a default value in the component
+  orderId?: string // Make orderId optional with a default value in the component
 }
 
 export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProps) {
@@ -64,34 +53,29 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
       </Box>
 
       <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <Grid container spacing={25} alignItems="center">
+        <Grid container justifyContent="space-between" alignItems="center">
           <Grid>
             <Box>
               <Typography variant="subtitle1" fontWeight="700" color="#1a365d">
                 Order ID: {orderId}
               </Typography>
               <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   Order date:
                 </Typography>
                 <Typography variant="body2" fontWeight="500">
                   Feb 16, 2022 |
                 </Typography>
-                <Box display="flex" alignItems="center" mt={0}>
-              <LocalShipping sx={{ color: "#4caf50", fontSize: 18, mr: 1 }} />
-              <Typography variant="body2" color="#4caf50" fontWeight="500">
-                Estimated delivery: May 16, 2022
-              </Typography>
-            </Box>
+                <Box display="flex" alignItems="center">
+                  <LocalShipping sx={{ color: "#4caf50", fontSize: 18, mr: 1 }} />
+                  <Typography variant="body2" color="#4caf50" fontWeight="500">
+                    Estimated delivery: May 16, 2022
+                  </Typography>
+                </Box>
               </Box>
-           
             </Box>
-
           </Grid>
-          <Grid
-            sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" }, gap: 1 }}
-            mt={2}
-          >
+          <Grid sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
             <Button
               variant="outlined"
               startIcon={<Receipt />}
@@ -121,60 +105,131 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
         </Grid>
       </Paper>
 
-      <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", width: "100%", mb: 4, justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "20%" }}>
-            <StatusCircle isActive={true}>
-              <CheckCircle fontSize="small" />
-            </StatusCircle>
-            <Typography variant="caption" sx={{ mt: 1, textAlign: "center", fontWeight: 500 }}>
-              Order Confirmed
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary", textAlign: "center" }}>
-              Wed, 11th Jan
-            </Typography>
+      <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, bgcolor: "white" }}>
+        <Box sx={{ position: "relative", width: "100%", mb: 4, px: 2 }}>
+          {/* Progress lines */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: "6px",
+              left: "calc(12.5% + 6px)",
+              right: "calc(12.5% + 6px)",
+              height: "1px",
+              zIndex: 0,
+            }}
+          >
+            {/* First segment - completed halfway (dark) */}
+            <Box
+              sx={{
+                position: "absolute",
+                left: 0,
+                width: "16.67%", // Half of the first segment (33.33% / 2)
+                height: "1px",
+                backgroundColor: "#667085",
+              }}
+            />
+
+            {/* Rest of the line - incomplete (light) */}
+            <Box
+              sx={{
+                position: "absolute",
+                left: "16.67%",
+                right: 0,
+                height: "1px",
+                backgroundColor: "#e0e0e0",
+              }}
+            />
           </Box>
 
-          <Box sx={{ height: 2, backgroundColor: "#4caf50", width: "15%" }} />
+          {/* Status dots and labels */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", position: "relative", zIndex: 1 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+              <StatusDot isActive={true} />
+              <Typography
+                variant="caption"
+                sx={{
+                  mt: 1,
+                  textAlign: "center",
+                  fontWeight: 500,
+                  color: "#f5a623",
+                  fontSize: "12px",
+                }}
+              >
+                Order Confirmed
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+              >
+                Wed, 11th Jan
+              </Typography>
+            </Box>
 
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "20%" }}>
-            <StatusCircle isActive={true}>
-              <CheckCircle fontSize="small" />
-            </StatusCircle>
-            <Typography variant="caption" sx={{ mt: 1, textAlign: "center", fontWeight: 500 }}>
-              Shipped
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary", textAlign: "center" }}>
-              Wed, 11th Jan
-            </Typography>
-          </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+              <StatusDot />
+              <Typography
+                variant="caption"
+                sx={{
+                  mt: 1,
+                  textAlign: "center",
+                  fontWeight: 500,
+                  color: "#667085",
+                  fontSize: "12px",
+                }}
+              >
+                Shipped
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+              >
+                Wed, 11th Jan
+              </Typography>
+            </Box>
 
-          <Box sx={{ height: 2, backgroundColor: "#4caf50", width: "15%" }} />
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+              <StatusDot />
+              <Typography
+                variant="caption"
+                sx={{
+                  mt: 1,
+                  textAlign: "center",
+                  fontWeight: 500,
+                  color: "#667085",
+                  fontSize: "12px",
+                }}
+              >
+                Out For Delivery
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+              >
+                Wed, 11th Jan
+              </Typography>
+            </Box>
 
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "20%" }}>
-            <StatusCircle isActive={true}>
-              <CheckCircle fontSize="small" />
-            </StatusCircle>
-            <Typography variant="caption" sx={{ mt: 1, textAlign: "center", fontWeight: 500 }}>
-              Out For Delivery
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary", textAlign: "center" }}>
-              Wed, 11th Jan
-            </Typography>
-          </Box>
-
-          <Box sx={{ height: 2, backgroundColor: "#e0e0e0", width: "15%" }} />
-
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "20%" }}>
-            <StatusCircle isActive={false}>
-              <CheckCircle fontSize="small" />
-            </StatusCircle>
-            <Typography variant="caption" sx={{ mt: 1, textAlign: "center", fontWeight: 500 }}>
-              Delivered
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary", textAlign: "center" }}>
-              Expected by, Mon 16th
-            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+              <StatusDot />
+              <Typography
+                variant="caption"
+                sx={{
+                  mt: 1,
+                  textAlign: "center",
+                  fontWeight: 500,
+                  color: "#667085",
+                  fontSize: "12px",
+                }}
+              >
+                Delivered
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+              >
+                Expected by, Mon 16th
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Paper>
@@ -194,12 +249,12 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                 <Typography variant="subtitle2" fontWeight="700">
                   vitamin
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   T-floral ipsum
                 </Typography>
               </Grid>
               <Grid>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   Qty: 234
                 </Typography>
               </Grid>
@@ -214,20 +269,17 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
         ))}
       </Paper>
 
-      <Grid container spacing={3} sx={{ mt: 2 }}>
+      <Grid container spacing={26} sx={{ mt: 2 }}>
         <Grid>
           <Box>
             <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
               Payment
             </Typography>
             <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="body2"color="#1a365d" >Visa **56</Typography>
-              <Box
-                component="img"
-                src="/api/placeholder/80/30" // Replaced external image with placeholder
-                alt="Visa"
-                sx={{ height: 16 }}
-              />
+              <Typography variant="body2" color="rgba(102, 112, 133, 1)">
+                Visa **56
+              </Typography>
+              <Box component="img" src="/placeholder.svg?height=30&width=80" alt="Visa" sx={{ height: 16 }} />
             </Box>
           </Box>
         </Grid>
@@ -237,11 +289,15 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
             <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
               Delivery
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="rgba(102, 112, 133, 1)">
               Address
             </Typography>
-            <Typography variant="body2">847 Jewess Bridge Apt. 174</Typography>
-            <Typography variant="body2">London, UK 474-769-3919</Typography>
+            <Typography variant="body2" color="rgba(102, 112, 133, 1)">
+              847 Jewess Bridge Apt. 174
+            </Typography>
+            <Typography variant="body2" color="rgba(102, 112, 133, 1)">
+              London, UK 474-769-3919
+            </Typography>
           </Box>
         </Grid>
 
@@ -250,17 +306,17 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
             Order Summary
           </Typography>
           <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+              <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                 Subtotal
               </Typography>
-              <Typography variant="body2" fontWeight="500">
+              <Typography variant="body2" fontWeight="500" color="rgba(102, 112, 133, 1)">
                 $5554
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+              <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                 Discount
               </Typography>
               <Typography variant="body2" fontWeight="500" color="#4caf50">
@@ -268,31 +324,31 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+              <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                 Delivery
               </Typography>
-              <Typography variant="body2" fontWeight="500">
+              <Typography variant="body2" fontWeight="500" color="rgba(102, 112, 133, 1)">
                 $0.00
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+              <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                 Tax
               </Typography>
-              <Typography variant="body2" fontWeight="500">
+              <Typography variant="body2" fontWeight="500" color="rgba(102, 112, 133, 1)">
                 +$221.88
               </Typography>
             </Box>
 
             <Divider sx={{ my: 1.5 }} />
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="subtitle2" fontWeight="700">
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+              <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
                 Total
               </Typography>
-              <Typography variant="subtitle2" fontWeight="700">
+              <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
                 $4666.48
               </Typography>
             </Box>
