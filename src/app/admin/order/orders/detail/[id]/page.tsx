@@ -517,7 +517,7 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                 </Box>
               </Paper>
             </Grid>
-            <Grid mt={-10} width={"80%"}>
+            <Grid mt={-10} width={"60%"}>
               <Box >
                 <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
                   Customer Orders
