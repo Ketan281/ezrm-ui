@@ -37,7 +37,7 @@ export interface TableColumn {
   type?: 'status' | 'link' | 'default';
 }
 
-interface TableRowData {
+export interface TableRowData {
   [key: string]: any;
   id: string;
 }
