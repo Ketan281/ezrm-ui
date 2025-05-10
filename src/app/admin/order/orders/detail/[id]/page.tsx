@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import { NextPage } from "next";
 import { Box, Typography, Tabs, Tab, Paper, Button, Divider, Grid, styled, Avatar, Rating } from "@mui/material";
 import { LocalShipping, Receipt } from "@mui/icons-material";
 import { type TableColumn, type TableRowData, TableComponent } from "../../../../../../components/TableComponent";
@@ -29,12 +30,13 @@ const StatusDot = styled(Box, {
   border: isCompleted || isActive ? "none" : "2px solid #e0e0e0",
 }));
 
-// Define the props type explicitly
+// Define the props type
 interface OrderTrackingProps {
   params: { id: string };
 }
 
-export default function OrderTracking({ params }: OrderTrackingProps) {
+// Use NextPage to type the component
+const OrderTracking: NextPage<OrderTrackingProps> = ({ params }) => {
   const [tabValue, setTabValue] = React.useState(1);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -401,7 +403,7 @@ export default function OrderTracking({ params }: OrderTrackingProps) {
                     <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
                       Total
                     </Typography>
-                    <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, scratchpad133, 1)">
+                    <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
                       $4666.48
                     </Typography>
                   </Box>
@@ -535,4 +537,6 @@ export default function OrderTracking({ params }: OrderTrackingProps) {
       )}
     </Box>
   );
-}
+};
+
+export default OrderTracking;
