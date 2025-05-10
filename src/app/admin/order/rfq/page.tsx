@@ -59,7 +59,7 @@ export default function OrderList() {
   };
 
   const handleRowClick = (row: any) => {
-    console.log('Row clicked:', row);
+    router.push(`/admin/order/rfq/detail/${row.id}`);
   };
 
   return (
