@@ -2,8 +2,9 @@
 
 import React from "react"
 import { Box, Typography, Tabs, Tab, Paper, Button, Divider, Grid, styled, Avatar, Rating } from "@mui/material"
-import { LocalShipping, Receipt} from "@mui/icons-material"
-import { TableColumn, TableRowData,TableComponent } from '../../../../../../components/TableComponent';
+import { LocalShipping, Receipt } from "@mui/icons-material"
+import { type TableColumn, type TableRowData, TableComponent } from "../../../../../../components/TableComponent"
+
 // Custom styled components
 const StyledTab = styled(Tab)({
   textTransform: "none",
@@ -28,6 +29,7 @@ const StatusDot = styled(Box, {
   border: isCompleted || isActive ? "none" : "2px solid #e0e0e0",
 }))
 
+// Define the props interface correctly
 interface OrderTrackingProps {
   orderId?: string // Make orderId optional with a default value in the component
 }
@@ -44,53 +46,55 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
     "& .MuiTabs-indicator": {
       backgroundColor: tabValue === 0 ? "#1a365d" : "#000000",
       height: tabValue === 0 ? "3px" : "2px",
-    }
+    },
   }
+
   // Add this inside your OrderTracking component, before the return statement
   const orderColumns: TableColumn[] = [
-    { id: 'order', label: 'Order', width: '25%' },
-    { id: 'date', label: 'Date', width: '25%' },
-    { id: 'status', label: 'Order Status', width: '25%', align: 'center', type: 'status' },
-    { id: 'price', label: 'Price', width: '25%', align: 'right' },
-  ];
+    { id: "order", label: "Order", width: "25%" },
+    { id: "date", label: "Date", width: "25%" },
+    { id: "status", label: "Order Status", width: "25%", align: "center", type: "status" },
+    { id: "price", label: "Price", width: "25%", align: "right" },
+  ]
 
   const orderData: TableRowData[] = [
     {
-      id: '1',
-      order: '#23534D',
-      date: 'May 25, 3:12 PM',
-      status: 'Pending',
-      price: '$29.74'
+      id: "1",
+      order: "#23534D",
+      date: "May 25, 3:12 PM",
+      status: "Pending",
+      price: "$29.74",
     },
     {
-      id: '2',
-      order: '#125128',
-      date: 'May 10, 2:00 PM',
-      status: 'Completed',
-      price: '$23.06'
+      id: "2",
+      order: "#125128",
+      date: "May 10, 2:00 PM",
+      status: "Completed",
+      price: "$23.06",
     },
     {
-      id: '3',
-      order: '#23534D',
-      date: 'April 18, 8:00 AM',
-      status: 'Completed',
-      price: '$29.74'
+      id: "3",
+      order: "#23534D",
+      date: "April 18, 8:00 AM",
+      status: "Completed",
+      price: "$29.74",
     },
     {
-      id: '4',
-      order: '#76543E',
-      date: 'April 12, 6:00 AM',
-      status: 'Completed',
-      price: '$23.06'
+      id: "4",
+      order: "#76543E",
+      date: "April 12, 6:00 AM",
+      status: "Completed",
+      price: "$23.06",
     },
     {
-      id: '5',
-      order: '#51323C',
-      date: 'April 10, 4:12 PM',
-      status: 'Completed',
-      price: '$23.06'
+      id: "5",
+      order: "#51323C",
+      date: "April 10, 4:12 PM",
+      status: "Completed",
+      price: "$23.06",
     },
-  ];
+  ]
+
   return (
     <Box sx={{ maxWidth: 950, margin: "0 auto", p: 3, bgcolor: "#f9fafb" }}>
       <Typography variant="h5" fontWeight="700" color="#1a365d" gutterBottom>
@@ -98,12 +102,7 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
       </Typography>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          aria-label="order tracking tabs"
-          sx={tabsStyles}
-        >
+        <Tabs value={tabValue} onChange={handleTabChange} aria-label="order tracking tabs" sx={tabsStyles}>
           <StyledTab label="Order Details" />
           <StyledTab label="Customer Information" />
         </Tabs>
@@ -301,8 +300,8 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
           <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
             {[1, 2].map((item, index) => (
               <React.Fragment key={index}>
-                <Grid container spacing={28} alignItems="center">
-                  <Grid display={"flex"} alignItems={"center"} gap={3}>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid display="flex" alignItems="center" gap={3}>
                     <Avatar variant="rounded" sx={{ width: 50, height: 50, bgcolor: "#f0f0f0" }} />
                     <Box>
                       <Typography variant="subtitle2" fontWeight="700">
@@ -313,12 +312,12 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                       </Typography>
                     </Box>
                   </Grid>
-                  <Grid>
+                  <Grid >
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                       Qty: 234
                     </Typography>
                   </Grid>
-                  <Grid>
+                  <Grid >
                     <Typography variant="subtitle2" fontWeight="700">
                       $1234.89
                     </Typography>
@@ -327,7 +326,7 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                 {index < 1 && <Divider sx={{ my: 2 }} />}
               </React.Fragment>
             ))}
-            <Grid container spacing={14} sx={{ mt: 5 }}>
+            <Grid container spacing={2} sx={{ mt: 5 }}>
               <Grid>
                 <Box>
                   <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
@@ -337,7 +336,7 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                       Visa **56
                     </Typography>
-                    <Box component="img" src="/visa.png?height=30&width=80" alt="Visa" sx={{ height: 16 }} />
+                    <Box component="img" src="/placeholder.svg?height=30&width=80" alt="Visa" sx={{ height: 16 }} />
                   </Box>
                 </Box>
               </Grid>
@@ -359,7 +358,7 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                 </Box>
               </Grid>
 
-              <Grid width={"35%"}>
+              <Grid>
                 <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
                   Order Summary
                 </Typography>
@@ -418,9 +417,9 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
       ) : (
         // Customer Information Tab Content
         <>
-          <Grid container spacing={13} >
+          <Grid container spacing={3}>
             <Grid>
-              <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, width: "120%" }}>
+              <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
                   <Avatar sx={{ bgcolor: "#E2E8F0", color: "#1a365d", width: 56, height: 56, fontSize: "24px" }}>
                     R
@@ -465,7 +464,7 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                       borderColor: "#e0e0e0",
                       borderRadius: 1,
                       color: "rgba(102, 112, 133, 0.7)",
-                      minHeight: "80px"
+                      minHeight: "80px",
                     }}
                   >
                     Add notes about customer
@@ -475,7 +474,7 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
             </Grid>
 
             <Grid>
-              <Paper elevation={0} sx={{ p: 3, mb: 2, borderRadius: 2, width: "150%", ml: 5 }}>
+              <Paper elevation={0} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
                 <Typography variant="subtitle2" fontWeight="700" color="#1a365d" sx={{ mb: 3 }}>
                   Overview
                 </Typography>
@@ -517,8 +516,9 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                 </Box>
               </Paper>
             </Grid>
-            <Grid mt={-10} width={"60%"}>
-              <Box >
+
+            <Grid>
+              <Box>
                 <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
                   Customer Orders
                 </Typography>
@@ -529,6 +529,8 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                   showCheckboxes={false}
                   showHeader={true}
                   rowsPerPage={10}
+                  currentPage={1}
+                  onPageChange={() => {}}
                 />
               </Box>
             </Grid>
