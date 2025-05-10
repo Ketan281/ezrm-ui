@@ -30,16 +30,16 @@ const StatusDot = styled(Box, {
 }));
 
 // Define the props interface for the Next.js page
-interface OrderTrackingPageProps {
-  params: {
-    id: string;
-  };
-  searchParams?: {
-    [key: string]: string | string[] | undefined;
-  };
-}
+// interface OrderTrackingPageProps {
+//   params: {
+//     id: string;
+//   };
+//   searchParams?: {
+//     [key: string]: string | string[] | undefined;
+//   };
+// }
 
-export default function OrderTracking({ params }: OrderTrackingPageProps) {
+export default function OrderTracking({ params }: { params: { id: string } }) {
   const [tabValue, setTabValue] = React.useState(1);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
