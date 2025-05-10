@@ -175,7 +175,8 @@ const RFQRequests = () => {
                             p: 3,
                             borderRadius: 1,
                             border: "1px solid #e0e0e0",
-                            backgroundColor: "#fff"
+                            backgroundColor: "#fff",
+                            maxHeight:"70%"
                         }}
                     >
                         <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#333", mb: 2 }}>
@@ -212,7 +213,7 @@ const RFQRequests = () => {
                 <Grid>
                   
                 </Grid>
-                <Grid width={"100%"} mt={-60}>
+                <Grid width={"56%"} mt={-28} ml={-32}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#333", mb: 2 }}>
                         Customer Notes
                     </Typography>
