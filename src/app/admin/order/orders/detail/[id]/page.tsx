@@ -29,17 +29,12 @@ const StatusDot = styled(Box, {
   border: isCompleted || isActive ? "none" : "2px solid #e0e0e0",
 }));
 
-// Define the props interface for the Next.js page
-// interface OrderTrackingPageProps {
-//   params: {
-//     id: string;
-//   };
-//   searchParams?: {
-//     [key: string]: string | string[] | undefined;
-//   };
-// }
+// Define the props type explicitly
+interface OrderTrackingProps {
+  params: { id: string };
+}
 
-export default function OrderTracking({ params }: { params: { id: string } }) {
+export default function OrderTracking({ params }: OrderTrackingProps) {
   const [tabValue, setTabValue] = React.useState(1);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -406,7 +401,7 @@ export default function OrderTracking({ params }: { params: { id: string } }) {
                     <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
                       Total
                     </Typography>
-                    <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
+                    <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, scratchpad133, 1)">
                       $4666.48
                     </Typography>
                   </Box>
