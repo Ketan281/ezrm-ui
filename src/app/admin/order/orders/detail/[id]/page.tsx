@@ -1,9 +1,10 @@
-"use client"
+// src/app/admin/order/orders/detail/[id]/page.tsx
+"use client";
 
-import React from "react"
-import { Box, Typography, Tabs, Tab, Paper, Button, Divider, Grid, styled, Avatar, Rating } from "@mui/material"
-import { LocalShipping, Receipt } from "@mui/icons-material"
-import { type TableColumn, type TableRowData, TableComponent } from "../../../../../../components/TableComponent"
+import React from "react";
+import { Box, Typography, Tabs, Tab, Paper, Button, Divider, Grid, styled, Avatar, Rating } from "@mui/material";
+import { LocalShipping, Receipt } from "@mui/icons-material";
+import { type TableColumn, type TableRowData, TableComponent } from "../../../../../../components/TableComponent";
 
 // Custom styled components
 const StyledTab = styled(Tab)({
@@ -16,9 +17,8 @@ const StyledTab = styled(Tab)({
     color: "#000000",
     fontWeight: 700,
   },
-})
+});
 
-// Use a prop that won't be passed to the DOM
 const StatusDot = styled(Box, {
   shouldForwardProp: (prop) => prop !== "isActive" && prop !== "isCompleted",
 })<{ isActive?: boolean; isCompleted?: boolean }>(({ isActive, isCompleted }) => ({
@@ -27,35 +27,35 @@ const StatusDot = styled(Box, {
   borderRadius: "50%",
   backgroundColor: isActive ? "#f5a623" : isCompleted ? "#667085" : "#e0e0e0",
   border: isCompleted || isActive ? "none" : "2px solid #e0e0e0",
-}))
+}));
 
-// Define the props interface correctly
-interface OrderTrackingProps {
-  orderId?: string // Make orderId optional with a default value in the component
+// Define the props interface for the Next.js page
+interface OrderTrackingPageProps {
+  params: {
+    id: string;
+  };
 }
 
-export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProps) {
-  const [tabValue, setTabValue] = React.useState(1) // Set to 1 for Customer Information tab to be active
+export default function OrderTracking({ params }: OrderTrackingPageProps) {
+  const [tabValue, setTabValue] = React.useState(1);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue)
-  }
+    setTabValue(newValue);
+  };
 
-  // Custom styles for the tabs indicator (the line under the active tab)
   const tabsStyles = {
     "& .MuiTabs-indicator": {
       backgroundColor: tabValue === 0 ? "#1a365d" : "#000000",
       height: tabValue === 0 ? "3px" : "2px",
     },
-  }
+  };
 
-  // Add this inside your OrderTracking component, before the return statement
   const orderColumns: TableColumn[] = [
     { id: "order", label: "Order", width: "25%" },
     { id: "date", label: "Date", width: "25%" },
     { id: "status", label: "Order Status", width: "25%", align: "center", type: "status" },
     { id: "price", label: "Price", width: "25%", align: "right" },
-  ]
+  ];
 
   const orderData: TableRowData[] = [
     {
@@ -93,7 +93,10 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
       status: "Completed",
       price: "$23.06",
     },
-  ]
+  ];
+
+  // Use the `id` from params as the orderId
+  const orderId = params.id;
 
   return (
     <Box sx={{ maxWidth: 950, margin: "0 auto", p: 3, bgcolor: "#f9fafb" }}>
@@ -166,7 +169,6 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
 
           <Paper elevation={0} sx={{ p: 3, mb: 0, borderRadius: 2, bgcolor: "transparent" }}>
             <Box sx={{ position: "relative", width: "100%", mb: 4, px: 2 }}>
-              {/* Progress lines */}
               <Box
                 sx={{
                   position: "absolute",
@@ -177,18 +179,15 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                   zIndex: 0,
                 }}
               >
-                {/* First segment - completed halfway (dark) */}
                 <Box
                   sx={{
                     position: "absolute",
                     left: 0,
-                    width: "16.67%", // Half of the first segment (33.33% / 2)
+                    width: "16.67%",
                     height: "1px",
                     backgroundColor: "#667085",
                   }}
                 />
-
-                {/* Rest of the line - incomplete (light) */}
                 <Box
                   sx={{
                     position: "absolute",
@@ -200,7 +199,6 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                 />
               </Box>
 
-              {/* Status dots and labels */}
               <Box sx={{ display: "flex", justifyContent: "space-between", position: "relative", zIndex: 1 }}>
                 <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
                   <StatusDot isActive={true} />
@@ -312,12 +310,12 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
                       </Typography>
                     </Box>
                   </Grid>
-                  <Grid >
+                  <Grid>
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                       Qty: 234
                     </Typography>
                   </Grid>
-                  <Grid >
+                  <Grid>
                     <Typography variant="subtitle2" fontWeight="700">
                       $1234.89
                     </Typography>
@@ -538,5 +536,5 @@ export default function OrderTracking({ orderId = "3354654" }: OrderTrackingProp
         </>
       )}
     </Box>
-  )
+  );
 }
