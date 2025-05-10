@@ -3,4 +3,4 @@ const nextConfig: import('next').NextConfig = {
   reactStrictMode: true,
 };
 
-export default nextConfig; 
+export default nextConfig;
