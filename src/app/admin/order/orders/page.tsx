@@ -3,16 +3,10 @@
 import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { TableComponent } from '../../../../components/TableComponent';
+import { TableComponent,TableRowData } from '../../../../components/TableComponent';
 
-// Import the TableRowData type from your TableComponent
-// You'll need to create this interface or import it from where TableComponent is defined
-interface TableRowData {
-  id: string;
-  [key: string]: any; // This allows for any additional properties
-}
 
-// Your OrderRowData now extends TableRowData to ensure compatibility
+
 interface OrderRowData extends TableRowData {
   product: string;
   orderId: string;
@@ -80,10 +74,7 @@ export default function OrderList() {
     setPage(page);
   };
 
-  // This now accepts TableRowData but we know it will be OrderRowData
   const handleRowClick = (row: TableRowData) => {
-    // Type casting to OrderRowData if needed to access specific properties
-    // const orderRow = row as OrderRowData;
     router.push(`/admin/order/orders/detail/${row.id}`);
   };
 

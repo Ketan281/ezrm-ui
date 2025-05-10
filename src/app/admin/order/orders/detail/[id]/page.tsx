@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Box, Typography, Tabs, Tab, Paper, Button, Divider, Grid, styled, Avatar, Rating } from "@mui/material"
-import { LocalShipping, Receipt, NoteAlt } from "@mui/icons-material"
+import { LocalShipping, Receipt} from "@mui/icons-material"
 import { TableColumn, TableRowData,TableComponent } from '../../../../../../components/TableComponent';
 // Custom styled components
 const StyledTab = styled(Tab)({

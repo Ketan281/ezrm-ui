@@ -38,7 +38,7 @@ export interface TableColumn {
 
 export interface TableRowData {
   id: string;
-  [key: string]: string | number | boolean | null | undefined;
+  [key: string]: string | number | boolean | null | undefined | React.ReactNode;
 }
 
 interface TableComponentProps {

@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation'; // Changed from next/router to next
 export default function DeleteProductPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
-  const [filter, setFilter] = useState('');
   const [page, setPage] = useState(1);
   const router = useRouter();
   
