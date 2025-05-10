@@ -24,8 +24,7 @@ import {
   DialogActions,
   Button,
   TextField,
-  InputAdornment,
-  InputLabel
+  InputAdornment
 } from '@mui/material';
 import Image from 'next/image';
 
@@ -38,8 +37,8 @@ export interface TableColumn {
 }
 
 export interface TableRowData {
-  [key: string]: any;
   id: string;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 interface TableComponentProps {
@@ -120,11 +119,14 @@ export const TableComponent: React.FC<TableComponentProps> = ({
 
   const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
-  const renderStatusCell = (value: string) => {
+  const renderStatusCell = (value: unknown) => {
+    if (value === null || value === undefined) return null;
+    
+    const stringValue = String(value);
     let bgColor = '#E5E7EB';
     let textColor = '#737791';
     
-    switch(value.toLowerCase()) {
+    switch(stringValue.toLowerCase()) {
       case 'completed':
         bgColor = 'rgba(6, 165, 97, 0.09)';
         textColor = 'rgba(6, 165, 97, 1)';
@@ -159,12 +161,14 @@ export const TableComponent: React.FC<TableComponentProps> = ({
           maxWidth: 'fit-content'
         }}
       >
-        {value}
+        {stringValue}
       </Box>
     );
   };
 
-  const renderLinkCell = (value: string) => {
+  const renderLinkCell = (value: unknown) => {
+    if (typeof value !== 'string' || !value.startsWith('http')) return null;
+    
     return (
       <Typography 
         sx={{ 
@@ -189,14 +193,12 @@ export const TableComponent: React.FC<TableComponentProps> = ({
     <Box sx={{ p: 1, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
       <TableContainer component={Paper} sx={{ boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
         <Table>
-          {/* Table Header */}
           {showHeader && (
             <TableHead sx={{ borderBottom: "2px solid rgba(215, 219, 236, 1)" }}>
               <TableRow>
                 <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} sx={{ borderBottom: 'none', py: 2 }}>
                   <Box display="flex" alignItems="center" justifyContent="space-between">
                     <Box display="flex" alignItems="center" gap={2}>
-                      {/* Search Bar First */}
                       {searchOptions && (
                         <TextField
                           placeholder={searchOptions.placeholder || "Search"}
@@ -220,7 +222,6 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                           }}
                         />
                       )}
-                      {/* Filter Dropdown Second */}
                       {filterOptions && (
                         <FormControl sx={{ minWidth: 150 }}>
                           <Select
@@ -275,7 +276,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       color: '#737791',
                       borderBottom: '1px solid #E5E7EB',
                       width: column.width || 'auto',
-                      textAlign:column.label === "Status" ? "center" : column.align || 'left',
+                      textAlign: column.label === "Status" ? "center" : column.align || 'left',
                     }}
                   >
                     {column.label}
@@ -285,7 +286,6 @@ export const TableComponent: React.FC<TableComponentProps> = ({
             </TableHead>
           )}
 
-          {/* Table Body */}
           <TableBody>
             {data.map((row) => {
               const isItemSelected = isSelected(row.id);
@@ -309,30 +309,38 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       />
                     </TableCell>
                   )}
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      sx={{
-                        fontSize: '14px',
-                        color: column.id === 'name' ? '#1F2A44' : '#737791',
-                        borderBottom: '1px solid #E5E7EB',
-                        fontWeight: column.id === 'name' ? 'bold' : 'normal',
-                        textAlign: column.align || 'left',
-                      }}
-                    >
-                      {column.type === 'status' ? renderStatusCell(row[column.id]) :
-                       column.type === 'link' ? renderLinkCell(row[column.id]) :
-                       column.id === 'status' ? renderStatusCell(row[column.id]) :
-                       (typeof row[column.id] === 'string' && row[column.id].startsWith('http')) ? renderLinkCell(row[column.id]) :
-                       row[column.id]}
-                    </TableCell>
-                  ))}
+                  {columns.map((column) => {
+                    const cellValue = row[column.id];
+                    let content: React.ReactNode = null;
+
+                    if (column.type === 'status' || column.id === 'status') {
+                      content = renderStatusCell(cellValue);
+                    } else if (column.type === 'link' || (typeof cellValue === 'string' && cellValue.startsWith('http'))) {
+                      content = renderLinkCell(cellValue);
+                    } else {
+                      content = cellValue !== null && cellValue !== undefined ? String(cellValue) : null;
+                    }
+
+                    return (
+                      <TableCell
+                        key={column.id}
+                        sx={{
+                          fontSize: '14px',
+                          color: column.id === 'name' ? '#1F2A44' : '#737791',
+                          borderBottom: '1px solid #E5E7EB',
+                          fontWeight: column.id === 'name' ? 'bold' : 'normal',
+                          textAlign: column.align || 'left',
+                        }}
+                      >
+                        {content}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               );
             })}
           </TableBody>
 
-          {/* Table Footer with Pagination - Modified to always show pagination when totalResults > rowsPerPage */}
           <TableFooter sx={{ backgroundColor: '#FFFFFF' }}>
             <TableRow>
               <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} sx={{ borderBottom: 'none', py: 2 }}>
@@ -378,9 +386,6 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   );
 };
 
-
-
-// Confirmation Dialog Component
 interface ConfirmationDialogProps {
   open: boolean;
   onClose: () => void;
@@ -462,7 +467,6 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   );
 };
 
-// Success Dialog Component
 interface SuccessDialogProps {
   open: boolean;
   onClose: () => void;
