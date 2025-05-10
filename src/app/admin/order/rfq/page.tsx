@@ -2,17 +2,15 @@
 
 import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { TableComponent } from '../../../../components/TableComponent';
+import { TableComponent, TableRowData } from '../../../../components/TableComponent';
 
-interface OrderRowData {
-  id: string;
+interface OrderRowData extends TableRowData {
   customerName: string;
   email: string;
   phoneNumber: string;
   quantity: string;
-  dateTime:string;
+  dateTime: string;
   trackOrder: string;
 }
 
@@ -22,9 +20,16 @@ export default function OrderList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  // Added more data to test pagination
   const orderData: OrderRowData[] = [
-    { id: '1', customerName : 'Robin Bosh', email: 'Robin@gmail.com', phoneNumber: '9876543210', quantity: '200',dateTime:"12/4/2025 12:45 Pm", trackOrder: '#' },
+    { 
+      id: '1', 
+      customerName: 'Robin Bosh', 
+      email: 'Robin@gmail.com', 
+      phoneNumber: '9876543210', 
+      quantity: '200', 
+      dateTime: "12/4/2025 12:45 Pm", 
+      trackOrder: '#' 
+    },
   ];
 
   const totalResults = orderData.length;
@@ -51,14 +56,14 @@ export default function OrderList() {
     { id: 'phoneNumber', label: 'Phone Number', width: '16%' },
     { id: 'quantity', label: 'Quantity', width: '10%' },
     { id: 'dateTime', label: 'Date/Time', width: '165', type: 'default' },
-    { id: 'viewDetails', label: 'View Details', width: '20%', type: 'link' },
+    { id: 'trackOrder', label: 'View Details', width: '20%', type: 'link' },
   ];
 
   const handlePageChange = (page: number) => {
     setPage(page);
   };
 
-  const handleRowClick = (row: any) => {
+  const handleRowClick = (row: TableRowData) => {
     router.push(`/admin/order/rfq/detail/${row.id}`);
   };
 
