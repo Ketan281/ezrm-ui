@@ -14,12 +14,12 @@ interface TableRowData {
 
 // ProductRowData extends TableRowData
 interface ProductRowData extends TableRowData {
-  name: string | React.ReactNode
+  name: string
   description: string
   inventory: string
   loreal: string
   price: string
-  rating: string | React.ReactNode
+  rating: string
 }
 
 export default function UpdateList() {
@@ -122,28 +122,8 @@ export default function UpdateList() {
 
   const processRowData = (row: (typeof rawData)[0]): ProductRowData => ({
     ...row,
-    name: (
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Box width={40} height={40} style={{ borderRadius: "5px", backgroundColor: "rgba(217, 217, 217, 1)" }} />
-        <Box sx={{ ml: 2 }}>
-          <Typography
-            sx={{ fontSize: "14px", fontWeight: "bold", color: "#1F2A44", fontFamily: "Poppins, sans-serif" }}
-          >
-            {row.name}
-          </Typography>
-          <Typography sx={{ fontSize: "14px", color: "#737791", fontFamily: "Poppins, sans-serif" }}>
-            {row.description}
-          </Typography>
-        </Box>
-      </Box>
-    ),
-    rating: (
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Box sx={{ fontSize: "14px", borderRadius: "20px", textAlign: "center", fontFamily: "Poppins, sans-serif" }}>
-          {row.rating}
-        </Box>
-      </Box>
-    ),
+    name: `${row.name} - ${row.description}`, // Combine name and description as a string
+    rating: row.rating, // Use the raw string value
   })
 
   const tableData: ProductRowData[] = rawData.map(processRowData)
@@ -171,45 +151,17 @@ export default function UpdateList() {
     setPage(page)
   }
 
-  // Fixed function signature to accept TableRowData
   const handleRowClick = (row: TableRowData) => {
-    // Cast to ProductRowData
     const productRow = row as ProductRowData
-
-    const getStringValue = (value: string | React.ReactNode): string => {
-      if (typeof value === "string") return value
-
-      // Rewritten to fix TypeScript error
-      if (React.isValidElement(value)) {
-        // Define a recursive function to extract text from React elements
-        const extractTextFromReactNode = (node: React.ReactNode): string => {
-          if (typeof node === "string") {
-            return node
-          } else if (Array.isArray(node)) {
-            return node.map(extractTextFromReactNode).join("")
-          } else if (React.isValidElement(node)) {
-            // Use a type that explicitly includes children
-            const props = node.props as { children?: React.ReactNode }
-            // Use optional chaining to safely access children
-            return extractTextFromReactNode(props?.children ?? "")
-          }
-          return ""
-        }
-
-        return extractTextFromReactNode(value) || ""
-      }
-
-      return ""
-    }
 
     const query = new URLSearchParams({
       id: productRow.id,
-      name: getStringValue(productRow.name),
+      name: productRow.name,
       description: productRow.description,
       inventory: productRow.inventory,
       loreal: productRow.loreal,
       price: productRow.price,
-      rating: getStringValue(productRow.rating),
+      rating: productRow.rating,
     }).toString()
 
     router.push(`/admin/inventory/update/detail?${query}`)

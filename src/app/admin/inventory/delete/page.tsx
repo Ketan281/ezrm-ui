@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import Image from 'next/image';
 import { TableComponent, ConfirmationDialog, SuccessDialog } from '../../../../components/TableComponent';
-import { useRouter } from 'next/navigation'; // Changed from next/router to next/navigation
+import { useRouter } from 'next/navigation';
 
 export default function DeleteProductPage() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -23,19 +23,7 @@ export default function DeleteProductPage() {
   const data = [
     { 
       id: '1',
-      product: (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box width={40} height={40} style={{ borderRadius: '5px', backgroundColor: "rgba(217, 217, 217, 1)" }} />
-          <Box sx={{ ml: 2 }}>
-            <Typography sx={{ fontSize: '14px', fontWeight: 'bold', color: '#1F2A44', fontFamily: 'Poppins, sans-serif' }}>
-              vitamin
-            </Typography>
-            <Typography sx={{ fontSize: '14px', color: '#737791', fontFamily: 'Poppins, sans-serif' }}>
-              loreal ipsum
-            </Typography>
-          </Box>
-        </Box>
-      ),
+      product: 'vitamin - loreal ipsum', // Changed from JSX to string
       inventory: '96 in stock',
       loreal: 'Black',
       price: '$49.90',
@@ -49,9 +37,8 @@ export default function DeleteProductPage() {
   };
 
   return (
-    <>
     <Box>
-     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3,mt:0}}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, mt: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => router.back()}>
           <Image src="/backArrow.png" alt="Back" width={13} height={13} />
           <Typography sx={{ ml: 1, color: '#737791', fontSize: '14px', fontFamily: 'Poppins, sans-serif' }}>
@@ -62,24 +49,23 @@ export default function DeleteProductPage() {
       
       {/* Page title */}
       <Typography sx={{ fontSize: '24px', fontWeight: 'bold', color: '#1F2A44', mb: 2, fontFamily: 'Poppins, sans-serif' }}>
-      Delete Product
+        Delete Product
       </Typography>
-      <Box sx={{ mb: 3, backgroundColor: '#fff' }} width={"100%"} height={"8vh"} display={"flex"} alignItems={"center"} justifyContent={"center"} gap={2}>
+      <Box sx={{ mb: 3, backgroundColor: '#fff' }} width="100%" height="8vh" display="flex" alignItems="center" justifyContent="center" gap={2}>
         <Image src="/magnifier.svg" alt="Search" width={16} height={16} />
-        <Typography color='rgba(16, 63, 90, 1)' fontWeight={"500"} sx={{ fontFamily: 'Poppins, sans-serif' }}>
+        <Typography color='rgba(16, 63, 90, 1)' fontWeight="500" sx={{ fontFamily: 'Poppins, sans-serif' }}>
           Search the Product you want to delete
         </Typography>
         <Image src="/Delete.png" alt="Clear" width={16} height={16} />
       </Box>
       <TableComponent
-        // title="Delete Product"
         columns={columns}
         data={data}
         totalResults={1}
         currentPage={page}
         onPageChange={setPage}
         actionButtons={
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 4,width:"100%" }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 4, width: "100%" }}>
             <Button
               sx={{
                 fontSize: '14px',
@@ -107,9 +93,7 @@ export default function DeleteProductPage() {
                   backgroundColor: '#E55050',
                 },
                 fontFamily: 'Poppins, sans-serif',
-              }
-            }
-              
+              }}
             >
               Delete
             </Button>
@@ -130,7 +114,6 @@ export default function DeleteProductPage() {
         onClose={() => setOpenSuccessDialog(false)}
         title="Deleted Successfully"
       />
-      </Box>
-    </>
+    </Box>
   );
 }
