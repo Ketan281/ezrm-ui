@@ -25,7 +25,7 @@ import AddIcon from "@mui/icons-material/Add"
 import CloseIcon from "@mui/icons-material/Close"
 import Image from "next/image"
 import { useRouter } from 'next/navigation';
-
+// import '../../../../app/globals.css'
 // Create a custom styled Switch component that looks like the first image
 const CustomSwitch = styled(Switch)(() => ({
     width: 42,
@@ -66,12 +66,14 @@ const theme = createTheme({
     },
     components: {
         MuiCssBaseline: {
-            styleOverrides: `
-                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-                * {
-                    font-family: 'Poppins', sans-serif;
-                }
-            `,
+            styleOverrides: {
+                '@global': {
+                    '@import': `url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap')`,
+                    '*': {
+                        fontFamily: '"Poppins", sans-serif',
+                    },
+                },
+            },
         },
         MuiInputBase: {
             styleOverrides: {
