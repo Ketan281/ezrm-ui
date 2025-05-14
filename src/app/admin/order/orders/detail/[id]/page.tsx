@@ -6,10 +6,10 @@ interface OrderTrackingPageProps {
   params: {
     id: string
   }
-  searchParams: Record<string, string | string[] | undefined>
+  // searchParams: Record<string, string | string[] | undefined>
 }
 
-export default function OrderTrackingPage({ params, searchParams }: OrderTrackingPageProps) {
+export default function OrderTrackingPage({ params, }: OrderTrackingPageProps) {
   // Server components can directly use params
-  return <OrderTrackingClient id={params.id} searchParams={searchParams} />
+  return <OrderTrackingClient id={params.id} />
 }

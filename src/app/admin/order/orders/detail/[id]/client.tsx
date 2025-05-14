@@ -31,11 +31,11 @@ const StatusDot = styled(Box, {
 // Define the props type for the client component
 interface OrderTrackingClientProps {
   id: string
-  searchParams: Record<string, string | string[] | undefined>
+//   searchParams: Record<string, string | string[] | undefined>
 }
 
 // Client component receives unwrapped id
-export function OrderTrackingClient({ id, searchParams }: OrderTrackingClientProps) {
+export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
   const [tabValue, setTabValue] = React.useState(1)
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
