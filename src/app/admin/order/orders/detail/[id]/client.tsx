@@ -28,13 +28,10 @@ const StatusDot = styled(Box, {
   border: isCompleted || isActive ? "none" : "2px solid #e0e0e0",
 }))
 
-// Define the props type for the client component
 interface OrderTrackingClientProps {
   id: string
-//   searchParams: Record<string, string | string[] | undefined>
 }
 
-// Client component receives unwrapped id
 export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
   const [tabValue, setTabValue] = React.useState(1)
 
@@ -94,9 +91,6 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
     },
   ]
 
-  // Use the unwrapped id directly
-  const orderId = id
-
   return (
     <Box sx={{ maxWidth: 950, margin: "0 auto", p: 3, bgcolor: "#f9fafb" }}>
       <Typography variant="h5" fontWeight="700" color="#1a365d" gutterBottom>
@@ -118,7 +112,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
               <Grid>
                 <Box>
                   <Typography variant="subtitle1" fontWeight="700" color="#1a365d">
-                    Order ID: {orderId}
+                    Order ID: {id}
                   </Typography>
                   <Box display="flex" alignItems="center" gap={1} mt={0.5}>
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
@@ -165,7 +159,6 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
               </Grid>
             </Grid>
           </Paper>
-
           <Paper elevation={0} sx={{ p: 3, mb: 0, borderRadius: 2, bgcolor: "transparent" }}>
             <Box sx={{ position: "relative", width: "100%", mb: 4, px: 2 }}>
               <Box
