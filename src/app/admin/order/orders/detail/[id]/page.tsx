@@ -6,8 +6,8 @@ import { NextPage } from "next";
 import { Box, Typography, Tabs, Tab, Paper, Button, Divider, Grid, styled, Avatar, Rating } from "@mui/material";
 import { LocalShipping, Receipt } from "@mui/icons-material";
 import { type TableColumn, type TableRowData, TableComponent } from "../../../../../../components/TableComponent";
+import Image from 'next/image';
 
-// Custom styled components
 const StyledTab = styled(Tab)({
   textTransform: "none",
   fontWeight: 600,
@@ -298,7 +298,7 @@ const OrderTracking: NextPage<OrderTrackingProps> = ({ params }) => {
           <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
             {[1, 2].map((item, index) => (
               <React.Fragment key={index}>
-                <Grid container spacing={2} alignItems="center">
+                <Grid container spacing={22} alignItems="center">
                   <Grid display="flex" alignItems="center" gap={3}>
                     <Avatar variant="rounded" sx={{ width: 50, height: 50, bgcolor: "#f0f0f0" }} />
                     <Box>
@@ -324,7 +324,7 @@ const OrderTracking: NextPage<OrderTrackingProps> = ({ params }) => {
                 {index < 1 && <Divider sx={{ my: 2 }} />}
               </React.Fragment>
             ))}
-            <Grid container spacing={2} sx={{ mt: 5 }}>
+            <Grid container spacing={12} sx={{ mt: 5 }}>
               <Grid>
                 <Box>
                   <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
@@ -334,7 +334,7 @@ const OrderTracking: NextPage<OrderTrackingProps> = ({ params }) => {
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                       Visa **56
                     </Typography>
-                    <Box component="img" src="/placeholder.svg?height=30&width=80" alt="Visa" sx={{ height: 16 }} />
+                    <Image src="/visa.png" alt="ERMM Logo" width={30} height={35} />
                   </Box>
                 </Box>
               </Grid>
@@ -360,7 +360,7 @@ const OrderTracking: NextPage<OrderTrackingProps> = ({ params }) => {
                 <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
                   Order Summary
                 </Typography>
-                <Box>
+                <Box width={"25vw"}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                       Subtotal
@@ -415,124 +415,129 @@ const OrderTracking: NextPage<OrderTrackingProps> = ({ params }) => {
       ) : (
         // Customer Information Tab Content
         <>
-          <Grid container spacing={3}>
-            <Grid>
-              <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-                  <Avatar sx={{ bgcolor: "#E2E8F0", color: "#1a365d", width: 56, height: 56, fontSize: "24px" }}>
-                    R
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h6" fontWeight="700" color="#1a365d">
-                      Randhir Kumar
-                    </Typography>
-                    <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                      India
-                    </Typography>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                      <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                        5 Orders
+          {/* Customer Information Tab Content */}
+          {/* Customer Information Tab Content */}
+          <Box sx={{ maxWidth: "100%", margin: "0 auto", p: 3, bgcolor: "#f9fafb" }}>
+            <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, mb: 3 }}>
+              {/* Left Column - Customer Info & Notes */}
+              <Box sx={{ flex: 2 }}>
+                <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: "100%" }}>
+                  <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 4 }}>
+                    <Avatar sx={{ bgcolor: "#E2E8F0", color: "#1a365d", width: 48, height: 48, fontSize: "20px" }}>
+                      R
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" fontWeight="700" color="#1a365d">
+                        Randhir Kumar
                       </Typography>
                       <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                        •
+                        India
                       </Typography>
-                      <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                        Customer for 2 years
-                      </Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
+                        <Typography variant="body2" color="rgba(102, 112, 133, 1)">
+                          5 Orders
+                        </Typography>
+                        <Typography variant="body2" color="rgba(102, 112, 133, 1)">
+                          •
+                        </Typography>
+                        <Typography variant="body2" color="rgba(102, 112, 133, 1)">
+                          Customer for 2 years
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ ml: "auto" }}>
+                      <Rating name="read-only" value={5} readOnly size="small" />
                     </Box>
                   </Box>
-                  <Box sx={{ ml: "auto" }}>
-                    <Rating name="read-only" value={5} readOnly size="small" />
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="subtitle2" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
+                      Customer Notes
+                    </Typography>
+                    <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 1 }}>
+                      Notes
+                    </Typography>
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        borderColor: "#e0e0e0",
+                        borderRadius: 1,
+                        color: "rgba(102, 112, 133, 0.7)",
+                        minHeight: "80px",
+                      }}
+                    >
+                      Add notes about customer
+                    </Paper>
                   </Box>
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
-                    Customer Notes
-                  </Typography>
-                  <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 1 }}>
-                    Notes
-                  </Typography>
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      p: 2,
-                      borderColor: "#e0e0e0",
-                      borderRadius: 1,
-                      color: "rgba(102, 112, 133, 0.7)",
-                      minHeight: "80px",
-                    }}
-                  >
-                    Add notes about customer
-                  </Paper>
-                </Box>
-              </Paper>
-            </Grid>
-
-            <Grid>
-              <Paper elevation={0} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
-                <Typography variant="subtitle2" fontWeight="700" color="#1a365d" sx={{ mb: 3 }}>
-                  Overview
-                </Typography>
-
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 0.5 }}>
-                    Address
-                  </Typography>
-                  <Typography variant="body2" fontWeight="500" color="#1a365d">
-                    Panapur langa
-                  </Typography>
-                  <Typography variant="body2" fontWeight="500" color="#1a365d">
-                    Hajipur,vaishali
-                  </Typography>
-                  <Typography variant="body2" fontWeight="500" color="#1a365d">
-                    844124
-                  </Typography>
-                  <Typography variant="body2" fontWeight="500" color="#1a365d">
-                    India
-                  </Typography>
-                </Box>
-
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 0.5 }}>
-                    Email Address
-                  </Typography>
-                  <Typography variant="body2" fontWeight="500" color="#1a365d">
-                    randhirpal@gmail.com
-                  </Typography>
-                </Box>
-
-                <Box>
-                  <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 0 }}>
-                    Phone
-                  </Typography>
-                  <Typography variant="body2" fontWeight="500" color="#1a365d">
-                    +91 8504789764
-                  </Typography>
-                </Box>
-              </Paper>
-            </Grid>
-
-            <Grid>
-              <Box>
-                <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
-                  Customer Orders
-                </Typography>
-                <TableComponent
-                  columns={orderColumns}
-                  data={orderData}
-                  totalResults={orderData.length}
-                  showCheckboxes={false}
-                  showHeader={true}
-                  rowsPerPage={10}
-                  currentPage={1}
-                  onPageChange={() => {}}
-                />
+                </Paper>
               </Box>
-            </Grid>
-          </Grid>
+
+              {/* Right Column - Overview */}
+              <Box sx={{ flex: 1 }}>
+                <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: "100%" }}>
+                  <Typography variant="subtitle2" fontWeight="700" color="#1a365d" sx={{ mb: 3 }}>
+                    Overview
+                  </Typography>
+
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 0.5 }}>
+                      Address
+                    </Typography>
+                    <Typography variant="body2" fontWeight="500" color="#1a365d">
+                      Panapur langa
+                    </Typography>
+                    <Typography variant="body2" fontWeight="500" color="#1a365d">
+                      Hajipur,vaishali
+                    </Typography>
+                    <Typography variant="body2" fontWeight="500" color="#1a365d">
+                      844124
+                    </Typography>
+                    <Typography variant="body2" fontWeight="500" color="#1a365d">
+                      India
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 0.5 }}>
+                      Email Address
+                    </Typography>
+                    <Typography variant="body2" fontWeight="500" color="#1a365d">
+                      randhirpal@gmail.com
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="rgba(102, 112, 133, 1)" sx={{ mb: 0.5 }}>
+                      Phone
+                    </Typography>
+                    <Typography variant="body2" fontWeight="500" color="#1a365d">
+                      +91 8504789764
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
+            </Box>
+
+            {/* Customer Orders (full width) */}
+            <Box sx={{ width: "70%" }}>
+              <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
+                Customer Orders
+              </Typography>
+              <TableComponent
+                columns={orderColumns}
+                data={orderData}
+                totalResults={orderData.length}
+                showCheckboxes={false}
+                showHeader={true}
+                rowsPerPage={10}
+                currentPage={1}
+                onPageChange={() => { }}
+              />
+            </Box>
+          </Box>
         </>
       )}
     </Box>
