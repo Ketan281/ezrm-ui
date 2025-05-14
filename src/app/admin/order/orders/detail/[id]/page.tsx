@@ -1,15 +1,15 @@
 // This is a Server Component
 import { OrderTrackingClient } from "./client"
 
-// Define proper types for the params and searchParams
 interface OrderTrackingPageProps {
   params: {
     id: string
   }
-  // searchParams: Record<string, string | string[] | undefined>
+  searchParams?: {
+    [key: string]: string | string[] | undefined
+  }
 }
 
-export default function OrderTrackingPage({ params, }: OrderTrackingPageProps) {
-  // Server components can directly use params
+export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
   return <OrderTrackingClient id={params.id} />
 }
