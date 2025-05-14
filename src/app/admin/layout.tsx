@@ -47,7 +47,7 @@ const sidebarItems: SidebarItem[] = [
   },
   { text: 'Logistics', icon: '/logistics.png', path: '/admin/logistics' },
   { text: 'Sales Report', icon: '/sales-report.png', path: '/admin/sales' },
-  { text: 'Customers', icon: '/customers.png', path: '/admin/customers' },
+  { text: 'Messages', icon: '/customers.png', path: '/admin/messages' },
   { text: 'Settings', icon: '/settings.png', path: '/admin/settings' },
   { text: 'Sign Out', icon: '/sign-out.png', path: '/login' },
 ];
