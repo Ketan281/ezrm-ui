@@ -28,7 +28,7 @@ import StarIcon from "@mui/icons-material/Star"
 import { styled } from "@mui/material/styles"
 
 // Custom styled components
-const StyledTab = styled(Tab)(({ theme }) => ({
+const StyledTab = styled(Tab)(({  }) => ({
   textTransform: "none",
   fontWeight: 600,
   fontSize: "14px",
