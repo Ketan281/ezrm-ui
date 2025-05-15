@@ -1,21 +1,18 @@
-// First, check what type of props OrderTrackingClient expects
-import { OrderTrackingClient } from "./client";
+import { OrderTrackingClient } from "./client"
 
-// src/app/admin/order/orders/detail/[id]/page.tsx
-type OrderTrackingPageProps = {
-  params: {
-    id: string;
-  };
-  searchParams?: {
-    [key: string]: string | string[] | undefined;
-  };
-};
-export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
-  console.log("Params:", params); // Debug: Log params to verify id
+// Make the page component async
+export default async function OrderTrackingPage({
+  params,
+}: {
+  params: { id: string }
+  searchParams?: { [key: string]: string | string[] | undefined }
+}) {
+  console.log("Params:", params) // Debug: Log params to verify id
+
   if (!params.id) {
-    return <div>Error: No order ID provided</div>;
+    return <div>Error: No order ID provided</div>
   }
-  
-  // Make sure the id is passed as the expected type (likely string)
-  return <OrderTrackingClient id={params.id} />;
+
+  // Pass the id to your client component
+  return <OrderTrackingClient id={params.id} />
 }
