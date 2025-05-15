@@ -41,7 +41,7 @@ const StyledTab = styled(Tab)(({  }) => ({
   },
 }))
 
-const StyledTabs = styled(Tabs)(({ theme }) => ({
+const StyledTabs = styled(Tabs)(({  }) => ({
   "& .MuiTabs-indicator": {
     backgroundColor: "#1976d2",
     height: "3px",
@@ -49,7 +49,7 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
   marginBottom: "0px",
 }))
 
-const PublishButton = styled(Button)(({ theme }) => ({
+const PublishButton = styled(Button)(({  }) => ({
   backgroundColor: "#e6f7f1",
   color: "#00a76f",
   textTransform: "none",
@@ -63,7 +63,7 @@ const PublishButton = styled(Button)(({ theme }) => ({
   minWidth: "80px",
 }))
 
-const DeleteButton = styled(Button)(({ theme }) => ({
+const DeleteButton = styled(Button)(({  }) => ({
   backgroundColor: "#ffe4de",
   color: "#ff5630",
   textTransform: "none",
@@ -77,12 +77,12 @@ const DeleteButton = styled(Button)(({ theme }) => ({
   minWidth: "80px",
 }))
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(({  }) => ({
   borderBottom: "1px solid #f0f0f0",
   padding: "16px 8px",
 }))
 
-const StyledTableHeadCell = styled(TableCell)(({ theme }) => ({
+const StyledTableHeadCell = styled(TableCell)(({  }) => ({
   borderBottom: "1px solid #f0f0f0",
   padding: "16px 8px",
   color: "#637381",
