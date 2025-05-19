@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -81,12 +81,20 @@ export const TableComponent: React.FC<TableComponentProps> = ({
 }) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [internalPage, setInternalPage] = useState(1);
+  const [filteredData, setFilteredData] = useState<TableRowData[]>(data);
   
+  // Calculate the total pages based on the total results, not just the data array length
   const totalPages = Math.ceil(totalResults / rowsPerPage);
   const showPagination = totalResults > rowsPerPage;
 
+  // Use the provided currentPage if onPageChange is defined, otherwise use internal state
   const page = onPageChange ? currentPage : internalPage;
   const handlePageChange = onPageChange || setInternalPage;
+
+  // Reset selection when data changes
+  useEffect(() => {
+    setSelected([]);
+  }, [data]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -167,7 +175,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   };
 
   const renderLinkCell = (value: unknown) => {
-    if (typeof value !== 'string' || !value.startsWith('http')) return null;
+    if (typeof value !== 'string') return "View";
     
     return (
       <Typography 
@@ -181,13 +189,21 @@ export const TableComponent: React.FC<TableComponentProps> = ({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          window.open(value, '_blank');
+          window.open(value !== '#' ? value : '#', '_blank');
         }}
       >
         View
       </Typography>
     );
   };
+
+  // Debug info
+  console.log('Total Results:', totalResults);
+  console.log('Total Pages:', totalPages);
+  console.log('Current Page:', page);
+  console.log('Rows Per Page:', rowsPerPage);
+  console.log('Data Length:', data.length);
+  console.log('Showing Pagination:', showPagination);
 
   return (
     <Box sx={{ p: 1, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
@@ -276,7 +292,8 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       color: '#737791',
                       borderBottom: '1px solid #E5E7EB',
                       width: column.width || 'auto',
-                      textAlign: column.label === "Status" ? "center" : column.align || 'left',
+                      textAlign: column.align || 'left',
+                      textTransform: 'capitalize'
                     }}
                   >
                     {column.label}
@@ -287,58 +304,66 @@ export const TableComponent: React.FC<TableComponentProps> = ({
           )}
 
           <TableBody>
-            {data.map((row) => {
-              const isItemSelected = isSelected(row.id);
-              return (
-                <TableRow
-                  hover
-                  key={row.id}
-                  sx={{
-                    backgroundColor: '#FFFFFF',
-                    cursor: onRowClick ? 'pointer' : 'default',
-                    '&:hover': { backgroundColor: '#F5F5F5' }
-                  }}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                >
-                  {showCheckboxes && (
-                    <TableCell sx={{ borderBottom: '1px solid #E5E7EB' }}>
-                      <Checkbox
-                        size="small"
-                        checked={isItemSelected}
-                        onClick={(event) => handleClick(event, row.id)}
-                      />
-                    </TableCell>
-                  )}
-                  {columns.map((column) => {
-                    const cellValue = row[column.id];
-                    let content: React.ReactNode = null;
-
-                    if (column.type === 'status' || column.id === 'status') {
-                      content = renderStatusCell(cellValue);
-                    } else if (column.type === 'link' || (typeof cellValue === 'string' && cellValue.startsWith('http'))) {
-                      content = renderLinkCell(cellValue);
-                    } else {
-                      content = cellValue !== null && cellValue !== undefined ? String(cellValue) : null;
-                    }
-
-                    return (
-                      <TableCell
-                        key={column.id}
-                        sx={{
-                          fontSize: '14px',
-                          color: column.id === 'name' ? '#1F2A44' : '#737791',
-                          borderBottom: '1px solid #E5E7EB',
-                          fontWeight: column.id === 'name' ? 'bold' : 'normal',
-                          textAlign: column.align || 'left',
-                        }}
-                      >
-                        {content}
+            {data.length > 0 ? (
+              data.map((row) => {
+                const isItemSelected = isSelected(row.id);
+                return (
+                  <TableRow
+                    hover
+                    key={row.id}
+                    sx={{
+                      backgroundColor: '#FFFFFF',
+                      cursor: onRowClick ? 'pointer' : 'default',
+                      '&:hover': { backgroundColor: '#F5F5F5' }
+                    }}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  >
+                    {showCheckboxes && (
+                      <TableCell sx={{ borderBottom: '1px solid #E5E7EB' }}>
+                        <Checkbox
+                          size="small"
+                          checked={isItemSelected}
+                          onClick={(event) => handleClick(event, row.id)}
+                        />
                       </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
+                    )}
+                    {columns.map((column) => {
+                      const cellValue = row[column.id];
+                      let content: React.ReactNode = null;
+
+                      if (column.type === 'status' || column.id === 'status') {
+                        content = renderStatusCell(cellValue);
+                      } else if (column.type === 'link') {
+                        content = renderLinkCell(cellValue);
+                      } else {
+                        content = cellValue !== null && cellValue !== undefined ? String(cellValue) : null;
+                      }
+
+                      return (
+                        <TableCell
+                          key={column.id}
+                          sx={{
+                            fontSize: '14px',
+                            color: column.id === 'name' ? '#1F2A44' : '#737791',
+                            borderBottom: '1px solid #E5E7EB',
+                            fontWeight: column.id === 'name' ? 'bold' : 'normal',
+                            textAlign: column.align || 'left',
+                          }}
+                        >
+                          {content}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} align="center" sx={{ py: 3 }}>
+                  No data found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
 
           <TableFooter sx={{ backgroundColor: '#FFFFFF' }}>
@@ -349,7 +374,10 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                     <Pagination
                       count={totalPages}
                       page={page}
-                      onChange={(event, page) => handlePageChange(page)}
+                      onChange={(event, newPage) => {
+                        console.log("Page changed to:", newPage);
+                        handlePageChange(newPage);
+                      }}
                       siblingCount={1}
                       boundaryCount={1}
                       sx={{

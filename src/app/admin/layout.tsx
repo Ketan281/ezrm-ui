@@ -36,6 +36,15 @@ const sidebarItems: SidebarItem[] = [
       { text: 'View All Products', path: '/admin/inventory/view' },
     ],
   },
+    {
+    text: 'Payments',
+    icon: '/order.png',
+    hasDropdown: true,
+    options: [
+      { text: 'Payments', path: '/admin/payments/payment' },
+      { text: 'Refunds', path: '/admin/payments/refund' },
+    ],
+  },
   {
     text: 'Orders',
     icon: '/order.png',
@@ -161,8 +170,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       sx={{
                         mr: 3,
                         ml: 3,
-                        mt: 1,
-                        mb: 1,
+                        mt: 0.5,
+                        mb: 0.5,
                         color: isItemActive(item) ? '#fff' : 'rgba(115, 119, 145, 1)',
                         borderRadius: "16px",
                         border: isDropdownOpen(item.text) ? '2px solid #f9a922' : 'none',

@@ -161,7 +161,7 @@ export default function CustomerReviews() {
   })
 
   return (
-    <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 3 }}>
+    <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
         {/* Back button */}
         <Button
@@ -170,7 +170,8 @@ export default function CustomerReviews() {
             color: "#637381",
             textTransform: "none",
             fontWeight: 500,
-            mb: 2,
+            mb: 1,
+            mt:-2,
             "&:hover": {
               backgroundColor: "transparent",
               color: "#212B36",
