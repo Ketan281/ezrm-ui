@@ -5,9 +5,39 @@ import EmailIcon from "@mui/icons-material/Email"
 import LocationOnIcon from "@mui/icons-material/LocationOn"
 import React from "react"
 import Image from "next/image"
-export default function UserProfileCard() {
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"
+export default function CompletedDetails() {
     return (
         <Box>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          sx={{
+            color: "#637381",
+            textTransform: "none",
+            fontWeight: 500,
+            mb: 1,
+            mt: 0,
+            "&:hover": {
+              backgroundColor: "transparent",
+              color: "#212B36",
+            },
+          }}
+        >
+          Back
+        </Button>
+
+        {/* Page title */}
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 700,
+            color: "#212B36",
+            mb: 3,
+          }}
+        >
+          Completed payment
+        </Typography>
+
             <Box sx={{ display: "flex", gap: 5, maxWidth: "950px", width: "100%" }}>
                 {/* Left Section */}
                 <Paper
@@ -92,49 +122,22 @@ export default function UserProfileCard() {
                     }}
                 >
                     <Box sx={{ mb: 2 }}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                            <Typography variant="body2" sx={{ color: "#666" }}>
-                                Amount Paid
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: "#00b894", fontWeight: "bold" }}>
-                                $123
+                        <Box sx={{ display: "flex", justifyContent: "space-around", mb: 1,alignItems:"Center" }}>
+                           <Image src="/completed.png" alt="completed" height={50} width={50}/>
+                            <Typography variant="body2" sx={{  fontWeight: "bold" }}>
+                                Payment Completed
                             </Typography>
                         </Box>
 
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                            <Typography variant="body2" sx={{ color: "#666" }}>
-                                Amount pending
+                        <Box sx={{ display: "flex", justifyContent: "space-around", mt:2,ml:-1 }}>
+                            <Typography variant="body2" sx={{ color: "#666" ,fontWeight: "bold"}}>
+                                Pay Date
                             </Typography>
-                            <Typography variant="body2" sx={{ color: "#ff5252", fontWeight: "bold" }}>
-                                $123
-                            </Typography>
-                        </Box>
-
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-                            <Typography variant="body2" sx={{ color: "#666" }}>
-                                Due Date
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: "#333" }}>
-                                April 2, 2025
+                            <Typography variant="body2" sx={{ }}>
+                                April 2 2025
                             </Typography>
                         </Box>
                     </Box>
-
-                    <Button
-                        variant="contained"
-                        fullWidth
-                        sx={{
-                            textTransform: "none",
-                            backgroundColor: "#ffa726",
-                            "&:hover": {
-                                backgroundColor: "#f57c00",
-                            },
-                            borderRadius: "4px",
-                            py: 1,
-                        }}
-                    >
-                        Request Payment
-                    </Button>
                 </Paper>
             </Box>
              <Typography variant="h6" fontWeight="600" color="#1a365d" gutterBottom mt={3}>
