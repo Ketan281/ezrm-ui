@@ -203,7 +203,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           height={8}
                           style={{
                             transition: 'transform 0.3s',
-                            transform: isDropdownOpen(item.text) ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transform: isDropdownOpen(item.text) ? 'rotate(0deg)' : 'rotate(180deg)',
                           }}
                         />
                       )}
