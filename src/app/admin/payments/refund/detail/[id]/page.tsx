@@ -358,7 +358,7 @@ export default function RefundDetails() {
               },
             },
             '& .MuiOutlinedInput-input': {
-              padding: '12px 14px',
+              padding: '5px 6px',
               fontSize: '14px',
               lineHeight: 1.5,
               color: '#333',
