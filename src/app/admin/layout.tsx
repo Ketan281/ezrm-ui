@@ -90,7 +90,17 @@ const sidebarItems: SidebarItem[] = [
           { text: "Refund", path: "/admin/logistics/payment-management/refund" },
         ],
       },
-      { text: "Warehouse", path: "/admin/logistics/warehouse" },
+      {
+        text: "Warehouse",
+        path: "/admin/logistics/warehouse",
+        hasNestedDropdown: true,
+        nestedOptions: [
+          { text: "Add Product", path: "/admin/logistics/warehouse/add-product" },
+          { text: "Delete Product", path: "/admin/logistics/warehouse/delete-product" },
+          { text: "Update Product", path: "/admin/logistics/warehouse/update-product" },
+          { text: "View Products", path: "/admin/logistics/warehouse/view-products" },
+        ],
+      },
       { text: "Document Tracking", path: "/admin/logistics/document-tracking" },
     ],
   },
@@ -118,6 +128,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // State for nested dropdowns
   const [openNestedDropdowns, setOpenNestedDropdowns] = useState<NestedDropdownState>({
     "Payment Management": false,
+    Warehouse: false,
   })
 
   // Only execute client-side
@@ -140,6 +151,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       // Auto open nested dropdown if on a nested path
       if (pathname.startsWith("/admin/logistics/payment-management/")) {
         setOpenNestedDropdowns((prev) => ({ ...prev, "Payment Management": true }))
+      } else if (pathname.startsWith("/admin/logistics/warehouse/")) {
+        setOpenNestedDropdowns((prev) => ({ ...prev, Warehouse: true }))
       }
     }
   }, [pathname, router])
@@ -441,10 +454,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                           primary={nestedOption.text}
                                           primaryTypographyProps={{
                                             sx: {
-                                              fontSize: "10px",
+                                              fontSize: "8px",
                                               color: "inherit",
                                               fontFamily: "Poppins, sans-serif",
-                                              margin: 0, // Remove margin
+                                              mt: 0.5,
+                                              mb: 0.5,
                                             },
                                           }}
                                         />

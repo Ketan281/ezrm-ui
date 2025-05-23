@@ -328,10 +328,10 @@ export default function Payments() {
     setCompletedPage(page)
   }
  const handleRowClickPending = (row: TableRowData) => {
-    router.push(`/admin/payments/payment/detail/pending/${row.id}`)
+    router.push(`/admin/logistics/payment-management/payment/detail/pending/${row.id}`)
   }
    const handleRowClickCompleted = (row: TableRowData) => {
-    router.push(`/admin/payments/payment/detail/completed/${row.id}`)
+    router.push(`/admin/logistics/payment-management/payment/detail/completed/${row.id}`)
   }
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>

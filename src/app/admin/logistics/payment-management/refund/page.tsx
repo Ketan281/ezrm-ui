@@ -187,7 +187,7 @@ export default function Refunds() {
 
 
  const handleRowClickPending = (row: TableRowData) => {
-    router.push(`/admin/payments/refund/detail/${row.id}`)
+    router.push(`/admin/logistics/payment-management/refund/detail/${row.id}`)
   }
 
   return (
