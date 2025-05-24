@@ -53,6 +53,7 @@ const sidebarItems: SidebarItem[] = [
     icon: "/inventory.png",
     hasDropdown: true,
     options: [
+      { text: "Add Product", path: "/admin/inventory/add-product" },
       { text: "Delete Product/Category", path: "/admin/inventory/delete" },
       { text: "Update Product", path: "/admin/inventory/update" },
       { text: "View All Products", path: "/admin/inventory/view" },
@@ -145,6 +146,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setOpenDropdowns((prev) => ({ ...prev, Inventory: true }))
     } else if (pathname.startsWith("/admin/orders")) {
       setOpenDropdowns((prev) => ({ ...prev, Orders: true }))
+    } else if (pathname.startsWith("/admin/payments/")) {
+      setOpenDropdowns((prev) => ({ ...prev, Payments: true }))
     } else if (pathname.startsWith("/admin/logistics/")) {
       setOpenDropdowns((prev) => ({ ...prev, Logistics: true }))
 
@@ -165,9 +168,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     )
     setOpenDropdowns(newDropdownState)
 
-    // Reset nested dropdowns when closing parent
-    if (openDropdowns[dropdownName] && !newDropdownState[dropdownName]) {
-      setOpenNestedDropdowns({})
+    // Reset nested dropdowns when closing parent or switching to different parent
+    if (openDropdowns[dropdownName] || dropdownName !== "Logistics") {
+      setOpenNestedDropdowns({
+        "Payment Management": false,
+        Warehouse: false,
+      })
     }
   }
 
@@ -284,31 +290,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             width: 240,
             boxSizing: "border-box",
             borderRight: "none",
-            overflowY: "hidden",
+            overflowY: "auto",
+            // Hide scrollbar for webkit browsers
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+            // Hide scrollbar for Firefox
+            scrollbarWidth: "none",
+            // Hide scrollbar for IE
+            msOverflowStyle: "none",
           },
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: "hidden" }}>
+        <Box
+          sx={{
+            overflow: "auto",
+            // Hide scrollbar for webkit browsers
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+            // Hide scrollbar for Firefox
+            scrollbarWidth: "none",
+            // Hide scrollbar for IE
+            msOverflowStyle: "none",
+          }}
+        >
           <List>
             {sidebarItems.map((item) => (
               <React.Fragment key={item.text}>
                 {item.hasDropdown ? (
                   <>
                     <ListItemButton
-                      onClick={() => {
-                        // Close all other dropdowns when opening a new one
-                        const newDropdownState = Object.keys(openDropdowns).reduce<DropdownState>(
-                          (acc, key) => ({ ...acc, [key]: key === item.text ? !openDropdowns[item.text] : false }),
-                          {} as DropdownState,
-                        )
-                        setOpenDropdowns(newDropdownState)
-
-                        // Reset nested dropdowns when closing parent
-                        if (openDropdowns[item.text] && !newDropdownState[item.text]) {
-                          setOpenNestedDropdowns({})
-                        }
-                      }}
+                      onClick={() => toggleDropdown(item.text)}
                       selected={isItemActive(item)}
                       sx={{
                         mr: 3,
