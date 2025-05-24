@@ -169,7 +169,10 @@ export default function ProductDetail() {
                       alt={`Thumbnail ${item}`}
                       width={50}
                       height={50}
-                      style={{ objectFit: "cover" }}
+                      style={{
+                        objectFit: "cover",
+                        opacity: item === 1 ? 1 : item === 2 ? 0.5 : 0.2,
+                      }}
                     />
                   </Box>
                 ))}
