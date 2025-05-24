@@ -31,7 +31,9 @@ export default function ViewProductPage() {
 
   // State for filter dropdown
   const [filter, setFilter] = useState('');
-
+      const handleProductClick = (productId: string) => {
+    router.push(`view/detail/${productId}`)
+  }
   // Main container for the page
   return (
     <Box sx={{ p: 1, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
@@ -90,6 +92,7 @@ export default function ViewProductPage() {
           <Grid key={index}>
             <Paper
               elevation={1}
+              onClick={() => handleProductClick(product.id)}
               sx={{
                 borderRadius: '10px',
                 overflow: 'hidden',
