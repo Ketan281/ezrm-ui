@@ -25,6 +25,7 @@ const products = [
 ];
 
 // Define the ViewProductPage component
+
 export default function ViewProductPage() {
   // Initialize router for navigation
   const router = useRouter();
@@ -33,6 +34,9 @@ export default function ViewProductPage() {
   const [filter, setFilter] = useState('');
 
   // Main container for the page
+    const handleProductClick = (productId: string) => {
+    router.push(`view-products/detail/${productId}`)
+  }
   return (
     <Box sx={{ p: 1, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
       {/* Header Section with Back button and title */}
@@ -90,6 +94,7 @@ export default function ViewProductPage() {
           <Grid key={index}>
             <Paper
               elevation={1}
+              onClick={() => handleProductClick(product.id)}
               sx={{
                 borderRadius: '10px',
                 overflow: 'hidden',

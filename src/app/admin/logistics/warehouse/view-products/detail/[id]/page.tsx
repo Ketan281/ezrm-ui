@@ -86,7 +86,7 @@ export default function ProductDetail() {
             {/* Left Column - Image */}
             <Box sx={{ width: "320px" }}>
               <Image
-                src="/placeholder-fcb5q.png"
+                src="/productDetail.png"
                 alt="Product Image"
                 width={320}
                 height={500}
@@ -165,7 +165,7 @@ export default function ProductDetail() {
                     }}
                   >
                     <Image
-                      src={`/vitamin-supplement-thumbnail.png?height=50&width=50&query=vitamin supplement thumbnail ${item}`}
+                      src="/productDetail.png"
                       alt={`Thumbnail ${item}`}
                       width={50}
                       height={50}
