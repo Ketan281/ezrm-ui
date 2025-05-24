@@ -272,9 +272,9 @@ export default function ProductDetail() {
                     color: "white",
                     textTransform: "none",
                     borderRadius: "20px",
-                    px: 3,
+                    px: 1.5,
                     py: 1,
-                    fontSize: "14px",
+                    fontSize: "10px",
                     "&:hover": {
                       backgroundColor: "#f57c00",
                     },
