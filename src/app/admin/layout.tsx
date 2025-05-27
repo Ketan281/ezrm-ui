@@ -225,7 +225,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-
       {/* Navbar */}
       <AppBar
         position="fixed"
