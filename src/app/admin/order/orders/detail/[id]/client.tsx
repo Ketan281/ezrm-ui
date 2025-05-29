@@ -33,7 +33,7 @@ interface OrderTrackingClientProps {
 }
 
 export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
-  const [tabValue, setTabValue] = React.useState(1)
+  const [tabValue, setTabValue] = React.useState(0)
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue)

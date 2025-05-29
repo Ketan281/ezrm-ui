@@ -102,6 +102,7 @@ const sidebarItems: SidebarItem[] = [
           { text: "View Products", path: "/admin/logistics/warehouse/view-products" },
         ],
       },
+      { text: "Orders", path: "/admin/logistics/orders" },
       { text: "Document Tracking", path: "/admin/logistics/document-tracking" },
     ],
   },
