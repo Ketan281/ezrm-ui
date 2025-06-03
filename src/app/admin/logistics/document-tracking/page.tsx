@@ -1,13 +1,41 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, Button, Select, MenuItem, FormControl, IconButton, Container } from "@mui/material"
-import { ArrowBack, KeyboardArrowDown, Refresh } from "@mui/icons-material"
+import {
+  Box,
+  Typography,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  IconButton,
+  Container,
+  Dialog,
+  DialogContent,
+  ToggleButton,
+  ToggleButtonGroup,
+  TextField,
+} from "@mui/material"
+import {
+  ArrowBack,
+  KeyboardArrowDown,
+  Refresh,
+  Close,
+  ImportExport,
+  FileDownload,
+  DirectionsBoat,
+  Flight,
+  CloudUpload,
+} from "@mui/icons-material"
 import type { SelectChangeEvent } from "@mui/material/Select"
-import Image from "next/image"
+
 export default function ShipmentHeader() {
   const [filterValue, setFilterValue] = React.useState("All")
   const [dateSort, setDateSort] = React.useState("Date Added")
+  const [isModalOpen, setIsModalOpen] = React.useState(false)
+  const [importExport, setImportExport] = React.useState<string>("import")
+  const [transportMode, setTransportMode] = React.useState<string>("")
+  const [hblTracker, setHblTracker] = React.useState<string>("")
 
   const handleFilterChange = (event: SelectChangeEvent) => {
     setFilterValue(event.target.value)
@@ -16,6 +44,24 @@ export default function ShipmentHeader() {
   const handleDateSortChange = (event: SelectChangeEvent) => {
     setDateSort(event.target.value)
   }
+
+  const handleImportExportChange = (event: React.MouseEvent<HTMLElement>, newValue: string | null) => {
+    if (newValue !== null) {
+      setImportExport(newValue)
+    }
+  }
+
+  const handleTransportModeChange = (event: React.MouseEvent<HTMLElement>, newValue: string | null) => {
+    if (newValue !== null) {
+      setTransportMode(newValue)
+    }
+  }
+
+  const handleHblTrackerChange = (event: SelectChangeEvent) => {
+    setHblTracker(event.target.value)
+  }
+
+  const bothOptionsSelected = importExport && transportMode
 
   return (
     <Container maxWidth={false} sx={{ px: 3, py: 2 }}>
@@ -74,23 +120,6 @@ export default function ShipmentHeader() {
           {/* Left Section - Dropdowns and Reset */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* All dropdown */}
-            <Box
-             sx={{
-                  minWidth: 100,
-                  height: 40,
-                  fontSize: "14px",
-                  color: "#333",
-                  backgroundColor: "white",
-                  border: "1px solid #e1e5e9",
-                  borderRadius: "20px",
-                  display:"flex",
-                  justifyContent:"center",
-                  alignItems:"center",
-                  gap:2
-                  }}>
-                <Image src="/ship.png" alt="ERMM Logo" width={20} height={15} />
-                <Image src="/air.png" alt="ERMM Logo" width={20} height={15} />
-            </Box>
             <FormControl size="small">
               <Select
                 value=""
@@ -211,6 +240,7 @@ export default function ShipmentHeader() {
           {/* Right Section - Add Shipment button */}
           <Button
             variant="contained"
+            onClick={() => setIsModalOpen(true)}
             sx={{
               backgroundColor: "#FF8C42",
               color: "white",
@@ -233,6 +263,474 @@ export default function ShipmentHeader() {
           </Button>
         </Box>
       </Box>
+
+      {/* Add Shipment Modal */}
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            padding: "24px",
+            minHeight: bothOptionsSelected ? "600px" : "350px",
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          {/* Header */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 4,
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 600,
+                fontSize: "24px",
+                color: "#FF8C42",
+              }}
+            >
+              Add Shipment
+            </Typography>
+            <IconButton
+              onClick={() => setIsModalOpen(false)}
+              sx={{
+                color: "#666",
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                },
+              }}
+            >
+              <Close />
+            </IconButton>
+          </Box>
+
+          {/* Horizontal Container for both grey boxes */}
+          <Box sx={{ display: "flex", gap: 4, mb: 4 }}>
+            {/* Import/Export Grey Box */}
+            <Box
+              sx={{
+                flex: 1,
+                backgroundColor: "#f5f5f5",
+                borderRadius: "12px",
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <ToggleButtonGroup
+                value={importExport}
+                exclusive
+                onChange={handleImportExportChange}
+                orientation="horizontal"
+                sx={{
+                  gap: 2,
+                  "& .MuiToggleButtonGroup-grouped": {
+                    border: "none",
+                    borderRadius: "25px !important",
+                    px: 3,
+                    py: 1,
+                    fontFamily: "Poppins, sans-serif",
+                    textTransform: "none",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    minWidth: 120,
+                    height: 40,
+                    backgroundColor: "white",
+                    color: "#666",
+                    "&:hover": {
+                      backgroundColor: "#f8f9fa",
+                    },
+                  },
+                }}
+              >
+                <ToggleButton value="import" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      backgroundColor: importExport === "import" ? "#FF8C42" : "#e8e8e8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ImportExport sx={{ fontSize: 14, color: importExport === "import" ? "white" : "#666" }} />
+                  </Box>
+                  Import
+                </ToggleButton>
+                <ToggleButton value="export" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      backgroundColor: importExport === "export" ? "#FF8C42" : "#e8e8e8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <FileDownload sx={{ fontSize: 14, color: importExport === "export" ? "white" : "#666" }} />
+                  </Box>
+                  Export
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
+            {/* Sea/Air Grey Box */}
+            <Box
+              sx={{
+                flex: 1,
+                backgroundColor: "#f5f5f5",
+                borderRadius: "12px",
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <ToggleButtonGroup
+                value={transportMode}
+                exclusive
+                onChange={handleTransportModeChange}
+                orientation="horizontal"
+                sx={{
+                  gap: 2,
+                  "& .MuiToggleButtonGroup-grouped": {
+                    border: "none",
+                    borderRadius: "25px !important",
+                    px: 3,
+                    py: 1,
+                    fontFamily: "Poppins, sans-serif",
+                    textTransform: "none",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    minWidth: 120,
+                    height: 40,
+                    backgroundColor: "white",
+                    color: "#666",
+                    "&:hover": {
+                      backgroundColor: "#f8f9fa",
+                    },
+                  },
+                }}
+              >
+                <ToggleButton value="sea" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      backgroundColor: transportMode === "sea" ? "#FF8C42" : "#e8e8e8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <DirectionsBoat sx={{ fontSize: 14, color: transportMode === "sea" ? "white" : "#666" }} />
+                  </Box>
+                  Sea
+                </ToggleButton>
+                <ToggleButton value="air" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      backgroundColor: transportMode === "air" ? "#FF8C42" : "#e8e8e8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Flight sx={{ fontSize: 14, color: transportMode === "air" ? "white" : "#666" }} />
+                  </Box>
+                  Air
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+          </Box>
+
+          {/* Conditional Content */}
+          {bothOptionsSelected ? (
+            /* Form Fields when both options are selected */
+            <Box sx={{ display: "flex", gap: 4 }}>
+              {/* Left Form Section */}
+              <Box
+                sx={{
+                  flex: 1,
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: "12px",
+                  p: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 3,
+                }}
+              >
+                {/* First Row */}
+                <Box sx={{ display: "flex", gap: 3 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "14px",
+                        color: "#666",
+                        mb: 1,
+                      }}
+                    >
+                      Ref Number
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          fontFamily: "Poppins, sans-serif",
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "14px",
+                        color: "#666",
+                        mb: 1,
+                      }}
+                    >
+                      PO Number
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          fontFamily: "Poppins, sans-serif",
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Second Row */}
+                <Box sx={{ display: "flex", gap: 3 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "14px",
+                        color: "#666",
+                        mb: 1,
+                      }}
+                    >
+                      MBL Number
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          fontFamily: "Poppins, sans-serif",
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "14px",
+                        color: "#666",
+                        mb: 1,
+                      }}
+                    >
+                      Container Number
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          fontFamily: "Poppins, sans-serif",
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Third Row */}
+                <Box sx={{ display: "flex", gap: 3 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "14px",
+                        color: "#666",
+                        mb: 1,
+                      }}
+                    >
+                      HBL Number
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          fontFamily: "Poppins, sans-serif",
+                          backgroundColor: "white",
+                        },
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "14px",
+                        color: "#666",
+                        mb: 1,
+                      }}
+                    >
+                      HBL Tracker
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={hblTracker}
+                        onChange={handleHblTrackerChange}
+                        displayEmpty
+                        renderValue={(value) => (value === "" ? "Select HBL Track" : value)}
+                        sx={{
+                          borderRadius: "8px",
+                          fontFamily: "Poppins, sans-serif",
+                          backgroundColor: "white",
+                        }}
+                      >
+                        <MenuItem value="" disabled sx={{ fontFamily: "Poppins, sans-serif" }}>
+                          Select HBL Track
+                        </MenuItem>
+                        <MenuItem value="Track1" sx={{ fontFamily: "Poppins, sans-serif" }}>
+                          Track 1
+                        </MenuItem>
+                        <MenuItem value="Track2" sx={{ fontFamily: "Poppins, sans-serif" }}>
+                          Track 2
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Right File Upload Section */}
+              <Box sx={{ flex: 1 }}>
+                <Box
+                  sx={{
+                    border: "2px dashed #ccc",
+                    borderRadius: "12px",
+                    p: 4,
+                    textAlign: "center",
+                    backgroundColor: "#fafafa",
+                    minHeight: "200px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 2,
+                  }}
+                >
+                  <CloudUpload sx={{ fontSize: 48, color: "#999" }} />
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: "16px",
+                      color: "#666",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Drop Items here or{" "}
+                    <Typography
+                      component="span"
+                      sx={{
+                        color: "#FF8C42",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        fontFamily: "Poppins, sans-serif",
+                      }}
+                    >
+                      Browse Files
+                    </Typography>
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: "12px",
+                      color: "#999",
+                    }}
+                  >
+                    You can Upload pdf, xsl, doc, png, jpg, jpeg files
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          ) : (
+            /* Instruction Text when options are not selected */
+            <Box
+              sx={{
+                backgroundColor: "#f5f5f5",
+                borderRadius: "12px",
+                p: 3,
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "14px",
+                  color: "#666",
+                  lineHeight: 1.5,
+                }}
+              >
+                Please Select Import/Export and Sea/Air shipment to add shipment
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </Container>
   )
 }
