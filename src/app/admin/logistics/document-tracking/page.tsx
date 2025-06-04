@@ -68,7 +68,8 @@ export default function ShipmentHeader() {
   return (
     <>
       <Container maxWidth={false} sx={{ px: 3, py: 2 }}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {/* Header Section - Full Width */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
           {/* First Row - Back button */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
@@ -111,17 +112,34 @@ export default function ShipmentHeader() {
             </Typography>
           </Box>
 
-          {/* Third Row - Controls */}
+          {/* Third Row - Controls - Responsive Layout */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
+              gap: 2,
+              mb: 2,
+              flexWrap: "wrap", // Allow wrapping on smaller screens
               justifyContent: "space-between",
-              width: "100%",
+              "@media (max-width: 1200px)": {
+                flexDirection: "column",
+                alignItems: "stretch",
+                gap: 2,
+              },
             }}
           >
             {/* Left Section - Dropdowns and Reset */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+                "@media (max-width: 768px)": {
+                  justifyContent: "center",
+                },
+              }}
+            >
               {/* Ship/Air Icons Box */}
               <Box
                 sx={{
@@ -284,34 +302,50 @@ export default function ShipmentHeader() {
               </Button>
             </Box>
 
-            {/* Right Section - Add Shipment button */}
-            <Button
-              variant="contained"
-              onClick={() => setIsModalOpen(true)}
+            {/* Right Section - Add Shipment button - Responsive positioning */}
+            <Box
               sx={{
-                backgroundColor: "#FF8C42",
-                color: "white",
-                fontSize: "14px",
-                fontWeight: 500,
-                textTransform: "none",
-                borderRadius: "8px",
-                px: 3,
-                py: 1.25,
-                height: 40,
-                boxShadow: "none",
-                fontFamily: "Poppins, sans-serif",
-                "&:hover": {
-                  backgroundColor: "#E67A35",
-                  boxShadow: "none",
+                display: "flex",
+                justifyContent: "flex-end",
+                "@media (max-width: 1200px)": {
+                  justifyContent: "center",
+                  width: "100%",
                 },
               }}
             >
-              Add Shipment
-            </Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  console.log("Add Shipment button clicked!")
+                  setIsModalOpen(true)
+                }}
+                sx={{
+                  backgroundColor: "#FF8C42",
+                  color: "white",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  px: 3,
+                  py: 1.25,
+                  height: 40,
+                  boxShadow: "none",
+                  fontFamily: "Poppins, sans-serif",
+                  minWidth: "140px",
+                  maxWidth: "200px", // Prevent button from getting too wide
+                  "&:hover": {
+                    backgroundColor: "#E67A35",
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                Add Shipment
+              </Button>
+            </Box>
           </Box>
         </Box>
 
-        {/* Shipment Table */}
+        {/* Table Section - 60% Width, Independent of Header */}
         <ShipmentTable />
       </Container>
 
