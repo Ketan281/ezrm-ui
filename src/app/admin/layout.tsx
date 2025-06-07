@@ -133,13 +133,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     Warehouse: false,
   })
 
+  // Add this function near your other utility functions
+  const safeNavigate = (path: string) => {
+    try {
+      router.push(path)
+    } catch (error) {
+      console.error(`Navigation error to ${path}:`, error)
+      // Optionally show a toast or notification to the user
+    }
+  }
+
   // Only execute client-side
   useEffect(() => {
     setMounted(true)
 
     // Set Dashboard as the default route on initial load
     if (pathname === "/admin" || pathname === "/admin/") {
-      router.push("/admin/dashboard")
+      safeNavigate("/admin/dashboard")
     }
 
     // Auto open appropriate dropdown based on current path
@@ -223,8 +233,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return pathname === path
   }
 
+  // Show loading state during hydration to prevent mismatch
+  if (!mounted) {
+    return (
+      <div style={{ display: "flex" }}>
+        <div style={{ width: 240, height: "100vh", backgroundColor: "#f5f5f5" }} />
+        <div style={{ flexGrow: 1, padding: 24, marginTop: 64, backgroundColor: "#F9FAFB", minHeight: "85vh" }}>
+          {children}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex" }} suppressHydrationWarning={true}>
       <CssBaseline />
       {/* Navbar */}
       <AppBar
@@ -349,23 +371,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <Image src={item.icon || "/placeholder.svg"} alt={`${item.text} Icon`} width={24} height={24} />
                       </ListItemIcon>
                       <ListItemText primary={item.text} sx={{ color: "inherit" }} />
-                      {mounted && (
-                        <Image
-                          src={"/down.png"}
-                          alt="Toggle Icon"
-                          width={12}
-                          height={8}
-                          style={{
-                            transition: "transform 0.3s",
-                            transform: isDropdownOpen(item.text) ? "rotate(0deg)" : "rotate(180deg)",
-                          }}
-                        />
-                      )}
+                      <Image
+                        src={"/down.png"}
+                        alt="Toggle Icon"
+                        width={12}
+                        height={8}
+                        style={{
+                          transition: "transform 0.3s",
+                          transform: isDropdownOpen(item.text) ? "rotate(0deg)" : "rotate(180deg)",
+                        }}
+                      />
                     </ListItemButton>
                     {isDropdownOpen(item.text) && item.options && (
                       <Box sx={{ ml: 1, mt: 0, mb: 0.5, display: "grid", placeItems: "center" }}>
                         {item.options.map((option) => {
-                          const isActive = mounted && pathname === option.path
+                          const isActive = pathname === option.path
                           const hasNestedDropdown = option.hasNestedDropdown && option.nestedOptions
 
                           return (
@@ -375,7 +395,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                   if (hasNestedDropdown) {
                                     toggleNestedDropdown(e, option.text)
                                   } else {
-                                    router.push(option.path)
+                                    safeNavigate(option.path)
                                   }
                                 }}
                                 selected={isActive}
@@ -386,8 +406,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                     backgroundColor: isActive ? "#f9a922" : "#f9a922",
                                     color: "#fff",
                                   },
-                                  py: 0.25, // Reduced padding
-                                  mt: 0.25, // Reduced margin
+                                  py: 0.25,
+                                  mt: 0.25,
                                   textAlign: "center",
                                   width: "200px",
                                   minWidth: "180px",
@@ -413,7 +433,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                     },
                                   }}
                                 />
-                                {hasNestedDropdown && mounted && (
+                                {hasNestedDropdown && (
                                   <Image
                                     src={"/down.png"}
                                     alt="Toggle Icon"
@@ -437,7 +457,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                       <ListItemButton
                                         key={nestedOption.text}
                                         onClick={() => {
-                                          router.push(nestedOption.path)
+                                          safeNavigate(nestedOption.path)
                                         }}
                                         selected={isNestedActive}
                                         sx={{
@@ -447,8 +467,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                             backgroundColor: isNestedActive ? "#f9a922" : "#f9a922",
                                             color: "#fff",
                                           },
-                                          py: 0.1, // Minimal padding
-                                          mt: 0.1, // Minimal margin
+                                          py: 0.1,
+                                          mt: 0.1,
                                           textAlign: "center",
                                           width: "160px",
                                           minWidth: "160px",
@@ -489,18 +509,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </>
                 ) : (
                   <ListItemButton
-                    onClick={() => router.push(item.path || "")}
-                    selected={mounted && pathname === item.path}
+                    onClick={() => safeNavigate(item.path || "")}
+                    selected={pathname === item.path}
                     sx={{
                       mr: 3,
                       ml: 3,
-                      mt: 0.5, // Reduced margin
-                      mb: 0.5, // Reduced margin
-                      backgroundColor: mounted && pathname === item.path ? "#f9a922" : "transparent",
-                      color: mounted && pathname === item.path ? "#fff" : "rgba(115, 119, 145, 1)",
+                      mt: 0.5,
+                      mb: 0.5,
+                      backgroundColor: pathname === item.path ? "#f9a922" : "transparent",
+                      color: pathname === item.path ? "#fff" : "rgba(115, 119, 145, 1)",
                       borderRadius: "16px",
                       "&:hover": {
-                        backgroundColor: mounted && pathname === item.path ? "#f9a922" : "#f9a922",
+                        backgroundColor: pathname === item.path ? "#f9a922" : "#f9a922",
                         color: "#fff",
                       },
                       "&.Mui-selected": {
