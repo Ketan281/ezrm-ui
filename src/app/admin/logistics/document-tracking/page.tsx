@@ -816,7 +816,6 @@ const ShipmentTable = () => {
             {currentPage}
           </Typography>
         </Box>
-
         <IconButton
           disabled={currentPage === totalPages}
           onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
