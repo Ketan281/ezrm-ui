@@ -1103,8 +1103,6 @@ export default function ShipmentComp() {
               ]}
             />
           </Box>
-
-          {/* Conditional Content */}
           {bothOptionsSelected ? (
             <Box sx={{ display: "flex", gap: 4 }}>
               {/* Form Section */}
