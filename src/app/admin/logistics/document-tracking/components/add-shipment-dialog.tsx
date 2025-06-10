@@ -433,32 +433,35 @@ export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogPr
             <FileUploadArea />
             </Box>
             <Button
-            variant="contained"
-            // onClick={onAddShipment}
-            sx={{
-              backgroundColor: "#FF8C42",
-              color: "white",
-              fontSize: "14px",
-              fontWeight: 500,
-              textTransform: "none",
-              borderRadius: "8px",
-              px: 3,
-              py: 1.25,
-              height: 40,
-              ml: 60,
-              mt:3,
-              boxShadow: "none",
-              fontFamily: "Poppins, sans-serif",
-              minWidth: "140px",
-              maxWidth: "200px",
-              "&:hover": {
-                backgroundColor: "#E67A35",
-                boxShadow: "none",
-              },
-            }}
-          >
-            Continue
-          </Button>
+  variant="contained"
+  // onClick={onAddShipment}
+  sx={{
+    backgroundColor: "#FF8C42",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: 500,
+    textTransform: "none",
+    borderRadius: "8px",
+    px: 3,
+    py: 1.25,
+    height: 40,
+    mt: 3, // Keep this if you want top margin
+    boxShadow: "none",
+    fontFamily: "Poppins, sans-serif",
+    minWidth: "140px",
+    maxWidth: "200px",
+    // --- Changes for centering ---
+    display: "block", // Make the button a block-level element
+    mx: "auto",       // Set left and right margins to 'auto' to center it
+    // --- End changes ---
+    "&:hover": {
+      backgroundColor: "#E67A35",
+      boxShadow: "none",
+    },
+  }}
+>
+  Continue
+</Button>
           </Box>
         ) : (
           <Box
