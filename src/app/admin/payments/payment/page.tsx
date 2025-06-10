@@ -333,7 +333,10 @@ export default function Payments() {
    const handleRowClickCompleted = (row: TableRowData) => {
     router.push(`/admin/payments/payment/detail/completed/${row.id}`)
   }
-    const handleLinkClick = (row: TableRowData) => {
+    const handleLinkClickPending = (row: TableRowData) => {
+      router.push(`/admin/payments/payment/detail/pending/${row.id}`)
+    }
+     const handleLinkClickCompleted = (row: TableRowData) => {
       router.push(`/admin/payments/payment/detail/completed/${row.id}`)
     }
   return (
@@ -515,6 +518,7 @@ export default function Payments() {
             currentPage={page}
             onPageChange={handlePageChange}
             onRowClick={handleRowClickPending}
+            onLinkClick={handleLinkClickPending}
             showCheckboxes={false}
             showHeader={true}
             rowsPerPage={9}
@@ -551,7 +555,7 @@ export default function Payments() {
             currentPage={completedPage}
             onPageChange={handleCompletedPageChange}
             onRowClick={handleRowClickCompleted}
-            onLinkClick={handleLinkClick}
+            onLinkClick={handleLinkClickCompleted}
             showCheckboxes={false}
             showHeader={true}
             rowsPerPage={9}
