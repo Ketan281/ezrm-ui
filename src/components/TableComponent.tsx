@@ -48,6 +48,8 @@ interface TableComponentProps {
   currentPage?: number;
   onPageChange?: (page: number) => void;
   onRowClick?: (row: TableRowData) => void;
+  onLinkClick?: (row: TableRowData) => void;
+  onClick?: (row: TableRowData) => void;
   filterOptions?: {
     value: string;
     onChange: (value: string) => void;
@@ -72,6 +74,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   currentPage = 1,
   onPageChange,
   onRowClick,
+  onLinkClick,
   filterOptions,
   searchOptions,
   actionButtons,
@@ -147,6 +150,10 @@ export const TableComponent: React.FC<TableComponentProps> = ({
         bgColor = 'rgba(255, 247, 225, 1)';
         textColor = 'rgba(255, 195, 39, 1)';
         break;
+      case 'declined':
+        bgColor = 'rgba(255, 244, 240, 1)';
+        textColor = 'rgba(255, 143, 107, 1)';
+        break;
       case 'new order':
         bgColor = 'rgba(239, 239, 255, 1)';
         textColor = 'rgba(96, 91, 255, 1)';
@@ -174,7 +181,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
     );
   };
 
-  const renderLinkCell = (value: unknown) => {
+  const renderLinkCell = (value: unknown, row: TableRowData) => {
     if (typeof value !== 'string') return "View";
     
     return (
@@ -188,8 +195,10 @@ export const TableComponent: React.FC<TableComponentProps> = ({
           }
         }}
         onClick={(e) => {
-          e.stopPropagation();
-          window.open(value !== '#' ? value : '#', '_blank');
+          e.stopPropagation()
+          if (onLinkClick) {
+            onLinkClick(row)
+          }
         }}
       >
         View
@@ -316,7 +325,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       cursor: onRowClick ? 'pointer' : 'default',
                       '&:hover': { backgroundColor: '#F5F5F5' }
                     }}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    onClick={onRowClick ? () => onRowClick(row) : (onLinkClick ? () => onLinkClick(row) : undefined)}
                   >
                     {showCheckboxes && (
                       <TableCell sx={{ borderBottom: '1px solid #E5E7EB' }}>
@@ -334,7 +343,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       if (column.type === 'status' || column.id === 'status') {
                         content = renderStatusCell(cellValue);
                       } else if (column.type === 'link') {
-                        content = renderLinkCell(cellValue);
+                        content = renderLinkCell(cellValue, row);
                       } else {
                         content = cellValue !== null && cellValue !== undefined ? String(cellValue) : null;
                       }

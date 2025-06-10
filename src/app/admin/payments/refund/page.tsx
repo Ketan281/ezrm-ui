@@ -1,7 +1,7 @@
 "use client"
-
-import type React from "react"
 import { useState } from "react"
+import type React from "react"
+
 import { Box, Typography, Button, CardContent, Grid, Card } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { useRouter } from "next/navigation"
@@ -39,115 +39,114 @@ export default function Refunds() {
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/1`,
       id: "1",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "in-process",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/w`,
       id: "w",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "declined",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/3`,
       id: "3",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/4`,
       id: "4",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "in-process",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/5`,
       id: "5",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/6`,
       id: "6",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/7`,
       id: "7",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/8`,
       id: "8",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/9`,
       id: "9",
     },
     // Add more rows to test pagination
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/10`,
       id: "10",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/11`,
       id: "11",
     },
-  {
+    {
       invoiceId: "#123456",
       date: "April 2, 2025, 3:45PM",
       customerName: "Robin Rosh",
       email: "Robin@gmail.com",
       status: "completed",
-      orderDetails: "#",
+      orderDetails: `/admin/payments/refund/detail/12`,
       id: "12",
     },
   ]
-  
+
   // Make sure to use the full length of the data
-  const pendingTotalResults = paymentData.length;
- 
-  
+  const pendingTotalResults = paymentData.length
+
   const columns: TableColumnType[] = [
     { id: "invoiceId", label: "Invoice ID", width: "12%" },
     { id: "date", label: "Date", width: "25%", align: "center" },
@@ -167,26 +166,27 @@ export default function Refunds() {
       align: "center",
     },
   ]
-  
 
-  
   const handlePageChange = (page: number) => {
     setPage(page)
   }
 
- 
-
   // Filter reviews based on selected tab
   const statusOptions = [
     { value: "", label: "Status" },
-   { value: "Completed", label: "Completed" },
+    { value: "Completed", label: "Completed" },
     { value: "In-process", label: "In-process" },
     { value: "Pending", label: "Pending" },
-    { value: "Declined", label: "Declined" },  
+    { value: "Declined", label: "Declined" },
   ]
 
+  const handleRowClickPending = (row: TableRowData) => {
+    router.push(`/admin/payments/refund/detail/${row.id}`)
+  }
 
- const handleRowClickPending = (row: TableRowData) => {
+  // Add handler for link clicks in the Order Details column
+  const handleLinkClick = (row: TableRowData) => {
+    // event.stopPropagation() // Prevent row click from firing
     router.push(`/admin/payments/refund/detail/${row.id}`)
   }
 
@@ -312,26 +312,27 @@ export default function Refunds() {
             </Card>
           </Grid>
         </Grid>
-            <>
-                     <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 500,
-            color: "#212B36",
-            mt: 3,
-            mb: 1,
-            ml:3
-          }}
-        >
-          Pending payments
-        </Typography>
+        <>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 500,
+              color: "#212B36",
+              mt: 3,
+              mb: 1,
+              ml: 3,
+            }}
+          >
+            Pending payments
+          </Typography>
           <TableComponent
             columns={columns}
             data={paymentData.slice((page - 1) * 9, page * 9)}
             totalResults={pendingTotalResults}
-            currentPage={page}
+            currentPage={page} 
             onPageChange={handlePageChange}
             onRowClick={handleRowClickPending}
+            onLinkClick={handleLinkClick}
             showCheckboxes={false}
             showHeader={true}
             rowsPerPage={9}
@@ -346,8 +347,7 @@ export default function Refunds() {
               options: statusOptions,
             }}
           />
-          </>
-    
+        </>
       </Box>
     </Box>
   )

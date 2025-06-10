@@ -333,6 +333,9 @@ export default function Payments() {
    const handleRowClickCompleted = (row: TableRowData) => {
     router.push(`/admin/payments/payment/detail/completed/${row.id}`)
   }
+    const handleLinkClick = (row: TableRowData) => {
+      router.push(`/admin/payments/payment/detail/completed/${row.id}`)
+    }
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
@@ -548,6 +551,7 @@ export default function Payments() {
             currentPage={completedPage}
             onPageChange={handleCompletedPageChange}
             onRowClick={handleRowClickCompleted}
+            onLinkClick={handleLinkClick}
             showCheckboxes={false}
             showHeader={true}
             rowsPerPage={9}
