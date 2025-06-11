@@ -66,7 +66,9 @@ export default function OrderList() {
   const handleRowClick = (row: TableRowData) => {
     router.push(`/admin/order/rfq/detail/${row.id}`);
   };
-
+  const handleLinkClick = (row: TableRowData) => {
+    router.push(`/admin/order/rfq/detail/${row.id}`);
+  };
   return (
     <Box sx={{ p: 3, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
       <Typography sx={{ 
@@ -86,6 +88,7 @@ export default function OrderList() {
         currentPage={page}
         onPageChange={handlePageChange}
         onRowClick={handleRowClick}
+        onLinkClick={handleLinkClick}
         showCheckboxes={false}
         showHeader={true}
         rowsPerPage={9}
