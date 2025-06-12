@@ -52,11 +52,11 @@ export default function OrderList() {
   
   const columns: TableColumnType[] = [
     { id: 'customerName', label: 'Customer Name', width: '18%' },
-    { id: 'email', label: 'Email', width: '12%' },
-    { id: 'phoneNumber', label: 'Phone Number', width: '16%' },
-    { id: 'quantity', label: 'Quantity', width: '10%' },
-    { id: 'dateTime', label: 'Date/Time', width: '165', type: 'default' },
-    { id: 'trackOrder', label: 'View Details', width: '20%', type: 'link' },
+    { id: 'email', label: 'Email', width: '12%',align:"center" },
+    { id: 'phoneNumber', label: 'Phone Number', width: '16%',align:"center" },
+    { id: 'quantity', label: 'Quantity', width: '10%' ,align:"center"},
+    { id: 'dateTime', label: 'Date/Time', width: '165', type: 'default',align:"center" },
+    { id: 'trackOrder', label: 'View Details', width: '20%', type: 'link',align:"center" },
   ];
 
   const handlePageChange = (page: number) => {
