@@ -57,16 +57,16 @@ export default function OrderList() {
   const columns: TableColumnType[] = [
     { id: 'product', label: 'Product', width: '18%' },
     { id: 'orderId', label: 'Order Id', width: '12%' },
-    { id: 'orderNumber', label: 'Order Number', width: '16%' },
-    { id: 'status', label: 'Status', width: '165', type: 'status' },
-    { id: 'quantity', label: 'Quantity', width: '10%' },
-    { id: 'customerName', label: 'Customer Name', width: '18%' },
+    { id: 'orderNumber', label: 'Order Number', width: '16%',align:"center" },
+    { id: 'status', label: 'Status', width: '165', type: 'status',align:"center" },
+    { id: 'quantity', label: 'Quantity', width: '10%',align:"center" },
+    { id: 'customerName', label: 'Customer Name', width: '18%',align:"center" },
     { 
       id: 'trackOrder', 
       label: 'Track Order', 
       width: '20%', 
       type: 'link',
-      align: 'right'
+      align: 'center'
     },
   ];
 
