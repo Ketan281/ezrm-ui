@@ -44,11 +44,21 @@ const ShipmentComp = () => {
   return (
     <>
       <Container maxWidth={false} sx={{ px: 3, py: 2 }}>
-           {showNotification && (
+         
+        <ShipmentHeader
+          filterValue={filterValue}
+          dateSort={dateSort}
+          onFilterChange={handleFilterChange}
+          onDateSortChange={handleDateSortChange}
+          onReset={handleReset}
+          onAddShipment={handleModalOpen}
+        />
+
+        {showNotification && (
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-end",
               width: "100%",
               mb: 2,
             }}
@@ -69,6 +79,9 @@ const ShipmentComp = () => {
                 fontFamily: "Poppins, sans-serif",
                 minWidth: "140px",
                 maxWidth: "400px",
+                mt:3,
+                mb:1,
+                // ml:30,
                 "&:hover": {
                   backgroundColor: "rgba(6, 165, 97, 0.9)",
                   boxShadow: "none",
@@ -79,16 +92,6 @@ const ShipmentComp = () => {
             </Button>
           </Box>
         )}
-        <ShipmentHeader
-          filterValue={filterValue}
-          dateSort={dateSort}
-          onFilterChange={handleFilterChange}
-          onDateSortChange={handleDateSortChange}
-          onReset={handleReset}
-          onAddShipment={handleModalOpen}
-        />
-
-     
 
         <ShipmentTable />
       </Container>
