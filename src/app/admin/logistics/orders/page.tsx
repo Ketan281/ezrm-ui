@@ -55,18 +55,18 @@ export default function OrderList() {
   }
   
   const columns: TableColumnType[] = [
-    { id: 'product', label: 'Product', width: '18%' },
-    { id: 'orderId', label: 'Order Id', width: '12%' },
-    { id: 'orderNumber', label: 'Order Number', width: '16%' },
-    { id: 'status', label: 'Status', width: '165', type: 'status' },
-    { id: 'quantity', label: 'Quantity', width: '10%' },
+    { id: 'product', label: 'Product', width: '15%' },
+    { id: 'orderId', label: 'Order Id', width: '12%',  align: 'center' },
+    { id: 'orderNumber', label: 'Order Number', width: '15%',  align: 'center' },
+    { id: 'status', label: 'Status', width: '165', type: 'status',  align: 'center' },
+    { id: 'quantity', label: 'Quantity', width: '10%',align: 'center' },
     { id: 'customerName', label: 'Customer Name', width: '18%' },
     { 
       id: 'trackOrder', 
       label: 'Track Order', 
       width: '20%', 
       type: 'link',
-      align: 'right'
+      align: 'center'
     },
   ];
 
@@ -77,7 +77,9 @@ export default function OrderList() {
   const handleRowClick = (row: TableRowData) => {
     router.push(`/admin/logistics/orders/detail/${row.id}`);
   };
-
+  const handleLinkClick = (row: TableRowData) => {
+    router.push(`/admin/logistics/orders/detail/${row.id}`);
+  };
   return (
     <Box sx={{ p: 3, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
       <Typography sx={{ 
@@ -97,6 +99,7 @@ export default function OrderList() {
         currentPage={page}
         onPageChange={handlePageChange}
         onRowClick={handleRowClick}
+        onLinkClick={handleLinkClick}
         showCheckboxes={false}
         showHeader={true}
         rowsPerPage={9}

@@ -333,6 +333,12 @@ export default function Payments() {
    const handleRowClickCompleted = (row: TableRowData) => {
     router.push(`/admin/logistics/payment-management/payment/detail/completed/${row.id}`)
   }
+   const handleLinkClickPending = (row: TableRowData) => {
+    router.push(`/admin/logistics/payment-management/payment/detail/pending/${row.id}`)
+  }
+   const handleLinkClickCompleted = (row: TableRowData) => {
+    router.push(`/admin/logistics/payment-management/payment/detail/completed/${row.id}`)
+  }
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
@@ -512,6 +518,7 @@ export default function Payments() {
             currentPage={page}
             onPageChange={handlePageChange}
             onRowClick={handleRowClickPending}
+            onLinkClick={handleLinkClickPending}
             showCheckboxes={false}
             showHeader={true}
             rowsPerPage={9}
@@ -548,6 +555,7 @@ export default function Payments() {
             currentPage={completedPage}
             onPageChange={handleCompletedPageChange}
             onRowClick={handleRowClickCompleted}
+            onLinkClick={handleLinkClickCompleted}
             showCheckboxes={false}
             showHeader={true}
             rowsPerPage={9}

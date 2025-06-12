@@ -189,7 +189,9 @@ export default function Refunds() {
  const handleRowClickPending = (row: TableRowData) => {
     router.push(`/admin/logistics/payment-management/refund/detail/${row.id}`)
   }
-
+ const handleLinkClickPending = (row: TableRowData) => {
+    router.push(`/admin/logistics/payment-management/refund/detail/${row.id}`)
+  }
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
@@ -332,6 +334,7 @@ export default function Refunds() {
             currentPage={page}
             onPageChange={handlePageChange}
             onRowClick={handleRowClickPending}
+            onLinkClick={handleLinkClickPending}
             showCheckboxes={false}
             showHeader={true}
             rowsPerPage={9}

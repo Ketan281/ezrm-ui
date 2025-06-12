@@ -284,7 +284,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
           </Stack>
 
           {/* Bottom Section */}
-          <Grid container spacing={26}>
+          <Grid container spacing={16}>
             {/* Payment */}
             <Grid>
               <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1e293b', mb: 2 }}>
@@ -317,12 +317,12 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
             </Grid>
 
             {/* Order Summary */}
-            <Grid>
+            <Grid width={330}>
               <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1e293b', mb: 2 }}>
                 Order Summary
               </Typography>
               <Stack spacing={1.5}>
-                <Stack direction="row" justifyContent="space-between">
+                <Stack direction="row" justifyContent="space-between" >
                   <Typography variant="body2" color="text.secondary">
                     Subtotal
                   </Typography>
