@@ -130,6 +130,10 @@ export default function Detail({ product }: DetailProps) {
   const [isDigitalItem, setIsDigitalItem] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
+  // Different Options state
+  const [options, setOptions] = useState([{ id: 1, name: "brand", values: ["1", "2", "3", "4"] }])
+  const [nextOptionId, setNextOptionId] = useState(2)
+
   // Category state
   const [categories, setCategories] = useState(["about", "brand", "team", "trend", "xyz"])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -210,6 +214,30 @@ export default function Detail({ product }: DetailProps) {
       setNewCategoryName("")
       setShowCreateCategory(false)
     }
+  }
+
+  // Options handlers
+  const handleAddOption = () => {
+    const newOption = {
+      id: nextOptionId,
+      name: "",
+      values: [],
+    }
+    setOptions([...options, newOption])
+    setNextOptionId(nextOptionId + 1)
+  }
+
+  const handleRemoveOption = (optionId: number) => {
+    setOptions(options.filter((option) => option.id !== optionId))
+  }
+
+  const handleOptionNameChange = (optionId: number, name: string) => {
+    setOptions(options.map((option) => (option.id === optionId ? { ...option, name } : option)))
+  }
+
+  const handleClearAllTags = () => {
+    setTags([])
+    setTagInput("")
   }
 
   return (
@@ -385,52 +413,104 @@ export default function Detail({ product }: DetailProps) {
 
                 {hasMultipleOptions && (
                   <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                      Option 1
-                    </Typography>
-                    <Box sx={{ display: "flex", gap: 2 }}>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                          Name
-                        </Typography>
-                        <FormControl fullWidth size="small">
-                          <Select value="brand" displayEmpty>
-                            <MenuItem value="brand">brand</MenuItem>
-                          </Select>
-                        </FormControl>
+                    {options.map((option, index) => (
+                      <Box key={option.id} sx={{ mb: 3 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+                          <Typography variant="subtitle2">Option {index + 1}</Typography>
+                          {options.length > 1 && (
+                            <Button
+                              size="small"
+                              onClick={() => handleRemoveOption(option.id)}
+                              sx={{ color: "error.main", minWidth: "auto", p: 0.5 }}
+                            >
+                              <CloseIcon sx={{ fontSize: 16 }} />
+                            </Button>
+                          )}
+                        </Box>
+                        <Box sx={{ display: "flex", gap: 2 }}>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                              Name
+                            </Typography>
+                            <FormControl fullWidth size="small">
+                              <Select
+                                value={option.name}
+                                displayEmpty
+                                onChange={(e) => handleOptionNameChange(option.id, e.target.value)}
+                              >
+                                <MenuItem value="">Select option</MenuItem>
+                                <MenuItem value="brand">brand</MenuItem>
+                                <MenuItem value="size">size</MenuItem>
+                                <MenuItem value="color">color</MenuItem>
+                                <MenuItem value="material">material</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Box>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                              Values
+                            </Typography>
+                            <TextField
+                              fullWidth
+                              variant="outlined"
+                              size="small"
+                            //   placeholder="Enter values separated by commas"
+                              InputProps={{
+                                startAdornment: option.values.length > 0 && (
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      gap: 1,
+                                    //   flexWrap: "wrap",
+                                      mr: 1,
+                                      maxWidth: "calc(100% - 100px)", // Leave space for input text
+                                      "& > *": {
+                                        flexBasis: "calc(25% - 8px)", // 4 chips per row with gap
+                                        minWidth: "60px",
+                                        maxWidth: "80px",
+                                      },
+                                    }}
+                                  >
+                                    {option.values.map((value, valueIndex) => (
+                                      <Chip
+                                        key={valueIndex}
+                                        label={value}
+                                        size="small"
+                                        variant="outlined"
+                                        deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
+                                        onDelete={() => {
+                                          // Remove this specific value from the option
+                                          const newValues = option.values.filter((_, i) => i !== valueIndex)
+                                          setOptions(
+                                            options.map((opt) =>
+                                              opt.id === option.id ? { ...opt, values: newValues } : opt,
+                                            ),
+                                          )
+                                        }}
+                                        sx={{
+                                          borderRadius: 0,
+                                          bgcolor: "rgba(217, 228, 255, 1)",
+                                          fontSize: "12px",
+                                          height: "24px",
+                                          "& .MuiChip-label": {
+                                            px: 1,
+                                          },
+                                        }}
+                                      />
+                                    ))}
+                                  </Box>
+                                ),
+                              }}
+                            />
+                          </Box>
+                        </Box>
                       </Box>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                          Values
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          variant="outlined"
-                          size="small"
-                          InputProps={{
-                            startAdornment: (
-                              <Box sx={{ display: "flex", gap: 2 }}>
-                                {["1", "2", "3", "4"].map((size) => (
-                                  <Chip
-                                    key={size}
-                                    label={size}
-                                    size="small"
-                                    variant="outlined"
-                                    deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
-                                    onDelete={() => {}}
-                                    sx={{ borderRadius: 0, bgcolor: "rgba(217, 228, 255, 1)", width: "80%" }}
-                                  />
-                                ))}
-                              </Box>
-                            ),
-                          }}
-                        />
-                      </Box>
-                    </Box>
+                    ))}
                     <Button
                       startIcon={<AddIcon />}
+                      onClick={handleAddOption}
                       sx={{
-                        mt: 2,
+                        mt: 1,
                         color: "primary.main",
                         textTransform: "none",
                         p: 0,
@@ -495,7 +575,7 @@ export default function Detail({ product }: DetailProps) {
                   px: 4,
                 }}
               >
-                Update
+                Add
               </Button>
             </Box>
           </Box>
@@ -545,7 +625,7 @@ export default function Detail({ product }: DetailProps) {
             {/* Tags */}
             <Box sx={{ mb: 4 }}>
               <Paper sx={{ p: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500, color: "black" }}>
                   Tags
                 </Typography>
                 <Button
