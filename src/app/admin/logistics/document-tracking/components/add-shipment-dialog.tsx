@@ -14,7 +14,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   TextField,
-  Button
+  Button,
 } from "@mui/material"
 import { Close, ImportExport, FileDownload, DirectionsBoat, Flight, CloudUpload } from "@mui/icons-material"
 
@@ -38,7 +38,7 @@ interface FormData {
 
 interface AddShipmentDialogProps {
   open: boolean
-  onClose: () => void
+  onClose: (success?: boolean) => void
 }
 
 // Custom hooks
@@ -280,6 +280,24 @@ export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogPr
   const [transportMode, setTransportMode] = useState<TransportModeType | "">("")
   const { formData, updateFormField, resetForm } = useFormData()
 
+  const isFormValid = () => {
+    return (
+      formData.refNumber.trim() !== "" &&
+      formData.poNumber.trim() !== "" &&
+      formData.mblNumber.trim() !== "" &&
+      formData.containerNumber.trim() !== "" &&
+      formData.hblNumber.trim() !== "" &&
+      formData.hblTracker.trim() !== ""
+    )
+  }
+
+  const handleContinue = () => {
+    if (isFormValid()) {
+      onClose(true) // Pass true to indicate successful submission
+      // If you need to pass data back to the parent, you could add a callback prop like onSubmit
+    }
+  }
+
   const handleImportExportChange = useCallback((event: React.MouseEvent<HTMLElement>, newValue: string | null) => {
     if (newValue !== null) {
       setImportExport(newValue as ImportExportType)
@@ -373,95 +391,98 @@ export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogPr
         </Box>
 
         {bothOptionsSelected ? (
-          <Box >
+          <Box>
             {/* Form Section */}
             <Box sx={{ display: "flex", gap: 4 }}>
-            <Box
-              sx={{
-                flex: 1,
-                backgroundColor: "#f5f5f5",
-                borderRadius: "12px",
-                p: 3,
-                display: "flex",
-                flexDirection: "column",
-                gap: 3,
-              }}
-            >
-              <Box sx={{ display: "flex", gap: 3 }}>
-                <FormField
-                  label="Ref Number"
-                  value={formData.refNumber}
-                  onChange={(value) => updateFormField("refNumber", value)}
-                />
-                <FormField
-                  label="PO Number"
-                  value={formData.poNumber}
-                  onChange={(value) => updateFormField("poNumber", value)}
-                />
+              <Box
+                sx={{
+                  flex: 1,
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: "12px",
+                  p: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 3,
+                }}
+              >
+                <Box sx={{ display: "flex", gap: 3 }}>
+                  <FormField
+                    label="Ref Number"
+                    value={formData.refNumber}
+                    onChange={(value) => updateFormField("refNumber", value)}
+                  />
+                  <FormField
+                    label="PO Number"
+                    value={formData.poNumber}
+                    onChange={(value) => updateFormField("poNumber", value)}
+                  />
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 3 }}>
+                  <FormField
+                    label="MBL Number"
+                    value={formData.mblNumber}
+                    onChange={(value) => updateFormField("mblNumber", value)}
+                  />
+                  <FormField
+                    label="Container Number"
+                    value={formData.containerNumber}
+                    onChange={(value) => updateFormField("containerNumber", value)}
+                  />
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 3 }}>
+                  <FormField
+                    label="HBL Number"
+                    value={formData.hblNumber}
+                    onChange={(value) => updateFormField("hblNumber", value)}
+                  />
+                  <FormField
+                    label="HBL Tracker"
+                    value={formData.hblTracker}
+                    onChange={(value) => updateFormField("hblTracker", value)}
+                    type="select"
+                    options={HBL_TRACKER_OPTIONS}
+                  />
+                </Box>
               </Box>
 
-              <Box sx={{ display: "flex", gap: 3 }}>
-                <FormField
-                  label="MBL Number"
-                  value={formData.mblNumber}
-                  onChange={(value) => updateFormField("mblNumber", value)}
-                />
-                <FormField
-                  label="Container Number"
-                  value={formData.containerNumber}
-                  onChange={(value) => updateFormField("containerNumber", value)}
-                />
-              </Box>
-
-              <Box sx={{ display: "flex", gap: 3 }}>
-                <FormField
-                  label="HBL Number"
-                  value={formData.hblNumber}
-                  onChange={(value) => updateFormField("hblNumber", value)}
-                />
-                <FormField
-                  label="HBL Tracker"
-                  value={formData.hblTracker}
-                  onChange={(value) => updateFormField("hblTracker", value)}
-                  type="select"
-                  options={HBL_TRACKER_OPTIONS}
-                />
-              </Box>
-            </Box>
-
-            {/* File Upload Section */}
-            <FileUploadArea />
+              {/* File Upload Section */}
+              <FileUploadArea />
             </Box>
             <Button
-  variant="contained"
-  // onClick={onAddShipment}
-  sx={{
-    backgroundColor: "#FF8C42",
-    color: "white",
-    fontSize: "14px",
-    fontWeight: 500,
-    textTransform: "none",
-    borderRadius: "8px",
-    px: 3,
-    py: 1.25,
-    height: 40,
-    mt: 3, // Keep this if you want top margin
-    boxShadow: "none",
-    fontFamily: "Poppins, sans-serif",
-    minWidth: "140px",
-    maxWidth: "200px",
-    // --- Changes for centering ---
-    display: "block", // Make the button a block-level element
-    mx: "auto",       // Set left and right margins to 'auto' to center it
-    // --- End changes ---
-    "&:hover": {
-      backgroundColor: "#E67A35",
-      boxShadow: "none",
-    },
-  }}
->
-  Continue
-</Button>
+              variant="contained"
+              onClick={handleContinue}
+              disabled={!isFormValid()}
+              sx={{
+                backgroundColor: "#FF8C42",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: 500,
+                textTransform: "none",
+                borderRadius: "8px",
+                px: 3,
+                py: 1.25,
+                height: 40,
+                mt: 3,
+                boxShadow: "none",
+                fontFamily: "Poppins, sans-serif",
+                minWidth: "140px",
+                maxWidth: "200px",
+                display: "block",
+                mx: "auto",
+                "&:hover": {
+                  backgroundColor: "#E67A35",
+                  boxShadow: "none",
+                },
+                "&:disabled": {
+                  backgroundColor: "#ccc",
+                  color: "#666",
+                },
+              }}
+            >
+              Continue
+            </Button>
           </Box>
         ) : (
           <Box

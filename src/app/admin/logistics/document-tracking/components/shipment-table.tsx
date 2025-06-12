@@ -230,7 +230,7 @@ export default function ShipmentTable() {
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
                   py: 2,
-                  minWidth: 140,
+                  minWidth: 180,
                 }}
               >
                 SHIPPING STATUS
