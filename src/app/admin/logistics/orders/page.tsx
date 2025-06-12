@@ -60,7 +60,7 @@ export default function OrderList() {
     { id: 'orderNumber', label: 'Order Number', width: '15%',  align: 'center' },
     { id: 'status', label: 'Status', width: '165', type: 'status',  align: 'center' },
     { id: 'quantity', label: 'Quantity', width: '10%',align: 'center' },
-    { id: 'customerName', label: 'Customer Name', width: '18%' },
+    { id: 'customerName', label: 'Customer Name', width: '18%',align:"center" },
     { 
       id: 'trackOrder', 
       label: 'Track Order', 

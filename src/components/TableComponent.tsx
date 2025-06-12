@@ -164,7 +164,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
       <Box 
         sx={{
           backgroundColor: bgColor,
-          borderRadius: '6px',
+          borderRadius: '10px',
           padding: '7px 10px',
           minWidth: '100px',
           height: '32px',
@@ -173,7 +173,8 @@ export const TableComponent: React.FC<TableComponentProps> = ({
           fontWeight: '500',
           color: textColor,
           textAlign: 'center',
-          maxWidth: 'fit-content'
+          maxWidth: 'fit-content',
+          border: `1px solid ${textColor}`
         }}
       >
         {stringValue}
