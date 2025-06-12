@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import {
   Box,
   Typography,
@@ -15,6 +15,7 @@ import {
   ToggleButtonGroup,
   TextField,
   Button,
+  Chip,
 } from "@mui/material"
 import { Close, ImportExport, FileDownload, DirectionsBoat, Flight, CloudUpload } from "@mui/icons-material"
 
@@ -216,68 +217,136 @@ const ToggleSection = ({
   </Box>
 )
 
-const FileUploadArea = () => (
-  <Box sx={{ flex: 1 }}>
-    <Box
-      sx={{
-        border: "2px dashed #ccc",
-        borderRadius: "12px",
-        p: 4,
-        textAlign: "center",
-        backgroundColor: "#fafafa",
-        minHeight: "200px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 2,
-        cursor: "pointer",
-        "&:hover": {
-          backgroundColor: "#f5f5f5",
-          borderColor: "#FF8C42",
-        },
-      }}
-    >
-      <CloudUpload sx={{ fontSize: 48, color: "#999" }} />
-      <Typography
-        variant="body1"
+const FileUploadArea = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+
+  const handleFileUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files) {
+      const newFiles = Array.from(files)
+      setUploadedFiles((prev) => [...prev, ...newFiles])
+    }
+  }
+
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  return (
+    <Box sx={{ flex: 1 }}>
+      <Box
+        onClick={handleFileUpload}
         sx={{
-          fontFamily: "Poppins, sans-serif",
-          fontSize: "16px",
-          color: "#666",
-          fontWeight: 500,
+          border: "2px dashed #ccc",
+          borderRadius: "12px",
+          p: 4,
+          textAlign: "center",
+          backgroundColor: "#fafafa",
+          minHeight: "200px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+          cursor: "pointer",
+          "&:hover": {
+            backgroundColor: "#f5f5f5",
+            borderColor: "#FF8C42",
+          },
         }}
       >
-        Drop Items here or{" "}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          multiple
+          accept=".pdf,.xls,.xlsx,.doc,.docx,.png,.jpg,.jpeg"
+          style={{ display: "none" }}
+        />
+        <CloudUpload sx={{ fontSize: 48, color: "#999" }} />
         <Typography
-          component="span"
+          variant="body1"
           sx={{
-            color: "#FF8C42",
-            textDecoration: "underline",
-            cursor: "pointer",
             fontFamily: "Poppins, sans-serif",
+            fontSize: "16px",
+            color: "#666",
+            fontWeight: 500,
           }}
         >
-          Browse Files
+          Drop Items here or{" "}
+          <Typography
+            component="span"
+            sx={{
+              color: "#FF8C42",
+              textDecoration: "underline",
+              cursor: "pointer",
+              fontFamily: "Poppins, sans-serif",
+            }}
+          >
+            Browse Files
+          </Typography>
         </Typography>
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          fontFamily: "Poppins, sans-serif",
-          fontSize: "12px",
-          color: "#999",
-        }}
-      >
-        You can Upload pdf, xsl, doc, png, jpg, jpeg files
-      </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            fontFamily: "Poppins, sans-serif",
+            fontSize: "12px",
+            color: "#999",
+          }}
+        >
+          You can Upload pdf, xsl, doc, png, jpg, jpeg files
+        </Typography>
+      </Box>
+
+      {/* Display uploaded files */}
+      {uploadedFiles.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "14px",
+              color: "#666",
+              mb: 1,
+            }}
+          >
+            Uploaded Files ({uploadedFiles.length}):
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {uploadedFiles.map((file, index) => (
+              <Chip
+                key={index}
+                label={file.name}
+                onDelete={() => handleRemoveFile(index)}
+                sx={{
+                  bgcolor: "#f0f8ff",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "12px",
+                  maxWidth: "200px",
+                  "& .MuiChip-label": {
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  },
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
     </Box>
-  </Box>
-)
+  )
+}
 
 export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogProps) {
   const [importExport, setImportExport] = useState<ImportExportType | "">("")
   const [transportMode, setTransportMode] = useState<TransportModeType | "">("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const { formData, updateFormField, resetForm } = useFormData()
 
   const isFormValid = () => {
@@ -298,6 +367,22 @@ export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogPr
     }
   }
 
+  const handleFileUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files) {
+      const newFiles = Array.from(files)
+      setUploadedFiles((prev) => [...prev, ...newFiles])
+    }
+  }
+
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const handleImportExportChange = useCallback((event: React.MouseEvent<HTMLElement>, newValue: string | null) => {
     if (newValue !== null) {
       setImportExport(newValue as ImportExportType)
@@ -313,6 +398,7 @@ export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogPr
   const handleClose = useCallback(() => {
     setImportExport("")
     setTransportMode("")
+    setUploadedFiles([]) // Add this line
     resetForm()
     onClose()
   }, [resetForm, onClose])
