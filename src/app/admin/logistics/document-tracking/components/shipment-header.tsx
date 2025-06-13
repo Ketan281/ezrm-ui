@@ -3,6 +3,7 @@ import { Box, Typography, Button, Select, MenuItem, FormControl, IconButton } fr
 import { ArrowBack, KeyboardArrowDown, Refresh } from "@mui/icons-material"
 import type { SelectChangeEvent } from "@mui/material/Select"
 import Image from "next/image"
+import React from "react"
 
 const FILTER_OPTIONS = [
   { value: "Active", label: "Active" },
@@ -84,50 +85,99 @@ const StyledSelect = ({
   </FormControl>
 )
 
-const TransportIcons = () => (
-  <Box
-    sx={{
-      minWidth: 100,
-      height: 40,
-      fontSize: "14px",
-      color: "#333",
-      backgroundColor: "white",
-      border: "1px solid #e1e5e9",
-      borderRadius: "20px",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 2,
-      padding: "0 16px",
-      position: "relative",
-    }}
-  >
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-      <Image
-        src="/ship.png?height=15&width=20"
-        alt="Ship Icon"
-        width={20}
-        height={15}
-        style={{
-          objectFit: "contain",
-          display: "block",
+const TransportIcons = () => {
+  const [transportType, setTransportType] = React.useState("Ship")
+
+  const handleTransportChange = (event: SelectChangeEvent) => {
+    setTransportType(event.target.value)
+  }
+
+  return (
+    <FormControl size="small">
+      <Select
+        value={transportType}
+        onChange={handleTransportChange}
+        sx={{
+          minWidth: 120,
+          height: 40,
+          fontSize: "14px",
+          color: "#333",
+          backgroundColor: "white",
+          border: "1px solid #e1e5e9",
+          borderRadius: "20px",
+          fontFamily: "Poppins, sans-serif",
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+          },
+          "& .MuiSelect-select": {
+            py: 1,
+            px: 1.5,
+            fontFamily: "Poppins, sans-serif",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          },
+          "&:hover": {
+            backgroundColor: "#f8f9fa",
+          },
+          "&.Mui-focused": {
+            backgroundColor: "white",
+            "& .MuiOutlinedInput-notchedOutline": {
+              border: "none",
+            },
+          },
         }}
-      />
-    </Box>
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-      <Image
-        src="/air.png?height=15&width=20"
-        alt="Air Icon"
-        width={20}
-        height={15}
-        style={{
-          objectFit: "contain",
-          display: "block",
-        }}
-      />
-    </Box>
-  </Box>
-)
+        IconComponent={KeyboardArrowDown}
+        renderValue={(value) => (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Image
+              src={value === "Ship" ? "/ship.png?height=15&width=20" : "/air.png?height=15&width=20"}
+              alt={`${value} Icon`}
+              width={20}
+              height={15}
+              style={{
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+            <Typography sx={{ fontSize: "14px", fontFamily: "Poppins, sans-serif" }}>{value}</Typography>
+          </Box>
+        )}
+      >
+        <MenuItem value="Ship" sx={{ fontFamily: "Poppins, sans-serif" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Image
+              src="/ship.png?height=15&width=20"
+              alt="Ship Icon"
+              width={20}
+              height={15}
+              style={{
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+            Ship
+          </Box>
+        </MenuItem>
+        <MenuItem value="Air" sx={{ fontFamily: "Poppins, sans-serif" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Image
+              src="/air.png?height=15&width=20"
+              alt="Air Icon"
+              width={20}
+              height={15}
+              style={{
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+            Air
+          </Box>
+        </MenuItem>
+      </Select>
+    </FormControl>
+  )
+}
 
 export default function ShipmentHeader({
   filterValue,
