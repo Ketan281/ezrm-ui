@@ -119,7 +119,7 @@ interface DetailProps {
 export default function Detail({ product }: DetailProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
-
+  const [includeTax, setIncludeTax] = useState(true)
   // State management
   const [tags, setTags] = useState<string[]>(["trend", "instagram"])
   const [tagInput, setTagInput] = useState("")
@@ -330,7 +330,7 @@ export default function Detail({ product }: DetailProps) {
                   </Box>
                 </Box>
                 <FormControlLabel
-                  control={<CustomSwitch checked={true} />}
+                  control={<CustomSwitch checked={includeTax} onChange={(e) => setIncludeTax(e.target.checked)}/>}
                   label="Add tax for this product"
                   sx={{
                     mt: 1,

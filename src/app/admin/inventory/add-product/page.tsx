@@ -240,6 +240,8 @@ export default function Detail({ product }: DetailProps) {
     setTagInput("")
   }
 
+  const [includeTax, setIncludeTax] = useState(true)
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -380,7 +382,7 @@ export default function Detail({ product }: DetailProps) {
                   </Box>
                 </Box>
                 <FormControlLabel
-                  control={<CustomSwitch checked={true} />}
+                  control={<CustomSwitch checked={includeTax} onChange={(e) => setIncludeTax(e.target.checked)} />}
                   label="Add tax for this product"
                   sx={{
                     mt: 1,
@@ -454,14 +456,14 @@ export default function Detail({ product }: DetailProps) {
                               fullWidth
                               variant="outlined"
                               size="small"
-                            //   placeholder="Enter values separated by commas"
+                              //   placeholder="Enter values separated by commas"
                               InputProps={{
                                 startAdornment: option.values.length > 0 && (
                                   <Box
                                     sx={{
                                       display: "flex",
                                       gap: 1,
-                                    //   flexWrap: "wrap",
+                                      //   flexWrap: "wrap",
                                       mr: 1,
                                       maxWidth: "calc(100% - 100px)", // Leave space for input text
                                       "& > *": {
