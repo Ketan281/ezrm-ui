@@ -12,9 +12,17 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  CircularProgress,
 } from "@mui/material"
 import { usePathname, useRouter } from "next/navigation"
 import Image from "next/image"
+import { useLogout } from "@/hooks/useAuth"
+import { useAuthStore } from "@/store/authStore"
 
 // Define types for our sidebar items with nested dropdowns
 interface NestedDropdownOption {
@@ -35,6 +43,7 @@ interface SidebarItem {
   path?: string
   hasDropdown?: boolean
   options?: DropdownOption[]
+  isLogout?: boolean // Add this to identify logout item
 }
 
 // Define dropdown state type with nested dropdowns
@@ -109,15 +118,20 @@ const sidebarItems: SidebarItem[] = [
   { text: "Sales Report", icon: "/sales-report.png", path: "/admin/sales" },
   { text: "Messages", icon: "/customers.png", path: "/admin/messages" },
   { text: "Settings", icon: "/settings.png", path: "/admin/settings" },
-  { text: "Sign Out", icon: "/sign-out.png", path: "/login" },
+  { text: "Sign Out", icon: "/sign-out.png", isLogout: true }, // Mark as logout item
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
 
+  // Auth hooks
+  const { user, isAuthenticated } = useAuthStore()
+  const logoutMutation = useLogout()
+
   // Add mounted state to prevent hydration issues
   const [mounted, setMounted] = useState(false)
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
   // Create separate state for each dropdown
   const [openDropdowns, setOpenDropdowns] = useState<DropdownState>({
@@ -140,6 +154,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } catch (error) {
       console.error(`Navigation error to ${path}:`, error)
       // Optionally show a toast or notification to the user
+    }
+  }
+
+  // Updated logout handler
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync()
+      setShowLogoutDialog(false)
+
+      // Force a hard redirect to prevent any auth checks from interfering
+      window.location.href = "/login"
+    } catch (error) {
+      console.error("Logout failed:", error)
+      // Still redirect even if there's an error
+      setShowLogoutDialog(false)
+      window.location.href = "/login"
+    }
+  }
+
+  // Check authentication on mount and redirect if not authenticated
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      window.location.href = "/login"
+      return
+    }
+  }, [mounted, isAuthenticated])
+
+  // Handle item click (including logout)
+  const handleItemClick = (item: SidebarItem) => {
+    if (item.isLogout) {
+      setShowLogoutDialog(true)
+    } else if (item.path) {
+      safeNavigate(item.path)
     }
   }
 
@@ -295,7 +342,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               style={{ borderRadius: "12px", objectFit: "cover" }}
             />
             <Typography variant="body2" sx={{ ml: 1 }}>
-              <b>Chetan</b> <br />
+              <b>{user?.name || "Admin"}</b> <br />
               Admin
             </Typography>
           </Box>
@@ -509,7 +556,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </>
                 ) : (
                   <ListItemButton
-                    onClick={() => safeNavigate(item.path || "")}
+                    onClick={() => handleItemClick(item)}
                     selected={pathname === item.path}
                     sx={{
                       mr: 3,
@@ -549,6 +596,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </List>
         </Box>
       </Drawer>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+      >
+        <DialogTitle id="logout-dialog-title">Confirm Logout</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to sign out?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowLogoutDialog(false)} disabled={logoutMutation.isPending}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleLogout}
+            color="error"
+            variant="contained"
+            disabled={logoutMutation.isPending}
+            startIcon={logoutMutation.isPending ? <CircularProgress size={16} /> : null}
+          >
+            {logoutMutation.isPending ? "Signing Out..." : "Sign Out"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Main Content */}
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, backgroundColor: "#F9FAFB", minHeight: "85vh" }}>
