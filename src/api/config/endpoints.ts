@@ -1,5 +1,5 @@
 // Use environment variable with fallback to your specific URL
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://34.47.167.0/api/v1"
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://34.47.167.0/api/v1';
 
 export const ENDPOINTS = {
   BASE_URL,
@@ -21,4 +21,11 @@ export const ENDPOINTS = {
     PROFILE: `${BASE_URL}/user/profile`,
     CHANGE_PASSWORD: `${BASE_URL}/user/change-password`,
   },
-} as const
+
+  // Products endpoints
+  PRODUCTS: {
+    GET: `${BASE_URL}/products`,
+    ADD: `${BASE_URL}/products`,
+    DELETE: `${BASE_URL}/products/:id`,
+  },
+} as const;

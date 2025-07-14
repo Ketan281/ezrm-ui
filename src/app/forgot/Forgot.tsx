@@ -21,23 +21,29 @@ const Forgot = () => {
     console.log('Login attempted with:', { email });
   };
 
-
   return (
     <Container
-    maxWidth="lg"
-    sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}
-    suppressHydrationWarning
-  >
-      <Grid container spacing={2} alignItems="center" justifyContent="space-around" width="100%">
+      maxWidth="lg"
+      sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}
+      suppressHydrationWarning
+    >
+      <Grid
+        container
+        spacing={2}
+        alignItems="center"
+        justifyContent="space-around"
+        width="100%"
+      >
         <Grid>
           <Box sx={{ textAlign: 'center' }}>
             <Image
               src="/Logo.png"
-              alt="ERMM Logo"
+              alt="EZRM Logo"
               width={429}
               height={229}
+              priority={true}
+              style={{ objectFit: 'contain' }}
             />
-
           </Box>
         </Grid>
         <Grid>
@@ -48,22 +54,36 @@ const Forgot = () => {
               padding: 3,
             }}
           >
-            <Box display={"flex"} alignItems={"center"} mb={2} >
-            <Image
-              src="/back.png"
-              alt="ERMM Logo"
-              width={30}
-              height={20}
-            />
-            <Link href="/login" color="#333" sx={{ textDecoration: 'none' }} ml={0.5} fontWeight={600}>
-            Back to login
-            </Link>
+            <Box display={'flex'} alignItems={'center'} mb={2}>
+              <Image src="/back.png" alt="EZRM Logo" width={30} height={20} />
+              <Link
+                href="/login"
+                color="#333"
+                sx={{ textDecoration: 'none' }}
+                ml={0.5}
+                fontWeight={600}
+              >
+                Back to login
+              </Link>
             </Box>
-            <Typography variant="h5" gutterBottom color="#333333" fontWeight="700">
-            Forgot your Password?
+            <Typography
+              variant="h5"
+              gutterBottom
+              color="#333333"
+              fontWeight="700"
+            >
+              Forgot your Password?
             </Typography>
-            <Typography variant="subtitle1" color="#333333" gutterBottom fontWeight="400" fontSize={"14px"} width={"100%"}>
-            Don’t worry, happens to all of us. Enter your email below to recover your password
+            <Typography
+              variant="subtitle1"
+              color="#333333"
+              gutterBottom
+              fontWeight="400"
+              fontSize={'14px'}
+              width={'100%'}
+            >
+              Don’t worry, happens to all of us. Enter your email below to
+              recover your password
             </Typography>
             <form onSubmit={handleSubmit}>
               <TextField
@@ -93,7 +113,13 @@ const Forgot = () => {
                   },
                 }}
               />
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
                 <Button
                   type="submit"
                   variant="contained"
