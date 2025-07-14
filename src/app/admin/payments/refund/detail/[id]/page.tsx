@@ -1,36 +1,53 @@
-"use client"
-import { Box, Typography, Avatar, Button, Paper, Grid, Divider, styled,TextField } from "@mui/material"
-import PhoneIcon from "@mui/icons-material/Phone"
-import EmailIcon from "@mui/icons-material/Email"
-import LocationOnIcon from "@mui/icons-material/LocationOn"
-import React from "react"
-import Image from "next/image"
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"
-import Notes from "./Notes"
+'use client';
+import {
+  Box,
+  Typography,
+  Avatar,
+  Button,
+  Paper,
+  Grid,
+  Divider,
+  styled,
+  TextField,
+} from '@mui/material';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import React from 'react';
+import Image from 'next/image';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import Notes from './Notes';
 export default function RefundDetails() {
   const StatusDot = styled(Box, {
-    shouldForwardProp: (prop: string) => prop !== "isActive" && prop !== "isCompleted",
-  })<{ isActive?: boolean; isCompleted?: boolean }>(({ isActive, isCompleted }) => ({
-    width: 12,
-    height: 12,
-    borderRadius: "50%",
-    backgroundColor: isActive ? "#f5a623" : isCompleted ? "#667085" : "#e0e0e0",
-    border: isCompleted || isActive ? "none" : "2px solid #e0e0e0",
-  }))
+    shouldForwardProp: (prop: string) =>
+      prop !== 'isActive' && prop !== 'isCompleted',
+  })<{ isActive?: boolean; isCompleted?: boolean }>(
+    ({ isActive, isCompleted }) => ({
+      width: 12,
+      height: 12,
+      borderRadius: '50%',
+      backgroundColor: isActive
+        ? '#f5a623'
+        : isCompleted
+          ? '#667085'
+          : '#e0e0e0',
+      border: isCompleted || isActive ? 'none' : '2px solid #e0e0e0',
+    })
+  );
 
   return (
     <Box>
       <Button
         startIcon={<ArrowBackIcon />}
         sx={{
-          color: "#637381",
-          textTransform: "none",
+          color: '#637381',
+          textTransform: 'none',
           fontWeight: 500,
           mb: 1,
           mt: 0,
-          "&:hover": {
-            backgroundColor: "transparent",
-            color: "#212B36",
+          '&:hover': {
+            backgroundColor: 'transparent',
+            color: '#212B36',
           },
         }}
       >
@@ -42,76 +59,95 @@ export default function RefundDetails() {
         variant="h5"
         sx={{
           fontWeight: 700,
-          color: "#212B36",
+          color: '#212B36',
           mb: 3,
         }}
       >
         Refund Requests
       </Typography>
 
-      <Box sx={{ display: "flex", gap: 5, maxWidth: "950px", width: "100%" }}>
+      <Box sx={{ display: 'flex', gap: 5, maxWidth: '950px', width: '100%' }}>
         {/* Left Section */}
         <Paper
           elevation={0}
           sx={{
             flex: 1,
-            borderRadius: "8px",
-            border: "1px solid #e0e0e0",
-            padding: "24px",
+            borderRadius: '8px',
+            border: '1px solid #e0e0e0',
+            padding: '24px',
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               sx={{
-                bgcolor: "#1e3a5f",
+                bgcolor: '#1e3a5f',
                 width: 56,
                 height: 56,
-                fontSize: "24px",
-                fontWeight: "bold",
+                fontSize: '24px',
+                fontWeight: 'bold',
               }}
             >
               R
             </Avatar>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: "bold", fontSize: "16px" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 'bold', fontSize: '16px' }}
+              >
                 Robin Bask
               </Typography>
-              <Typography variant="body2" sx={{ color: "#666", fontSize: "14px" }}>
+              <Typography
+                variant="body2"
+                sx={{ color: '#666', fontSize: '14px' }}
+              >
                 India
               </Typography>
             </Box>
           </Box>
 
           <Grid container spacing={3} sx={{ mt: 3, ml: 8 }}>
-            <Grid >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <PhoneIcon sx={{ color: "#666", fontSize: "18px", minWidth: "20px" }} />
-                <Typography variant="body2" sx={{ color: "#666", fontSize: "14px" }}>
+            <Grid>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PhoneIcon
+                  sx={{ color: '#666', fontSize: '18px', minWidth: '20px' }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#666', fontSize: '14px' }}
+                >
                   +91 8804789784
                 </Typography>
               </Box>
             </Grid>
 
-            <Grid >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <EmailIcon sx={{ color: "#666", fontSize: "18px", minWidth: "20px" }} />
-                <Typography variant="body2" sx={{ color: "#666", fontSize: "14px" }}>
+            <Grid>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <EmailIcon
+                  sx={{ color: '#666', fontSize: '18px', minWidth: '20px' }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#666', fontSize: '14px' }}
+                >
                   randhrpol@gmail.com
                 </Typography>
               </Box>
             </Grid>
 
             <Grid>
-              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                 <LocationOnIcon
                   sx={{
-                    color: "#666",
-                    fontSize: "18px",
-                    minWidth: "20px",
-                    mt: "2px",
+                    color: '#666',
+                    fontSize: '18px',
+                    minWidth: '20px',
+                    mt: '2px',
                   }}
                 />
-                <Typography variant="body2" sx={{ color: "#666", fontSize: "14px" }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#666', fontSize: '14px' }}
+                >
                   Lorem ipsum garden, high street, jungi - 678004
                 </Typography>
               </Box>
@@ -123,42 +159,44 @@ export default function RefundDetails() {
         <Paper
           elevation={0}
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            padding: "24px",
-            width: "350px",
-            backgroundColor: "#ffffff",
-            borderRadius: "8px",
-            border: "1px solid #e0e0e0",
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '24px',
+            width: '350px',
+            backgroundColor: '#ffffff',
+            borderRadius: '8px',
+            border: '1px solid #e0e0e0',
           }}
         >
           <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-              <Typography variant="h6" sx={{ color: "#333" }} fontWeight={600}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}
+            >
+              <Typography variant="h6" sx={{ color: '#333' }} fontWeight={600}>
                 Refund Requests
               </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-start" }}>
+            <Box sx={{ display: 'flex', gap: 3, justifyContent: 'flex-start' }}>
               <Button
                 variant="outlined"
                 sx={{
-                  textTransform: "none",
-                  color: "rgba(246, 57, 24, 1)",
-                  backgroundColor: "rgba(255, 244, 240, 1)",
-                  borderColor: "rgba(246, 57, 24, 1)",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  width: "180px",
-                  height: "40px",
-                  fontSize: "16px",
+                  textTransform: 'none',
+                  color: 'rgba(246, 57, 24, 1)',
+                  backgroundColor: 'rgba(255, 244, 240, 1)',
+                  borderColor: 'rgba(246, 57, 24, 1)',
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  width: '180px',
+                  height: '40px',
+                  fontSize: '16px',
                   fontWeight: 500,
-                  borderRadius: "8px",
-                  "&:hover": {
-                    borderColor: "rgba(246, 57, 24, 0.8)",
-                    backgroundColor: "rgba(255, 244, 240, 0.9)",
+                  borderRadius: '8px',
+                  '&:hover': {
+                    borderColor: 'rgba(246, 57, 24, 0.8)',
+                    backgroundColor: 'rgba(255, 244, 240, 0.9)',
                   },
-                  mt: 2
+                  mt: 2,
                 }}
               >
                 Decline
@@ -166,148 +204,200 @@ export default function RefundDetails() {
               <Button
                 variant="outlined"
                 sx={{
-                  textTransform: "none",
-                  color: "rgba(6, 165, 97, 1)",
-                  backgroundColor: "rgba(6, 165, 97, 0.09)",
-                  borderColor: "rgba(6, 165, 97, 1)",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  width: "180px",
-                  height: "40px",
-                  fontSize: "16px",
+                  textTransform: 'none',
+                  color: 'rgba(6, 165, 97, 1)',
+                  backgroundColor: 'rgba(6, 165, 97, 0.09)',
+                  borderColor: 'rgba(6, 165, 97, 1)',
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  width: '180px',
+                  height: '40px',
+                  fontSize: '16px',
                   fontWeight: 500,
-                  borderRadius: "8px",
-                  "&:hover": {
-                    borderColor: "rgba(6, 165, 97, 0.8)",
-                    backgroundColor: "rgba(6, 165, 97, 0.07)",
+                  borderRadius: '8px',
+                  '&:hover': {
+                    borderColor: 'rgba(6, 165, 97, 0.8)',
+                    backgroundColor: 'rgba(6, 165, 97, 0.07)',
                   },
-                  mt: 2
+                  mt: 2,
                 }}
               >
                 Approve
               </Button>
             </Box>
           </Box>
-
-
         </Paper>
       </Box>
-      <Paper elevation={0} sx={{ p: 3, mb: 0, mt: 2, borderRadius: 2, bgcolor: "transparent" }}>
-        <Box sx={{ position: "relative", width: "100%", mb: 4, px: 2 }}>
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 0, mt: 2, borderRadius: 2, bgcolor: 'transparent' }}
+      >
+        <Box sx={{ position: 'relative', width: '100%', mb: 4, px: 2 }}>
           <Box
             sx={{
-              position: "absolute",
-              top: "6px",
-              left: "calc(12.5% + 6px)",
-              right: "calc(12.5% + 6px)",
-              height: "1px",
+              position: 'absolute',
+              top: '6px',
+              left: 'calc(12.5% + 6px)',
+              right: 'calc(12.5% + 6px)',
+              height: '1px',
               zIndex: 0,
             }}
           >
             <Box
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 left: 0,
-                width: "16.67%",
-                height: "1px",
-                backgroundColor: "#667085",
+                width: '16.67%',
+                height: '1px',
+                backgroundColor: '#667085',
               }}
             />
             <Box
               sx={{
-                position: "absolute",
-                left: "16.67%",
+                position: 'absolute',
+                left: '16.67%',
                 right: 0,
-                height: "1px",
-                backgroundColor: "#e0e0e0",
+                height: '1px',
+                backgroundColor: '#e0e0e0',
               }}
             />
           </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", position: "relative", zIndex: 1 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              position: 'relative',
+              zIndex: 1,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '25%',
+              }}
+            >
               <StatusDot isActive={true} />
               <Typography
                 variant="caption"
                 sx={{
                   mt: 1,
-                  textAlign: "center",
+                  textAlign: 'center',
                   fontWeight: 500,
-                  color: "#f5a623",
-                  fontSize: "12px",
+                  color: '#f5a623',
+                  fontSize: '12px',
                 }}
               >
                 Order Confirmed
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+                sx={{
+                  color: 'rgba(102, 112, 133, 1)',
+                  textAlign: 'center',
+                  fontSize: '11px',
+                }}
               >
                 Wed, 11th Jan
               </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '25%',
+              }}
+            >
               <StatusDot />
               <Typography
                 variant="caption"
                 sx={{
                   mt: 1,
-                  textAlign: "center",
+                  textAlign: 'center',
                   fontWeight: 500,
-                  color: "#667085",
-                  fontSize: "12px",
+                  color: '#667085',
+                  fontSize: '12px',
                 }}
               >
                 Shipped
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+                sx={{
+                  color: 'rgba(102, 112, 133, 1)',
+                  textAlign: 'center',
+                  fontSize: '11px',
+                }}
               >
                 Wed, 11th Jan
               </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '25%',
+              }}
+            >
               <StatusDot />
               <Typography
                 variant="caption"
                 sx={{
                   mt: 1,
-                  textAlign: "center",
+                  textAlign: 'center',
                   fontWeight: 500,
-                  color: "#667085",
-                  fontSize: "12px",
+                  color: '#667085',
+                  fontSize: '12px',
                 }}
               >
                 Out For Delivery
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+                sx={{
+                  color: 'rgba(102, 112, 133, 1)',
+                  textAlign: 'center',
+                  fontSize: '11px',
+                }}
               >
                 Wed, 11th Jan
               </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "25%" }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '25%',
+              }}
+            >
               <StatusDot />
               <Typography
                 variant="caption"
                 sx={{
                   mt: 1,
-                  textAlign: "center",
+                  textAlign: 'center',
                   fontWeight: 500,
-                  color: "#667085",
-                  fontSize: "12px",
+                  color: '#667085',
+                  fontSize: '12px',
                 }}
               >
                 Delivered
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ color: "rgba(102, 112, 133, 1)", textAlign: "center", fontSize: "11px" }}
+                sx={{
+                  color: 'rgba(102, 112, 133, 1)',
+                  textAlign: 'center',
+                  fontSize: '11px',
+                }}
               >
                 Expected by, Mon 16th
               </Typography>
@@ -315,7 +405,13 @@ export default function RefundDetails() {
           </Box>
         </Box>
       </Paper>
-      <Typography variant="h6" sx={{ color: "#333" }} fontWeight={550} mt={2} mb={2}>
+      <Typography
+        variant="h6"
+        sx={{ color: '#333' }}
+        fontWeight={550}
+        mt={2}
+        mb={2}
+      >
         Refund Reasons
       </Typography>
 
@@ -327,16 +423,16 @@ export default function RefundDetails() {
           mt: 2,
           borderRadius: 1.5,
           border: '1px solid #e0e0e0',
-          boxShadow: 'none'
+          boxShadow: 'none',
         }}
       >
         <Typography
           variant="body1"
           sx={{
-            color: "#666",
-            fontSize: "14px",
+            color: '#666',
+            fontSize: '14px',
             fontWeight: 500,
-            mb: 1
+            mb: 1,
           }}
         >
           Notes
@@ -371,7 +467,10 @@ export default function RefundDetails() {
           <React.Fragment key={index}>
             <Grid container spacing={30} alignItems="center">
               <Grid display="flex" alignItems="center" gap={3}>
-                <Avatar variant="rounded" sx={{ width: 50, height: 50, bgcolor: "#f0f0f0" }} />
+                <Avatar
+                  variant="rounded"
+                  sx={{ width: 50, height: 50, bgcolor: '#f0f0f0' }}
+                />
                 <Box>
                   <Typography variant="subtitle2" fontWeight="700">
                     vitamin
@@ -398,21 +497,31 @@ export default function RefundDetails() {
         <Grid container spacing={18} sx={{ mt: 5 }}>
           <Grid>
             <Box>
-              <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
+              <Typography
+                variant="h6"
+                fontWeight="700"
+                color="#1a365d"
+                sx={{ mb: 2 }}
+              >
                 Payment
               </Typography>
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   Visa **56
                 </Typography>
-                <Image src="/visa.png" alt="ERMM Logo" width={30} height={35} />
+                <Image src="/visa.png" alt="EZRM Logo" width={30} height={35} />
               </Box>
             </Box>
           </Grid>
 
           <Grid>
             <Box>
-              <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
+              <Typography
+                variant="h6"
+                fontWeight="700"
+                color="#1a365d"
+                sx={{ mb: 2 }}
+              >
                 Delivery
               </Typography>
               <Typography variant="body2" color="rgba(102, 112, 133, 1)">
@@ -428,20 +537,33 @@ export default function RefundDetails() {
           </Grid>
 
           <Grid>
-            <Typography variant="h6" fontWeight="700" color="#1a365d" sx={{ mb: 2 }}>
+            <Typography
+              variant="h6"
+              fontWeight="700"
+              color="#1a365d"
+              sx={{ mb: 2 }}
+            >
               Order Summary
             </Typography>
-            <Box width={"25vw"}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+            <Box width={'25vw'}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
                 <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   Subtotal
                 </Typography>
-                <Typography variant="body2" fontWeight="500" color="rgba(102, 112, 133, 1)">
+                <Typography
+                  variant="body2"
+                  fontWeight="500"
+                  color="rgba(102, 112, 133, 1)"
+                >
                   $5554
                 </Typography>
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
                 <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   Discount
                 </Typography>
@@ -450,31 +572,53 @@ export default function RefundDetails() {
                 </Typography>
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
                 <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   Delivery
                 </Typography>
-                <Typography variant="body2" fontWeight="500" color="rgba(102, 112, 133, 1)">
+                <Typography
+                  variant="body2"
+                  fontWeight="500"
+                  color="rgba(102, 112, 133, 1)"
+                >
                   $0.00
                 </Typography>
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
                 <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                   Tax
                 </Typography>
-                <Typography variant="body2" fontWeight="500" color="rgba(102, 112, 133, 1)">
+                <Typography
+                  variant="body2"
+                  fontWeight="500"
+                  color="rgba(102, 112, 133, 1)"
+                >
                   +$221.88
                 </Typography>
               </Box>
 
               <Divider sx={{ my: 1.5 }} />
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  fontWeight="700"
+                  color="rgba(102, 112, 133, 1)"
+                >
                   Total
                 </Typography>
-                <Typography variant="subtitle2" fontWeight="700" color="rgba(102, 112, 133, 1)">
+                <Typography
+                  variant="subtitle2"
+                  fontWeight="700"
+                  color="rgba(102, 112, 133, 1)"
+                >
                   $4666.48
                 </Typography>
               </Box>
@@ -483,5 +627,5 @@ export default function RefundDetails() {
         </Grid>
       </Paper>
     </Box>
-  )
+  );
 }

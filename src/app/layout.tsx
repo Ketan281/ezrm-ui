@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import ClientProvider from './ClientProvider';
 import './globals.css';
+import { ToastContainer, toast } from 'react-toastify';
 
 export const metadata: Metadata = {
-  title: 'ERMM - Home',
-  description: 'Welcome to ERMM - Raw Materials Simplified',
+  title: 'EZRM - Home',
+  description: 'Welcome to EZRM - Raw Materials Simplified',
 };
 
 export default function RootLayout({
@@ -22,6 +23,7 @@ export default function RootLayout({
       </head>
       <body>
         <ClientProvider>{children}</ClientProvider>
+        <ToastContainer position="top-center" />
       </body>
     </html>
   );

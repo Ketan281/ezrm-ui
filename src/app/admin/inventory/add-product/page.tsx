@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState, useRef } from "react"
+import type React from 'react';
+import { useState, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -24,41 +24,41 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from "@mui/material"
-import AddIcon from "@mui/icons-material/Add"
-import CloseIcon from "@mui/icons-material/Close"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // Create a custom styled Switch component that looks like the first image
 const CustomSwitch = styled(Switch)(() => ({
   width: 42,
   height: 22,
   padding: 0,
-  "& .MuiSwitch-switchBase": {
+  '& .MuiSwitch-switchBase': {
     padding: 2,
-    "&.Mui-checked": {
-      transform: "translateX(20px)",
-      color: "#fff",
-      "& + .MuiSwitch-track": {
+    '&.Mui-checked': {
+      transform: 'translateX(20px)',
+      color: '#fff',
+      '& + .MuiSwitch-track': {
         opacity: 1,
-        backgroundColor: "#073E54", // Dark teal/blue color for ON state
+        backgroundColor: '#073E54', // Dark teal/blue color for ON state
       },
     },
   },
-  "& .MuiSwitch-thumb": {
+  '& .MuiSwitch-thumb': {
     width: 18,
     height: 18,
-    borderRadius: "50%",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 4px 0 rgba(0, 0, 0, 0.1)",
+    borderRadius: '50%',
+    backgroundColor: '#fff',
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
   },
-  "& .MuiSwitch-track": {
+  '& .MuiSwitch-track': {
     opacity: 1,
-    backgroundColor: "rgba(217, 228, 255, 1)", // Light blue color for OFF state
+    backgroundColor: 'rgba(217, 228, 255, 1)', // Light blue color for OFF state
     borderRadius: 32,
   },
-}))
+}));
 
 // Create a theme with Poppins font
 const theme = createTheme({
@@ -71,8 +71,8 @@ const theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
-        "@global": {
-          "*": {
+        '@global': {
+          '*': {
             fontFamily: '"Poppins", sans-serif',
           },
         },
@@ -100,171 +100,213 @@ const theme = createTheme({
       },
     },
   },
-})
+});
 
 interface Product {
-  id: string
-  name: string
-  description: string
-  inventory: string
-  loreal: string
-  price: string
-  rating: string
+  id: string;
+  name: string;
+  description: string;
+  inventory: string;
+  loreal: string;
+  price: string;
+  rating: string;
 }
 
 interface DetailProps {
-  product: Product
+  product: Product;
 }
 
 export default function Detail({ product }: DetailProps) {
-  const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Separate state for tags and min max orders
-  const [tags, setTags] = useState<string[]>(["trend", "instagram"])
-  const [tagInput, setTagInput] = useState("")
-  const [minMaxTags, setMinMaxTags] = useState<string[]>([])
-  const [minMaxInput, setMinMaxInput] = useState("")
+  const [tags, setTags] = useState<string[]>(['trend', 'instagram']);
+  const [tagInput, setTagInput] = useState('');
+  const [minMaxTags, setMinMaxTags] = useState<string[]>([]);
+  const [minMaxInput, setMinMaxInput] = useState('');
 
-  const [hasMultipleOptions, setHasMultipleOptions] = useState(true)
-  const [isDigitalItem, setIsDigitalItem] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [hasMultipleOptions, setHasMultipleOptions] = useState(true);
+  const [isDigitalItem, setIsDigitalItem] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   // Different Options state
-  const [options, setOptions] = useState([{ id: 1, name: "brand", values: ["1", "2", "3", "4"] }])
-  const [nextOptionId, setNextOptionId] = useState(2)
+  const [options, setOptions] = useState([
+    { id: 1, name: 'brand', values: ['1', '2', '3', '4'] },
+  ]);
+  const [nextOptionId, setNextOptionId] = useState(2);
 
   // Category state
-  const [categories, setCategories] = useState(["about", "brand", "team", "trend", "xyz"])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [showCreateCategory, setShowCreateCategory] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState("")
+  const [categories, setCategories] = useState([
+    'about',
+    'brand',
+    'team',
+    'trend',
+    'xyz',
+  ]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showCreateCategory, setShowCreateCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const [formData, setFormData] = useState({
-    name: product?.name || "",
-    description: product?.description || "",
-    price: product?.price?.replace("$", "") || "",
-  })
+    name: product?.name || '',
+    description: product?.description || '',
+    price: product?.price?.replace('$', '') || '',
+  });
 
   // File upload handlers
   const handleFileUpload = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
+    const files = event.target.files;
     if (files) {
-      const newFiles = Array.from(files)
-      setUploadedFiles((prev) => [...prev, ...newFiles])
+      const newFiles = Array.from(files);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
     }
-  }
+  };
 
   const handleRemoveFile = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   // Tag handlers
   const handleAddTag = () => {
     if (tagInput && !tags.includes(tagInput)) {
-      setTags([...tags, tagInput])
-      setTagInput("")
+      setTags([...tags, tagInput]);
+      setTagInput('');
     }
-  }
+  };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
-  }
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
 
   const handleTagKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      handleAddTag()
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTag();
     }
-  }
+  };
 
   // Min Max orders handlers
   const handleAddMinMaxTag = () => {
     if (minMaxInput && !minMaxTags.includes(minMaxInput)) {
-      setMinMaxTags([...minMaxTags, minMaxInput])
-      setMinMaxInput("")
+      setMinMaxTags([...minMaxTags, minMaxInput]);
+      setMinMaxInput('');
     }
-  }
+  };
 
   const handleRemoveMinMaxTag = (tagToRemove: string) => {
-    setMinMaxTags(minMaxTags.filter((tag) => tag !== tagToRemove))
-  }
+    setMinMaxTags(minMaxTags.filter((tag) => tag !== tagToRemove));
+  };
 
   const handleMinMaxKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      handleAddMinMaxTag()
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddMinMaxTag();
     }
-  }
+  };
 
   // Category handlers
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-    )
-  }
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  };
 
   const handleCreateCategory = () => {
     if (newCategoryName && !categories.includes(newCategoryName)) {
-      setCategories([...categories, newCategoryName])
-      setNewCategoryName("")
-      setShowCreateCategory(false)
+      setCategories([...categories, newCategoryName]);
+      setNewCategoryName('');
+      setShowCreateCategory(false);
     }
-  }
+  };
 
   // Options handlers
   const handleAddOption = () => {
     const newOption = {
       id: nextOptionId,
-      name: "",
+      name: '',
       values: [],
-    }
-    setOptions([...options, newOption])
-    setNextOptionId(nextOptionId + 1)
-  }
+    };
+    setOptions([...options, newOption]);
+    setNextOptionId(nextOptionId + 1);
+  };
 
   const handleRemoveOption = (optionId: number) => {
-    setOptions(options.filter((option) => option.id !== optionId))
-  }
+    setOptions(options.filter((option) => option.id !== optionId));
+  };
 
   const handleOptionNameChange = (optionId: number, name: string) => {
-    setOptions(options.map((option) => (option.id === optionId ? { ...option, name } : option)))
-  }
+    setOptions(
+      options.map((option) =>
+        option.id === optionId ? { ...option, name } : option
+      )
+    );
+  };
 
   const handleClearAllTags = () => {
-    setTags([])
-    setTagInput("")
-  }
+    setTags([]);
+    setTagInput('');
+  };
 
-  const [includeTax, setIncludeTax] = useState(true)
+  const [includeTax, setIncludeTax] = useState(true);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.back()}>
-            <Image src="/back.png?height=13&width=13" alt="Back" width={13} height={13} />
-            <Typography sx={{ ml: 1, color: "#737791", fontSize: "14px" }}>Back</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            onClick={() => router.back()}
+          >
+            <Image
+              src="/back.png?height=13&width=13"
+              alt="Back"
+              width={13}
+              height={13}
+            />
+            <Typography sx={{ ml: 1, color: '#737791', fontSize: '14px' }}>
+              Back
+            </Typography>
           </Box>
         </Box>
 
-        <Typography sx={{ fontSize: "24px", fontWeight: "bold", color: "#1F2A44", mb: 2 }}>Add Product</Typography>
+        <Typography
+          sx={{ fontSize: '24px', fontWeight: 'bold', color: '#1F2A44', mb: 2 }}
+        >
+          Add Product
+        </Typography>
 
-        <Box sx={{ display: "flex", p: 2, minHeight: "100vh", alignItems: "flex-start", gap: 3, mt: -2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            p: 2,
+            minHeight: '100vh',
+            alignItems: 'flex-start',
+            gap: 3,
+            mt: -2,
+          }}
+        >
           {/* Left Section */}
-          <Box sx={{ flex: 1, pr: 2, bgcolor: "#fff", m: 2, p: 6, pt: 2, pb: 2 }}>
+          <Box
+            sx={{ flex: 1, pr: 2, bgcolor: '#fff', m: 2, p: 6, pt: 2, pb: 2 }}
+          >
             {/* Information Section */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
                 Information
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                   Product Name
                 </Typography>
                 <TextField
@@ -273,10 +315,12 @@ export default function Detail({ product }: DetailProps) {
                   size="small"
                   sx={{ mb: 2 }}
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                 />
 
-                <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                   Product Description
                 </Typography>
                 <TextField
@@ -288,24 +332,29 @@ export default function Detail({ product }: DetailProps) {
                   placeholder="Product description"
                   sx={{ mb: 1 }}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                 />
               </Paper>
             </Box>
 
             {/* Images Section */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
                 Images
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
                 <Box
                   sx={{
-                    border: "1px dashed #ccc",
+                    border: '1px dashed #ccc',
                     borderRadius: 1,
                     p: 3,
-                    textAlign: "center",
-                    bgcolor: "#fff",
+                    textAlign: 'center',
+                    bgcolor: '#fff',
                   }}
                 >
                   <input
@@ -314,12 +363,12 @@ export default function Detail({ product }: DetailProps) {
                     onChange={handleFileChange}
                     multiple
                     accept="image/*"
-                    style={{ display: "none" }}
+                    style={{ display: 'none' }}
                   />
                   <Button
                     variant="outlined"
                     color="primary"
-                    sx={{ mb: 1, textTransform: "none" }}
+                    sx={{ mb: 1, textTransform: 'none' }}
                     onClick={handleFileUpload}
                   >
                     Add File
@@ -332,17 +381,17 @@ export default function Detail({ product }: DetailProps) {
                 {/* Display uploaded files */}
                 {uploadedFiles.length > 0 && (
                   <Box sx={{ mt: 2 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                       Uploaded Files:
                     </Typography>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {uploadedFiles.map((file, index) => (
                         <Chip
                           key={index}
                           label={file.name}
                           onDelete={() => handleRemoveFile(index)}
                           deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
-                          sx={{ bgcolor: "#f0f0f0" }}
+                          sx={{ bgcolor: '#f0f0f0' }}
                         />
                       ))}
                     </Box>
@@ -353,13 +402,16 @@ export default function Detail({ product }: DetailProps) {
 
             {/* Price Section */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
                 Price
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                       Product Price
                     </Typography>
                     <TextField
@@ -368,26 +420,40 @@ export default function Detail({ product }: DetailProps) {
                       size="small"
                       placeholder="0.00"
                       value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
                       InputProps={{
-                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        startAdornment: (
+                          <InputAdornment position="start">$</InputAdornment>
+                        ),
                       }}
                     />
                   </Box>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                       Discount Price
                     </Typography>
-                    <TextField fullWidth variant="outlined" size="small" placeholder="Price at checkout" />
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      placeholder="Price at checkout"
+                    />
                   </Box>
                 </Box>
                 <FormControlLabel
-                  control={<CustomSwitch checked={includeTax} onChange={(e) => setIncludeTax(e.target.checked)} />}
+                  control={
+                    <CustomSwitch
+                      checked={includeTax}
+                      onChange={(e) => setIncludeTax(e.target.checked)}
+                    />
+                  }
                   label="Add tax for this product"
                   sx={{
                     mt: 1,
-                    "& .MuiFormControlLabel-label": { fontSize: 14 },
-                    "& .MuiSwitch-root": { mr: 2 },
+                    '& .MuiFormControlLabel-label': { fontSize: 14 },
+                    '& .MuiSwitch-root': { mr: 2 },
                   }}
                 />
               </Paper>
@@ -395,7 +461,10 @@ export default function Detail({ product }: DetailProps) {
 
             {/* Different Options */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
                 Different Options
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
@@ -408,8 +477,8 @@ export default function Detail({ product }: DetailProps) {
                   }
                   label="This product has multiple options"
                   sx={{
-                    "& .MuiFormControlLabel-label": { fontSize: 14 },
-                    "& .MuiSwitch-root": { mr: 2 },
+                    '& .MuiFormControlLabel-label': { fontSize: 14 },
+                    '& .MuiSwitch-root': { mr: 2 },
                   }}
                 />
 
@@ -417,28 +486,49 @@ export default function Detail({ product }: DetailProps) {
                   <Box sx={{ mt: 2 }}>
                     {options.map((option, index) => (
                       <Box key={option.id} sx={{ mb: 3 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-                          <Typography variant="subtitle2">Option {index + 1}</Typography>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            mb: 1,
+                          }}
+                        >
+                          <Typography variant="subtitle2">
+                            Option {index + 1}
+                          </Typography>
                           {options.length > 1 && (
                             <Button
                               size="small"
                               onClick={() => handleRemoveOption(option.id)}
-                              sx={{ color: "error.main", minWidth: "auto", p: 0.5 }}
+                              sx={{
+                                color: 'error.main',
+                                minWidth: 'auto',
+                                p: 0.5,
+                              }}
                             >
                               <CloseIcon sx={{ fontSize: 16 }} />
                             </Button>
                           )}
                         </Box>
-                        <Box sx={{ display: "flex", gap: 2 }}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ mb: 1, color: '#666' }}
+                            >
                               Name
                             </Typography>
                             <FormControl fullWidth size="small">
                               <Select
                                 value={option.name}
                                 displayEmpty
-                                onChange={(e) => handleOptionNameChange(option.id, e.target.value)}
+                                onChange={(e) =>
+                                  handleOptionNameChange(
+                                    option.id,
+                                    e.target.value
+                                  )
+                                }
                               >
                                 <MenuItem value="">Select option</MenuItem>
                                 <MenuItem value="brand">brand</MenuItem>
@@ -449,7 +539,10 @@ export default function Detail({ product }: DetailProps) {
                             </FormControl>
                           </Box>
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ mb: 1, color: '#666' }}
+                            >
                               Values
                             </Typography>
                             <TextField
@@ -461,15 +554,15 @@ export default function Detail({ product }: DetailProps) {
                                 startAdornment: option.values.length > 0 && (
                                   <Box
                                     sx={{
-                                      display: "flex",
+                                      display: 'flex',
                                       gap: 1,
                                       //   flexWrap: "wrap",
                                       mr: 1,
-                                      maxWidth: "calc(100% - 100px)", // Leave space for input text
-                                      "& > *": {
-                                        flexBasis: "calc(25% - 8px)", // 4 chips per row with gap
-                                        minWidth: "60px",
-                                        maxWidth: "80px",
+                                      maxWidth: 'calc(100% - 100px)', // Leave space for input text
+                                      '& > *': {
+                                        flexBasis: 'calc(25% - 8px)', // 4 chips per row with gap
+                                        minWidth: '60px',
+                                        maxWidth: '80px',
                                       },
                                     }}
                                   >
@@ -479,22 +572,29 @@ export default function Detail({ product }: DetailProps) {
                                         label={value}
                                         size="small"
                                         variant="outlined"
-                                        deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
+                                        deleteIcon={
+                                          <CloseIcon style={{ fontSize: 14 }} />
+                                        }
                                         onDelete={() => {
                                           // Remove this specific value from the option
-                                          const newValues = option.values.filter((_, i) => i !== valueIndex)
+                                          const newValues =
+                                            option.values.filter(
+                                              (_, i) => i !== valueIndex
+                                            );
                                           setOptions(
                                             options.map((opt) =>
-                                              opt.id === option.id ? { ...opt, values: newValues } : opt,
-                                            ),
-                                          )
+                                              opt.id === option.id
+                                                ? { ...opt, values: newValues }
+                                                : opt
+                                            )
+                                          );
                                         }}
                                         sx={{
                                           borderRadius: 0,
-                                          bgcolor: "rgba(217, 228, 255, 1)",
-                                          fontSize: "12px",
-                                          height: "24px",
-                                          "& .MuiChip-label": {
+                                          bgcolor: 'rgba(217, 228, 255, 1)',
+                                          fontSize: '12px',
+                                          height: '24px',
+                                          '& .MuiChip-label': {
                                             px: 1,
                                           },
                                         }}
@@ -513,8 +613,8 @@ export default function Detail({ product }: DetailProps) {
                       onClick={handleAddOption}
                       sx={{
                         mt: 1,
-                        color: "primary.main",
-                        textTransform: "none",
+                        color: 'primary.main',
+                        textTransform: 'none',
                         p: 0,
                       }}
                     >
@@ -527,23 +627,35 @@ export default function Detail({ product }: DetailProps) {
 
             {/* Shipping */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
                 Shipping
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                       Weight
                     </Typography>
-                    <TextField fullWidth variant="outlined" size="small" placeholder="Enter Weight" />
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      placeholder="Enter Weight"
+                    />
                   </Box>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                       Country
                     </Typography>
                     <FormControl fullWidth size="small">
-                      <Select value="" displayEmpty renderValue={() => "Select Country"}>
+                      <Select
+                        value=""
+                        displayEmpty
+                        renderValue={() => 'Select Country'}
+                      >
                         <MenuItem value="">Select Country</MenuItem>
                       </Select>
                     </FormControl>
@@ -551,29 +663,34 @@ export default function Detail({ product }: DetailProps) {
                 </Box>
                 <FormControlLabel
                   control={
-                    <CustomSwitch checked={isDigitalItem} onChange={(e) => setIsDigitalItem(e.target.checked)} />
+                    <CustomSwitch
+                      checked={isDigitalItem}
+                      onChange={(e) => setIsDigitalItem(e.target.checked)}
+                    />
                   }
                   label="This is digital item"
                   sx={{
                     mt: 2,
-                    "& .MuiFormControlLabel-label": { fontSize: 14 },
-                    "& .MuiSwitch-root": { mr: 2 },
+                    '& .MuiFormControlLabel-label': { fontSize: 14 },
+                    '& .MuiSwitch-root': { mr: 2 },
                   }}
                 />
               </Paper>
             </Box>
 
             {/* Action Buttons */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-              <Button variant="text" sx={{ color: "#000" }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}
+            >
+              <Button variant="text" sx={{ color: '#000' }}>
                 Cancel
               </Button>
               <Button
                 variant="contained"
                 sx={{
-                  bgcolor: "#FFA500",
-                  color: "#fff",
-                  "&:hover": { bgcolor: "#FF8C00" },
+                  bgcolor: '#FFA500',
+                  color: '#fff',
+                  '&:hover': { bgcolor: '#FF8C00' },
                   px: 4,
                 }}
               >
@@ -587,12 +704,18 @@ export default function Detail({ product }: DetailProps) {
             {/* Categories */}
             <Box sx={{ mb: 4 }}>
               <Paper sx={{ p: 2, mt: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+                >
                   Categories
                 </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {categories.map((category) => (
-                    <Box key={category} sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      key={category}
+                      sx={{ display: 'flex', alignItems: 'center' }}
+                    >
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -611,9 +734,9 @@ export default function Detail({ product }: DetailProps) {
                     variant="text"
                     onClick={() => setShowCreateCategory(true)}
                     sx={{
-                      color: "#1976d2",
-                      textTransform: "none",
-                      justifyContent: "flex-start",
+                      color: '#1976d2',
+                      textTransform: 'none',
+                      justifyContent: 'flex-start',
                       p: 0,
                       mt: 1,
                     }}
@@ -627,15 +750,18 @@ export default function Detail({ product }: DetailProps) {
             {/* Tags */}
             <Box sx={{ mb: 4 }}>
               <Paper sx={{ p: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 500, color: "black" }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: 500, color: 'black' }}
+                >
                   Tags
                 </Typography>
                 <Button
                   variant="text"
                   sx={{
-                    color: "#1976d2",
-                    textTransform: "none",
-                    justifyContent: "flex-start",
+                    color: '#1976d2',
+                    textTransform: 'none',
+                    justifyContent: 'flex-start',
                     p: 0,
                     mb: 1,
                   }}
@@ -652,7 +778,7 @@ export default function Detail({ product }: DetailProps) {
                   onKeyPress={handleTagKeyPress}
                   sx={{ mb: 2 }}
                 />
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {tags.map((tag) => (
                     <Chip
                       key={tag}
@@ -662,7 +788,7 @@ export default function Detail({ product }: DetailProps) {
                       onDelete={() => handleRemoveTag(tag)}
                       deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
                       sx={{
-                        bgcolor: tag === "trend" ? "#f0f0f0" : "#e6e6fa",
+                        bgcolor: tag === 'trend' ? '#f0f0f0' : '#e6e6fa',
                         borderRadius: 0,
                       }}
                     />
@@ -674,15 +800,18 @@ export default function Detail({ product }: DetailProps) {
             {/* Min Max Orders */}
             <Box>
               <Paper sx={{ p: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+                >
                   Min Max orders
                 </Typography>
                 <Button
                   variant="text"
                   sx={{
-                    color: "#1976d2",
-                    textTransform: "none",
-                    justifyContent: "flex-start",
+                    color: '#1976d2',
+                    textTransform: 'none',
+                    justifyContent: 'flex-start',
                     p: 0,
                     mb: 1,
                   }}
@@ -699,7 +828,7 @@ export default function Detail({ product }: DetailProps) {
                   onKeyPress={handleMinMaxKeyPress}
                   sx={{ mb: 2 }}
                 />
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {minMaxTags.map((tag) => (
                     <Chip
                       key={tag}
@@ -709,7 +838,7 @@ export default function Detail({ product }: DetailProps) {
                       onDelete={() => handleRemoveMinMaxTag(tag)}
                       deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
                       sx={{
-                        bgcolor: "#f0f8ff",
+                        bgcolor: '#f0f8ff',
                         borderRadius: 0,
                       }}
                     />
@@ -721,7 +850,10 @@ export default function Detail({ product }: DetailProps) {
         </Box>
 
         {/* Create Category Dialog */}
-        <Dialog open={showCreateCategory} onClose={() => setShowCreateCategory(false)}>
+        <Dialog
+          open={showCreateCategory}
+          onClose={() => setShowCreateCategory(false)}
+        >
           <DialogTitle>Create New Category</DialogTitle>
           <DialogContent>
             <TextField
@@ -743,5 +875,5 @@ export default function Detail({ product }: DetailProps) {
         </Dialog>
       </Box>
     </ThemeProvider>
-  )
+  );
 }
