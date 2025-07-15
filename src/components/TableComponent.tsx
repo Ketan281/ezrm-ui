@@ -49,7 +49,6 @@ interface TableComponentProps {
   onPageChange?: (page: number) => void;
   onRowClick?: (row: TableRowData) => void;
   onLinkClick?: (row: TableRowData) => void;
-  onClick?: (row: TableRowData) => void;
   filterOptions?: {
     value: string;
     onChange: (value: string) => void;
@@ -65,6 +64,8 @@ interface TableComponentProps {
   showCheckboxes?: boolean;
   showHeader?: boolean;
   rowsPerPage?: number;
+  selected?: string[];
+  onSelectionChange?: (selected: string[]) => void;
 }
 
 export const TableComponent: React.FC<TableComponentProps> = ({
@@ -81,12 +82,17 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   showCheckboxes = true,
   showHeader = true,
   rowsPerPage = 9,
+  selected: externalSelected,
+  onSelectionChange,
 }) => {
-  const [selected, setSelected] = useState<string[]>([]);
+  const [internalSelected, setInternalSelected] = useState<string[]>([]);
   const [internalPage, setInternalPage] = useState(1);
-  const [filteredData, setFilteredData] = useState<TableRowData[]>(data);
   
-  // Calculate the total pages based on the total results, not just the data array length
+  // Use external selected state if provided, otherwise internal state
+  const selected = onSelectionChange ? externalSelected || [] : internalSelected;
+  const setSelected = onSelectionChange || setInternalSelected;
+
+  // Calculate the total pages based on the total results
   const totalPages = Math.ceil(totalResults / rowsPerPage);
   const showPagination = totalResults > rowsPerPage;
 
@@ -97,7 +103,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   // Reset selection when data changes
   useEffect(() => {
     setSelected([]);
-  }, [data]);
+  }, [data, setSelected]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -109,6 +115,7 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   };
 
   const handleClick = (event: React.MouseEvent<unknown>, id: string) => {
+    event.stopPropagation();
     const selectedIndex = selected.indexOf(id);
     let newSelected: string[] = [];
 
@@ -206,14 +213,6 @@ export const TableComponent: React.FC<TableComponentProps> = ({
       </Typography>
     );
   };
-
-  // Debug info
-  console.log('Total Results:', totalResults);
-  console.log('Total Pages:', totalPages);
-  console.log('Current Page:', page);
-  console.log('Rows Per Page:', rowsPerPage);
-  console.log('Data Length:', data.length);
-  console.log('Showing Pagination:', showPagination);
 
   return (
     <Box sx={{ p: 1, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
@@ -385,7 +384,6 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       count={totalPages}
                       page={page}
                       onChange={(event, newPage) => {
-                        console.log("Page changed to:", newPage);
                         handlePageChange(newPage);
                       }}
                       siblingCount={1}
@@ -423,16 +421,6 @@ export const TableComponent: React.FC<TableComponentProps> = ({
     </Box>
   );
 };
-
-interface ConfirmationDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  content: string;
-  confirmButtonText?: string;
-  cancelButtonText?: string;
-}
 
 export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   open,
@@ -501,60 +489,6 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           {confirmButtonText}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
-};
-
-interface SuccessDialogProps {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  icon?: string;
-}
-
-export const SuccessDialog: React.FC<SuccessDialogProps> = ({
-  open,
-  onClose,
-  title,
-  icon = '/deleteSuc.png',
-}) => {
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: '400px',
-          borderRadius: '10px',
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
-          p: 3,
-          minWidth: "35%",
-        },
-      }}
-    >
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <IconButton onClick={onClose} sx={{ p: 0 }} aria-label="Close success dialog">
-          <Image src="/Close.png" alt="Close" width={16} height={16} style={{ color: '#737791' }} />
-        </IconButton>
-      </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-        <Box
-          sx={{
-            width: '48px',
-            height: '48px',
-            backgroundColor: '#FFEBEB',
-            borderRadius: '50%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Image src={icon} alt="Success" width={24} height={24} />
-        </Box>
-        <Typography sx={{ fontSize: '16px', fontWeight: 'bold', color: '#1F2A44', fontFamily: 'Poppins, sans-serif' }}>
-          {title}
-        </Typography>
-      </Box>
     </Dialog>
   );
 };

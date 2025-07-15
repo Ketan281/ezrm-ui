@@ -1,7 +1,6 @@
 "use client"
-
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -24,13 +23,18 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Alert,
+  CircularProgress,
 } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import CloseIcon from "@mui/icons-material/Close"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useUpdateProduct } from "@/api/handlers"
+import { useUIStore } from "@/store/uiStore"
+import type { UpdateProductRequest } from "@/api/services"
 
-// Create a custom styled Switch component that looks like the first image
+// Create a custom styled Switch component
 const CustomSwitch = styled(Switch)(() => ({
   width: 42,
   height: 22,
@@ -42,7 +46,7 @@ const CustomSwitch = styled(Switch)(() => ({
       color: "#fff",
       "& + .MuiSwitch-track": {
         opacity: 1,
-        backgroundColor: "#073E54", // Dark teal/blue color for ON state
+        backgroundColor: "#073E54",
       },
     },
   },
@@ -55,7 +59,7 @@ const CustomSwitch = styled(Switch)(() => ({
   },
   "& .MuiSwitch-track": {
     opacity: 1,
-    backgroundColor: "rgba(217, 228, 255, 1)", // Light blue color for OFF state
+    backgroundColor: "rgba(217, 228, 255, 1)",
     borderRadius: 32,
   },
 }))
@@ -107,37 +111,133 @@ interface Product {
   name: string
   description: string
   inventory: string
-  loreal: string
+  category: string
   price: string
-  rating: string
+  inStock: string
 }
 
 interface DetailProps {
-  product: Product
+  product?: Product
 }
 
-export default function Detail({ product }: DetailProps) {
+export default function UpdateProductDetail({ product }: DetailProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [includeTax, setIncludeTax] = useState(true)
+
+  // Get product data from URL params if not passed as prop
+  const productData = product || {
+    id: searchParams.get("id") || "",
+    name: searchParams.get("name") || "",
+    description: searchParams.get("description") || "",
+    inventory: searchParams.get("inventory") || "",
+    category: searchParams.get("category") || "",
+    price: searchParams.get("price") || "",
+    inStock: searchParams.get("inStock") || "true",
+  }
+
+  // Hooks
+  const { notifications, addNotification } = useUIStore()
+  const updateProductMutation = useUpdateProduct()
+
   // State management
+  const [includeTax, setIncludeTax] = useState(true)
   const [tags, setTags] = useState<string[]>(["trend", "instagram"])
   const [tagInput, setTagInput] = useState("")
   const [hasMultipleOptions, setHasMultipleOptions] = useState(true)
   const [isDigitalItem, setIsDigitalItem] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [inStock, setInStock] = useState(productData.inStock === "true")
+
+  // Form validation state
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
   // Category state
-  const [categories, setCategories] = useState(["about", "brand", "team", "trend", "xyz"])
+  const [categories, setCategories] = useState(["Amino Acids", "Vitamins", "Supplements", "Protein", "Pre-workout"])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [showCreateCategory, setShowCreateCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
 
   const [formData, setFormData] = useState({
-    name: product?.name || "",
-    description: product?.description || "",
-    price: product?.price?.replace("$", "") || "",
+    name: productData.name || "",
+    description: productData.description || "",
+    price: productData.price?.replace("$", "") || "",
+    category: productData.category || "",
   })
+
+  // Initialize form with existing product data
+  useEffect(() => {
+    if (productData.category) {
+      setSelectedCategories([productData.category])
+    }
+  }, [productData.category])
+
+  // Form validation
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+
+    if (!formData.name.trim()) {
+      errors.name = "Product name is required"
+    }
+    if (!formData.description.trim()) {
+      errors.description = "Product description is required"
+    }
+    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+      errors.price = "Valid price is required"
+    }
+    if (selectedCategories.length === 0) {
+      errors.categories = "Please select at least one category"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  // Form submission handler
+const handleUpdate = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
+  if (!productData.id) {
+    addNotification({
+      type: "error",
+      message: "Product ID is missing. Cannot update product.",
+    });
+    return;
+  }
+
+  const updatePayload: Partial<UpdateProductRequest> = {
+    name: formData.name.trim(),
+    description: formData.description.trim(),
+    price: Number(formData.price),
+    category: selectedCategories[0],
+    inStock: inStock,
+  };
+
+  console.log("Update Payload:", updatePayload); // Debug log
+  console.log("Product ID:", productData.id); // Debug log
+
+  try {
+    const result = await updateProductMutation.mutateAsync({
+      productId: productData.id,
+      data: updatePayload,
+    });
+    
+    console.log("Update Result:", result); // Debug log
+
+    setTimeout(() => {
+      router.back();
+    }, 1500);
+  } catch (error) {
+    console.error("Update failed:", error);
+    // Add more detailed error handling
+    addNotification({
+      type: "error",
+      message: error instanceof Error ? error.message : "Failed to update product",
+    });
+  }
+}
 
   // File upload handlers
   const handleFileUpload = () => {
@@ -180,6 +280,10 @@ export default function Detail({ product }: DetailProps) {
     setSelectedCategories((prev) =>
       prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
     )
+    // Clear category error when user selects a category
+    if (formErrors.categories) {
+      setFormErrors((prev) => ({ ...prev, categories: "" }))
+    }
   }
 
   const handleCreateCategory = () => {
@@ -190,18 +294,28 @@ export default function Detail({ product }: DetailProps) {
     }
   }
 
+  // Get the latest notification for display
+  const latestNotification = notifications[notifications.length - 1]
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box>
         <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.back()}>
-            <Image src="/back.png?height=13&width=13" alt="Back" width={13} height={13} />
+            <Image src="/placeholder.svg?height=13&width=13" alt="Back" width={13} height={13} />
             <Typography sx={{ ml: 1, color: "#737791", fontSize: "14px" }}>Back</Typography>
           </Box>
         </Box>
 
         <Typography sx={{ fontSize: "24px", fontWeight: "bold", color: "#1F2A44", mb: 2 }}>Update Product</Typography>
+
+        {/* Show latest notification */}
+        {latestNotification && (
+          <Alert severity={latestNotification.type} sx={{ mb: 2 }}>
+            {latestNotification.message}
+          </Alert>
+        )}
 
         <Box sx={{ display: "flex", p: 2, minHeight: "100vh", alignItems: "flex-start", gap: 3, mt: -2 }}>
           {/* Left Section */}
@@ -213,7 +327,7 @@ export default function Detail({ product }: DetailProps) {
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
                 <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                  Product Name
+                  Product Name *
                 </Typography>
                 <TextField
                   fullWidth
@@ -221,11 +335,17 @@ export default function Detail({ product }: DetailProps) {
                   size="small"
                   sx={{ mb: 2 }}
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value })
+                    if (formErrors.name) {
+                      setFormErrors((prev) => ({ ...prev, name: "" }))
+                    }
+                  }}
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
-
                 <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                  Product Description
+                  Product Description *
                 </Typography>
                 <TextField
                   fullWidth
@@ -236,7 +356,14 @@ export default function Detail({ product }: DetailProps) {
                   placeholder="Product description"
                   sx={{ mb: 1 }}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, description: e.target.value })
+                    if (formErrors.description) {
+                      setFormErrors((prev) => ({ ...prev, description: "" }))
+                    }
+                  }}
+                  error={!!formErrors.description}
+                  helperText={formErrors.description}
                 />
               </Paper>
             </Box>
@@ -276,8 +403,6 @@ export default function Detail({ product }: DetailProps) {
                     Or drag and drop files
                   </Typography>
                 </Box>
-
-                {/* Display uploaded files */}
                 {uploadedFiles.length > 0 && (
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
@@ -308,7 +433,7 @@ export default function Detail({ product }: DetailProps) {
                 <Box sx={{ display: "flex", gap: 2 }}>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                      Product Price
+                      Product Price *
                     </Typography>
                     <TextField
                       fullWidth
@@ -316,7 +441,14 @@ export default function Detail({ product }: DetailProps) {
                       size="small"
                       placeholder="0.00"
                       value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, price: e.target.value })
+                        if (formErrors.price) {
+                          setFormErrors((prev) => ({ ...prev, price: "" }))
+                        }
+                      }}
+                      error={!!formErrors.price}
+                      helperText={formErrors.price}
                       InputProps={{
                         startAdornment: <InputAdornment position="start">$</InputAdornment>,
                       }}
@@ -330,10 +462,27 @@ export default function Detail({ product }: DetailProps) {
                   </Box>
                 </Box>
                 <FormControlLabel
-                  control={<CustomSwitch checked={includeTax} onChange={(e) => setIncludeTax(e.target.checked)}/>}
+                  control={<CustomSwitch checked={includeTax} onChange={(e) => setIncludeTax(e.target.checked)} />}
                   label="Add tax for this product"
                   sx={{
                     mt: 1,
+                    "& .MuiFormControlLabel-label": { fontSize: 14 },
+                    "& .MuiSwitch-root": { mr: 2 },
+                  }}
+                />
+              </Paper>
+            </Box>
+
+            {/* Stock Status */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
+                Stock Status
+              </Typography>
+              <Paper sx={{ p: 2, mb: 2 }}>
+                <FormControlLabel
+                  control={<CustomSwitch checked={inStock} onChange={(e) => setInStock(e.target.checked)} />}
+                  label="Product is in stock"
+                  sx={{
                     "& .MuiFormControlLabel-label": { fontSize: 14 },
                     "& .MuiSwitch-root": { mr: 2 },
                   }}
@@ -360,7 +509,6 @@ export default function Detail({ product }: DetailProps) {
                     "& .MuiSwitch-root": { mr: 2 },
                   }}
                 />
-
                 {hasMultipleOptions && (
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -461,7 +609,12 @@ export default function Detail({ product }: DetailProps) {
 
             {/* Action Buttons */}
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-              <Button variant="text" sx={{ color: "#000" }}>
+              <Button
+                variant="text"
+                sx={{ color: "#000" }}
+                disabled={updateProductMutation.isPending}
+                onClick={() => router.back()}
+              >
                 Cancel
               </Button>
               <Button
@@ -471,9 +624,25 @@ export default function Detail({ product }: DetailProps) {
                   color: "#fff",
                   "&:hover": { bgcolor: "#FF8C00" },
                   px: 4,
+                  position: "relative",
                 }}
+                onClick={handleUpdate}
+                disabled={updateProductMutation.isPending}
               >
-                Update
+                {updateProductMutation.isPending && (
+                  <CircularProgress
+                    size={20}
+                    sx={{
+                      color: "#fff",
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      marginLeft: "-10px",
+                      marginTop: "-10px",
+                    }}
+                  />
+                )}
+                {updateProductMutation.isPending ? "Updating..." : "Update"}
               </Button>
             </Box>
           </Box>
@@ -484,7 +653,7 @@ export default function Detail({ product }: DetailProps) {
             <Box sx={{ mb: 4 }}>
               <Paper sx={{ p: 2, mt: 2 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                  Categories
+                  Categories *
                 </Typography>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                   {categories.map((category) => (
@@ -517,6 +686,11 @@ export default function Detail({ product }: DetailProps) {
                     Create New
                   </Button>
                 </Box>
+                {formErrors.categories && (
+                  <Typography variant="caption" color="error" sx={{ mt: 1, display: "block" }}>
+                    {formErrors.categories}
+                  </Typography>
+                )}
               </Paper>
             </Box>
 

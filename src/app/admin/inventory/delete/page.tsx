@@ -1,119 +1,252 @@
-'use client';
+"use client"
+import type React from "react"
+import { useState, useEffect } from "react"
+import { Box, Typography, Button, TextField, InputAdornment, Alert } from "@mui/material"
+import Image from "next/image"
+import { TableComponent, ConfirmationDialog } from "../../../../components/TableComponent"
+import { useRouter } from "next/navigation"
+import { useProducts, useDeleteProduct } from "@/api/handlers"
+import { useUIStore } from "@/store/uiStore"
+import SearchIcon from "@mui/icons-material/Search"
+import ClearIcon from "@mui/icons-material/Clear"
 
-import React, { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import Image from 'next/image';
-import { TableComponent, ConfirmationDialog, SuccessDialog } from '../../../../components/TableComponent';
-import { useRouter } from 'next/navigation';
+interface ProductRow {
+  id: string
+  product: string
+  inventory: string
+  loreal: string
+  price: string
+  rating: string
+}
 
 export default function DeleteProductPage() {
-  const [openDialog, setOpenDialog] = useState(false);
-  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
-  const [page, setPage] = useState(1);
-  const router = useRouter();
-  
+  const [openDialog, setOpenDialog] = useState(false)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [productRows, setProductRows] = useState<ProductRow[]>([])
+  const [deleteCount, setDeleteCount] = useState(0)
+
+  const router = useRouter()
+  const { notifications, addNotification } = useUIStore()
+
+  // API hooks
+  const { data: productsData, isLoading, error } = useProducts({ page, limit: 10, search })
+  const deleteProductMutation = useDeleteProduct()
+
   const columns = [
-    { id: 'product', label: 'Product', width: '25%' },
-    { id: 'inventory', label: 'Inventory', width: '20%' },
-    { id: 'loreal', label: 'Loreal', width: '20%' },
-    { id: 'price', label: 'Price', width: '15%' },
-    { id: 'rating', label: 'Rating', width: '15%' },
-  ];
+    { id: "product", label: "Product", width: "30%" },
+    { id: "inventory", label: "Inventory", width: "20%" },
+    { id: "loreal", label: "Category", width: "20%" },
+    { id: "price", label: "Price", width: "15%" },
+    { id: "rating", label: "Stock Status", width: "10%" },
+  ]
 
-  const data = [
-    { 
-      id: '1',
-      product: 'vitamin - loreal ipsum', // Changed from JSX to string
-      inventory: '96 in stock',
-      loreal: 'Black',
-      price: '$49.90',
-      rating: '5.0 (32 Votes)',
+  // Transform API data to table format
+  useEffect(() => {
+    if (productsData?.products) {
+      const transformedData: ProductRow[] = productsData.products.map((product) => {
+        const productId = product.id || product._id
+        return {
+          id: productId,
+          product: product.name,
+          inventory: `${Math.floor(Math.random() * 100)} in stock`,
+          loreal: product.category,
+          price: `${product.price.toFixed(2)}`,
+          rating: product.inStock ? "In Stock" : "Out of Stock",
+        }
+      })
+      setProductRows(transformedData)
     }
-  ];
+  }, [productsData])
 
-  const handleDeleteConfirm = () => {
-    setOpenDialog(false);
-    setOpenSuccessDialog(true);
-  };
+  const handleDeleteConfirm = async () => {
+    setOpenDialog(false)
+    const productsToDelete = [...selectedProducts]
+    const countToDelete = deleteCount
+
+    try {
+      addNotification({
+        type: "info",
+        message: `Deleting ${countToDelete} product${countToDelete > 1 ? "s" : ""}...`,
+      })
+
+      for (const productId of productsToDelete) {
+        await deleteProductMutation.mutateAsync({ productId })
+      }
+
+      setSelectedProducts([])
+
+      addNotification({
+        type: "success",
+        message: `Successfully deleted ${countToDelete} product${countToDelete > 1 ? "s" : ""}!`,
+      })
+    } catch (error) {
+      console.error("Delete failed:", error)
+      addNotification({
+        type: "error",
+        message: "Failed to delete products. Please try again.",
+      })
+    }
+  }
+
+  const handleSearchClear = () => {
+    setSearch("")
+  }
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value)
+    setPage(1)
+  }
+
+  const latestNotification = notifications[notifications.length - 1]
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, mt: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => router.back()}>
-          <Image src="/backArrow.png" alt="Back" width={13} height={13} />
-          <Typography sx={{ ml: 1, color: '#737791', fontSize: '14px', fontFamily: 'Poppins, sans-serif' }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 3, mt: 0 }}>
+        <Box sx={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.back()}>
+          <Image src="/placeholder.svg?height=13&width=13" alt="Back" width={13} height={13} />
+          <Typography sx={{ ml: 1, color: "#737791", fontSize: "14px", fontFamily: "Poppins, sans-serif" }}>
             Back
           </Typography>
         </Box>
       </Box>
-      
-      {/* Page title */}
-      <Typography sx={{ fontSize: '24px', fontWeight: 'bold', color: '#1F2A44', mb: 2, fontFamily: 'Poppins, sans-serif' }}>
+
+      <Typography
+        sx={{ fontSize: "24px", fontWeight: "bold", color: "#1F2A44", mb: 2, fontFamily: "Poppins, sans-serif" }}
+      >
         Delete Product
       </Typography>
-      <Box sx={{ mb: 3, backgroundColor: '#fff' }} width="100%" height="8vh" display="flex" alignItems="center" justifyContent="center" gap={2}>
-        <Image src="/magnifier.svg" alt="Search" width={16} height={16} />
-        <Typography color='rgba(16, 63, 90, 1)' fontWeight="500" sx={{ fontFamily: 'Poppins, sans-serif' }}>
-          Search the Product you want to delete
-        </Typography>
-        <Image src="/Delete.png" alt="Clear" width={16} height={16} />
+
+      {latestNotification && (
+        <Alert severity={latestNotification.type} sx={{ mb: 2 }}>
+          {latestNotification.message}
+        </Alert>
+      )}
+
+      <Box
+        sx={{
+          mb: 3,
+          backgroundColor: "#fff",
+          p: 2,
+          borderRadius: 1,
+          border: "1px solid #e0e0e0",
+        }}
+      >
+        <TextField
+          fullWidth
+          placeholder="Search products to delete..."
+          value={search}
+          onChange={handleSearchChange}
+          size="small"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: "rgba(16, 63, 90, 1)" }} />
+              </InputAdornment>
+            ),
+            endAdornment: search && (
+              <InputAdornment position="end">
+                <ClearIcon sx={{ color: "rgba(16, 63, 90, 1)", cursor: "pointer" }} onClick={handleSearchClear} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              fontFamily: "Poppins, sans-serif",
+            },
+          }}
+        />
       </Box>
-      <TableComponent
-        columns={columns}
-        data={data}
-        totalResults={1}
-        currentPage={page}
-        onPageChange={setPage}
-        actionButtons={
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 4, width: "100%" }}>
-            <Button
-              sx={{
-                fontSize: '14px',
-                color: 'rgba(21, 27, 38, 1)',
-                fontWeight: 600,
-                textTransform: 'none',
-                fontFamily: 'Poppins, sans-serif',
-                width: "15vw"
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => setOpenDialog(true)}
-              sx={{
-                backgroundColor: 'rgba(246, 57, 24, 1)',
-                color: '#FFFFFF',
-                fontSize: '14px',
-                px: 3,
-                py: 1,
-                borderRadius: '16px',
-                textTransform: 'none',
-                width: "15vw",
-                '&:hover': {
-                  backgroundColor: '#E55050',
-                },
-                fontFamily: 'Poppins, sans-serif',
-              }}
-            >
-              Delete
-            </Button>
-          </Box>
-        }
-      />
+
+      {selectedProducts.length > 0 && (
+        <Box sx={{ mb: 2, p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+          <Typography sx={{ fontFamily: "Poppins, sans-serif", color: "#1F2A44" }}>
+            {selectedProducts.length} product{selectedProducts.length > 1 ? "s" : ""} selected for deletion
+          </Typography>
+        </Box>
+      )}
+
+      {isLoading && (
+        <Box sx={{ textAlign: "center", py: 4 }}>
+          <Typography sx={{ fontFamily: "Poppins, sans-serif" }}>Loading products...</Typography>
+        </Box>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to load products. Please try again.
+        </Alert>
+      )}
+
+      {!isLoading && !error && (
+        <>
+          <TableComponent
+            columns={columns}
+            data={productRows}
+            totalResults={productsData?.total || 0}
+            currentPage={page}
+            onPageChange={setPage}
+            showCheckboxes={true}
+            selected={selectedProducts}
+            onSelectionChange={setSelectedProducts}
+            actionButtons={
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 4, width: "100%" }}>
+                <Button
+                  onClick={() => router.back()}
+                  sx={{
+                    fontSize: "14px",
+                    color: "rgba(21, 27, 38, 1)",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    fontFamily: "Poppins, sans-serif",
+                    width: "15vw",
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    setDeleteCount(selectedProducts.length)
+                    setOpenDialog(true)
+                  }}
+                  disabled={selectedProducts.length === 0 || deleteProductMutation.isPending}
+                  sx={{
+                    backgroundColor: selectedProducts.length === 0 ? "#ccc" : "rgba(246, 57, 24, 1)",
+                    color: "#FFFFFF",
+                    fontSize: "14px",
+                    px: 3,
+                    py: 1,
+                    borderRadius: "16px",
+                    textTransform: "none",
+                    width: "15vw",
+                    "&:hover": {
+                      backgroundColor: selectedProducts.length === 0 ? "#ccc" : "#E55050",
+                    },
+                    "&:disabled": {
+                      backgroundColor: "#ccc",
+                      color: "#666",
+                    },
+                    fontFamily: "Poppins, sans-serif",
+                  }}
+                >
+                  {deleteProductMutation.isPending ? "Deleting..." : `Delete${selectedProducts.length > 0 ? ` (${selectedProducts.length})` : ""}`}
+                </Button>
+              </Box>
+            }
+          />
+        </>
+      )}
 
       <ConfirmationDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Items"
-        content="Are you sure you want to delete selected items?"
-      />
-
-      <SuccessDialog
-        open={openSuccessDialog}
-        onClose={() => setOpenSuccessDialog(false)}
-        title="Deleted Successfully"
+        title="Delete Products"
+        content={`Are you sure you want to delete ${deleteCount} selected product${
+          deleteCount > 1 ? "s" : ""
+        }? This action cannot be undone.`}
       />
     </Box>
-  );
+  )
 }

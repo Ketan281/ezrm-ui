@@ -12,3 +12,14 @@ export {
   useUpdateProfile,
   useChangePassword,
 } from "./userHandler"
+
+export {
+  useProducts,
+  useSearchProducts,
+  useProductsByCategory,
+  useProductsByStockStatus,
+  useProductsByPriceRange,
+  useAddProduct,
+  useUpdateProduct,
+  useDeleteProduct,
+} from "./productHandler"
