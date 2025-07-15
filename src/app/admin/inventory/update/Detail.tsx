@@ -32,7 +32,7 @@ import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useUpdateProduct } from "@/api/handlers"
 import { useUIStore } from "@/store/uiStore"
-import type { UpdateProductRequest } from "@/api/services"
+import type { CreateProductRequest } from "@/api/services"
 
 // Create a custom styled Switch component
 const CustomSwitch = styled(Switch)(() => ({
@@ -136,9 +136,16 @@ export default function UpdateProductDetail({ product }: DetailProps) {
     inStock: searchParams.get("inStock") || "true",
   }
 
+  console.log("=== COMPONENT INITIALIZATION ===")
+  console.log("Product data from URL/props:", productData)
+
   // Hooks
   const { notifications, addNotification } = useUIStore()
   const updateProductMutation = useUpdateProduct()
+
+  console.log("=== MUTATION STATUS ===")
+  console.log("Mutation object:", updateProductMutation)
+  console.log("Is pending:", updateProductMutation.isPending)
 
   // State management
   const [includeTax, setIncludeTax] = useState(true)
@@ -165,79 +172,160 @@ export default function UpdateProductDetail({ product }: DetailProps) {
     category: productData.category || "",
   })
 
+  console.log("=== INITIAL FORM DATA ===")
+  console.log("Form data:", formData)
+  console.log("Selected categories:", selectedCategories)
+  console.log("In stock:", inStock)
+
   // Initialize form with existing product data
   useEffect(() => {
-    if (productData.category) {
+    console.log("=== USEEFFECT RUNNING ===")
+    console.log("Product category:", productData.category)
+
+    if (productData.category && !selectedCategories.includes(productData.category)) {
+      console.log("Setting initial category:", productData.category)
       setSelectedCategories([productData.category])
+    }
+
+    // Also ensure the category exists in the categories list
+    if (productData.category && !categories.includes(productData.category)) {
+      console.log("Adding category to list:", productData.category)
+      setCategories((prev) => [...prev, productData.category])
     }
   }, [productData.category])
 
-  // Form validation
+  // Form validation with detailed logging
   const validateForm = (): boolean => {
+    console.log("=== FORM VALIDATION START ===")
     const errors: Record<string, string> = {}
 
+    console.log("Validating name:", `"${formData.name}"`, "Trimmed:", `"${formData.name.trim()}"`)
     if (!formData.name.trim()) {
       errors.name = "Product name is required"
+      console.log("❌ Name validation FAILED")
+    } else {
+      console.log("✅ Name validation PASSED")
     }
+
+    console.log("Validating description:", `"${formData.description}"`, "Trimmed:", `"${formData.description.trim()}"`)
     if (!formData.description.trim()) {
       errors.description = "Product description is required"
+      console.log("❌ Description validation FAILED")
+    } else {
+      console.log("✅ Description validation PASSED")
     }
+
+    console.log(
+      "Validating price:",
+      `"${formData.price}"`,
+      "Number:",
+      Number(formData.price),
+      "IsNaN:",
+      isNaN(Number(formData.price)),
+    )
     if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
       errors.price = "Valid price is required"
+      console.log("❌ Price validation FAILED")
+    } else {
+      console.log("✅ Price validation PASSED")
     }
+
+    console.log("Validating categories:", selectedCategories, "Length:", selectedCategories.length)
     if (selectedCategories.length === 0) {
       errors.categories = "Please select at least one category"
+      console.log("❌ Categories validation FAILED")
+    } else {
+      console.log("✅ Categories validation PASSED")
     }
+
+    console.log("=== VALIDATION SUMMARY ===")
+    console.log("Errors found:", errors)
+    console.log("Validation result:", Object.keys(errors).length === 0 ? "PASSED" : "FAILED")
 
     setFormErrors(errors)
     return Object.keys(errors).length === 0
   }
 
-  // Form submission handler
-const handleUpdate = async () => {
-  if (!validateForm()) {
-    return;
+  // Form submission handler with extensive logging
+  const handleUpdate = async () => {
+    console.log("🚀 =========================")
+    console.log("🚀 UPDATE BUTTON CLICKED!")
+    console.log("🚀 =========================")
+
+    try {
+      console.log("📋 Current form state:")
+      console.log("  - Form data:", formData)
+      console.log("  - Selected categories:", selectedCategories)
+      console.log("  - In stock:", inStock)
+      console.log("  - Product ID:", productData.id)
+
+      console.log("🔍 Starting form validation...")
+      const isValid = validateForm()
+
+      if (!isValid) {
+        console.log("❌ VALIDATION FAILED - Stopping execution")
+        console.log("❌ Form errors:", formErrors)
+        return
+      }
+      console.log("✅ VALIDATION PASSED")
+
+      console.log("🔍 Checking product ID...")
+      if (!productData.id) {
+        console.log("❌ PRODUCT ID MISSING")
+        addNotification({
+          type: "error",
+          message: "Product ID is missing. Cannot update product.",
+        })
+        return
+      }
+      console.log("✅ PRODUCT ID FOUND:", productData.id)
+
+      // Prepare API payload
+      const updatePayload: Partial<CreateProductRequest> = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        price: Number(formData.price),
+        category: selectedCategories[0],
+        inStock: inStock,
+      }
+
+      console.log("📤 PREPARED API PAYLOAD:")
+      console.log(JSON.stringify(updatePayload, null, 2))
+
+      console.log("🔍 Checking mutation function...")
+      console.log("Mutation function exists:", typeof updateProductMutation.mutateAsync === "function")
+      console.log("Mutation status:", {
+        isPending: updateProductMutation.isPending,
+        isError: updateProductMutation.isError,
+        isSuccess: updateProductMutation.isSuccess,
+      })
+
+      console.log("🚀 CALLING API MUTATION...")
+
+      const result = await updateProductMutation.mutateAsync({
+        productId: productData.id,
+        data: updatePayload,
+      })
+
+      console.log("✅ API CALL SUCCESSFUL!")
+      console.log("✅ Result:", result)
+
+      // Navigate back after successful update
+      setTimeout(() => {
+        console.log("🔄 Navigating back...")
+        router.back()
+      }, 1500)
+    } catch (error) {
+      console.log("❌ ERROR IN HANDLE UPDATE:")
+      console.error(error)
+
+      // Additional error details
+      if (error instanceof Error) {
+        console.log("Error message:", error.message)
+        console.log("Error stack:", error.stack)
+      }
+    }
   }
-
-  if (!productData.id) {
-    addNotification({
-      type: "error",
-      message: "Product ID is missing. Cannot update product.",
-    });
-    return;
-  }
-
-  const updatePayload: Partial<UpdateProductRequest> = {
-    name: formData.name.trim(),
-    description: formData.description.trim(),
-    price: Number(formData.price),
-    category: selectedCategories[0],
-    inStock: inStock,
-  };
-
-  console.log("Update Payload:", updatePayload); // Debug log
-  console.log("Product ID:", productData.id); // Debug log
-
-  try {
-    const result = await updateProductMutation.mutateAsync({
-      productId: productData.id,
-      data: updatePayload,
-    });
-    
-    console.log("Update Result:", result); // Debug log
-
-    setTimeout(() => {
-      router.back();
-    }, 1500);
-  } catch (error) {
-    console.error("Update failed:", error);
-    // Add more detailed error handling
-    addNotification({
-      type: "error",
-      message: error instanceof Error ? error.message : "Failed to update product",
-    });
-  }
-}
 
   // File upload handlers
   const handleFileUpload = () => {
@@ -277,9 +365,13 @@ const handleUpdate = async () => {
 
   // Category handlers
   const handleCategoryChange = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-    )
+    console.log("Category changed:", category)
+    setSelectedCategories((prev) => {
+      const newSelection = prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+      console.log("New category selection:", newSelection)
+      return newSelection
+    })
+
     // Clear category error when user selects a category
     if (formErrors.categories) {
       setFormErrors((prev) => ({ ...prev, categories: "" }))
@@ -317,6 +409,31 @@ const handleUpdate = async () => {
           </Alert>
         )}
 
+        {/* Debug Section */}
+        <Box sx={{ mb: 2, p: 2, bgcolor: "#fff3cd", border: "1px solid #ffeaa7", borderRadius: 1 }}>
+          <Typography variant="h6" sx={{ fontSize: "14px", fontWeight: "bold", mb: 1 }}>
+            🐛 DEBUG INFO
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
+            <strong>Product ID:</strong> {productData.id || "❌ MISSING"}
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
+            <strong>Form Valid:</strong> {validateForm() ? "✅ YES" : "❌ NO"}
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
+            <strong>Selected Categories:</strong> [{selectedCategories.join(", ")}] (Count: {selectedCategories.length})
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
+            <strong>Mutation Ready:</strong> {updateProductMutation ? "✅ YES" : "❌ NO"}
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
+            <strong>Mutation Pending:</strong> {updateProductMutation.isPending ? "⏳ YES" : "✅ NO"}
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block" }}>
+            <strong>Form Errors:</strong> {Object.keys(formErrors).length > 0 ? JSON.stringify(formErrors) : "None"}
+          </Typography>
+        </Box>
+
         <Box sx={{ display: "flex", p: 2, minHeight: "100vh", alignItems: "flex-start", gap: 3, mt: -2 }}>
           {/* Left Section */}
           <Box sx={{ flex: 1, pr: 2, bgcolor: "#fff", m: 2, p: 6, pt: 2, pb: 2 }}>
@@ -336,6 +453,7 @@ const handleUpdate = async () => {
                   sx={{ mb: 2 }}
                   value={formData.name}
                   onChange={(e) => {
+                    console.log("Name changed to:", e.target.value)
                     setFormData({ ...formData, name: e.target.value })
                     if (formErrors.name) {
                       setFormErrors((prev) => ({ ...prev, name: "" }))
@@ -357,6 +475,7 @@ const handleUpdate = async () => {
                   sx={{ mb: 1 }}
                   value={formData.description}
                   onChange={(e) => {
+                    console.log("Description changed to:", e.target.value)
                     setFormData({ ...formData, description: e.target.value })
                     if (formErrors.description) {
                       setFormErrors((prev) => ({ ...prev, description: "" }))
@@ -442,6 +561,7 @@ const handleUpdate = async () => {
                       placeholder="0.00"
                       value={formData.price}
                       onChange={(e) => {
+                        console.log("Price changed to:", e.target.value)
                         setFormData({ ...formData, price: e.target.value })
                         if (formErrors.price) {
                           setFormErrors((prev) => ({ ...prev, price: "" }))
@@ -480,7 +600,15 @@ const handleUpdate = async () => {
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
                 <FormControlLabel
-                  control={<CustomSwitch checked={inStock} onChange={(e) => setInStock(e.target.checked)} />}
+                  control={
+                    <CustomSwitch
+                      checked={inStock}
+                      onChange={(e) => {
+                        console.log("Stock status changed to:", e.target.checked)
+                        setInStock(e.target.checked)
+                      }}
+                    />
+                  }
                   label="Product is in stock"
                   sx={{
                     "& .MuiFormControlLabel-label": { fontSize: 14 },
@@ -617,6 +745,19 @@ const handleUpdate = async () => {
               >
                 Cancel
               </Button>
+
+              {/* Test Button */}
+              <Button
+                variant="outlined"
+                sx={{ mr: 2 }}
+                onClick={() => {
+                  console.log("🧪 TEST BUTTON CLICKED - Manual trigger")
+                  handleUpdate()
+                }}
+              >
+                🧪 Test Update
+              </Button>
+
               <Button
                 variant="contained"
                 sx={{
@@ -626,7 +767,10 @@ const handleUpdate = async () => {
                   px: 4,
                   position: "relative",
                 }}
-                onClick={handleUpdate}
+                onClick={(e) => {
+                  console.log("🔘 UPDATE BUTTON CLICKED - Event:", e)
+                  handleUpdate()
+                }}
                 disabled={updateProductMutation.isPending}
               >
                 {updateProductMutation.isPending && (

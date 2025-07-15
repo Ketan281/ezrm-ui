@@ -10,8 +10,14 @@ import { useUIStore } from "@/store/uiStore"
 import SearchIcon from "@mui/icons-material/Search"
 import ClearIcon from "@mui/icons-material/Clear"
 
-interface ProductRow {
+// Define the base TableRowData interface that matches what TableComponent expects
+interface TableRowData {
   id: string
+  [key: string]: string | number | boolean | null | undefined | React.ReactNode
+}
+
+// ProductRow extends TableRowData and includes the index signature
+interface ProductRow extends TableRowData {
   product: string
   inventory: string
   loreal: string
@@ -52,7 +58,7 @@ export default function DeleteProductPage() {
           product: product.name,
           inventory: `${Math.floor(Math.random() * 100)} in stock`,
           loreal: product.category,
-          price: `${product.price.toFixed(2)}`,
+          price: `$${product.price.toFixed(2)}`,
           rating: product.inStock ? "In Stock" : "Out of Stock",
         }
       })
@@ -230,7 +236,9 @@ export default function DeleteProductPage() {
                     fontFamily: "Poppins, sans-serif",
                   }}
                 >
-                  {deleteProductMutation.isPending ? "Deleting..." : `Delete${selectedProducts.length > 0 ? ` (${selectedProducts.length})` : ""}`}
+                  {deleteProductMutation.isPending
+                    ? "Deleting..."
+                    : `Delete${selectedProducts.length > 0 ? ` (${selectedProducts.length})` : ""}`}
                 </Button>
               </Box>
             }

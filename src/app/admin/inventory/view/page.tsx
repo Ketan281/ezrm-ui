@@ -228,7 +228,7 @@ export default function ViewProductPage() {
         <>
           <Grid container spacing={3}>
             {data.products.map((product) => (
-              <Grid item xs={12} sm={6} md={3} lg={3} key={product.id || product._id}>
+              <Grid item xs={12} sm={6} md={3} lg={3} key={product.id || product._id} >
                 <Paper
                   elevation={1}
                   onClick={() => handleProductClick(product.id || product._id)}
