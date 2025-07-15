@@ -178,21 +178,45 @@ export default function UpdateProductDetail({ product }: DetailProps) {
   console.log("In stock:", inStock)
 
   // Initialize form with existing product data
-  useEffect(() => {
-    console.log("=== USEEFFECT RUNNING ===")
-    console.log("Product category:", productData.category)
+useEffect(() => {
+  console.log("=== USEEFFECT RUNNING ===")
+  console.log("Product category:", productData.category)
 
-    if (productData.category && !selectedCategories.includes(productData.category)) {
-      console.log("Setting initial category:", productData.category)
-      setSelectedCategories([productData.category])
-    }
+  // Set form data if not already set
+  if (productData.name && !formData.name) {
+    setFormData(prev => ({
+      ...prev,
+      name: productData.name,
+      description: productData.description || "",
+      price: productData.price?.replace("$", "") || "",
+      category: productData.category || "",
+    }))
+  }
 
-    // Also ensure the category exists in the categories list
-    if (productData.category && !categories.includes(productData.category)) {
-      console.log("Adding category to list:", productData.category)
-      setCategories((prev) => [...prev, productData.category])
-    }
-  }, [productData.category])
+  // Set initial category selection
+  if (productData.category) {
+    // Add category to categories list if it doesn't exist
+    setCategories(prev => {
+      if (!prev.includes(productData.category)) {
+        console.log("Adding category to list:", productData.category)
+        return [...prev, productData.category]
+      }
+      return prev
+    })
+
+    // Set selected categories if not already set
+    setSelectedCategories(prev => {
+      if (!prev.includes(productData.category)) {
+        console.log("Setting initial category:", productData.category)
+        return [productData.category]
+      }
+      return prev
+    })
+  }
+
+  // Set stock status
+  setInStock(productData.inStock === "true")
+}, [productData]) 
 
   // Form validation with detailed logging
   const validateForm = (): boolean => {
@@ -409,31 +433,7 @@ export default function UpdateProductDetail({ product }: DetailProps) {
           </Alert>
         )}
 
-        {/* Debug Section */}
-        <Box sx={{ mb: 2, p: 2, bgcolor: "#fff3cd", border: "1px solid #ffeaa7", borderRadius: 1 }}>
-          <Typography variant="h6" sx={{ fontSize: "14px", fontWeight: "bold", mb: 1 }}>
-            🐛 DEBUG INFO
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
-            <strong>Product ID:</strong> {productData.id || "❌ MISSING"}
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
-            <strong>Form Valid:</strong> {validateForm() ? "✅ YES" : "❌ NO"}
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
-            <strong>Selected Categories:</strong> [{selectedCategories.join(", ")}] (Count: {selectedCategories.length})
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
-            <strong>Mutation Ready:</strong> {updateProductMutation ? "✅ YES" : "❌ NO"}
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block", mb: 1 }}>
-            <strong>Mutation Pending:</strong> {updateProductMutation.isPending ? "⏳ YES" : "✅ NO"}
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block" }}>
-            <strong>Form Errors:</strong> {Object.keys(formErrors).length > 0 ? JSON.stringify(formErrors) : "None"}
-          </Typography>
-        </Box>
-
+        
         <Box sx={{ display: "flex", p: 2, minHeight: "100vh", alignItems: "flex-start", gap: 3, mt: -2 }}>
           {/* Left Section */}
           <Box sx={{ flex: 1, pr: 2, bgcolor: "#fff", m: 2, p: 6, pt: 2, pb: 2 }}>
@@ -744,18 +744,6 @@ export default function UpdateProductDetail({ product }: DetailProps) {
                 onClick={() => router.back()}
               >
                 Cancel
-              </Button>
-
-              {/* Test Button */}
-              <Button
-                variant="outlined"
-                sx={{ mr: 2 }}
-                onClick={() => {
-                  console.log("🧪 TEST BUTTON CLICKED - Manual trigger")
-                  handleUpdate()
-                }}
-              >
-                🧪 Test Update
               </Button>
 
               <Button
