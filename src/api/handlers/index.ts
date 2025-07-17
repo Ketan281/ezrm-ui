@@ -23,3 +23,8 @@ export {
   useUpdateProduct,
   useDeleteProduct,
 } from "./productHandler"
+
+export {
+  useRFQs,
+  useRFQById,
+} from "./rfqHandler"

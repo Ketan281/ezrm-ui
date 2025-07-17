@@ -292,7 +292,7 @@ export default function Detail({ product }: DetailProps) {
       <Box>
         <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.back()}>
-            <Image src="/placeholder.svg?height=13&width=13" alt="Back" width={13} height={13} />
+            <Image src="/back.png?height=13&width=13" alt="Back" width={13} height={13} />
             <Typography sx={{ ml: 1, color: "#737791", fontSize: "14px" }}>Back</Typography>
           </Box>
         </Box>

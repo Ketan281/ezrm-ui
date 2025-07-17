@@ -29,4 +29,9 @@ PRODUCTS: {
   DELETE: `${BASE_URL}/private/products/:id`,
   UPDATE: `${BASE_URL}/private/products`, // Remove :id from here
 },
+  // RFQ endpoints
+  RFQ: {
+    GET: `${BASE_URL}/private/rfq`,
+    GET_BY_ID: `${BASE_URL}/private/rfq/:id`,
+  },
 } as const;

@@ -1,6 +1,7 @@
 export { authService } from "./authService"
 export { userService } from "./userService"
 export { productsService } from "./products"
+export { rfqService } from "./rfq"
 export type { LoginCredentials, RegisterData, User, AuthResponse } from "./authService"
 export type { UpdateProfileData, ChangePasswordData } from "./userService"
 export type {
@@ -8,6 +9,11 @@ export type {
   Product,
   GetProductsParams,
   ProductsResponse,
-  ApiResponse,
-  UpdateProductRequest
+  ApiResponse as ProductApiResponse,
 } from "./products"
+export type {
+  RFQItem,
+  GetRFQParams,
+  RFQResponse,
+  ApiResponse as RFQApiResponse,
+} from "./rfq"
