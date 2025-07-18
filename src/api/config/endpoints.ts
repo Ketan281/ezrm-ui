@@ -1,9 +1,7 @@
-// Use environment variable with fallback to your specific URL
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5007/api/v1';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007/api/v1"
 
 export const ENDPOINTS = {
   BASE_URL,
-
   // Auth endpoints
   AUTH: {
     LOGIN: `${BASE_URL}/auth/login`,
@@ -15,23 +13,27 @@ export const ENDPOINTS = {
     RESET_PASSWORD: `${BASE_URL}/auth/reset-password`,
     VERIFY_EMAIL: `${BASE_URL}/auth/verify-email`,
   },
-
   // User endpoints
   USER: {
     PROFILE: `${BASE_URL}/user/profile`,
     CHANGE_PASSWORD: `${BASE_URL}/user/change-password`,
   },
-
   // Products endpoints
-PRODUCTS: {
-  GET: `${BASE_URL}/private/products`,
-  ADD: `${BASE_URL}/private/products`,
-  DELETE: `${BASE_URL}/private/products/:id`,
-  UPDATE: `${BASE_URL}/private/products`, // Remove :id from here
-},
+  PRODUCTS: {
+    GET: `${BASE_URL}/private/products`,
+    ADD: `${BASE_URL}/private/products`,
+    UPDATE: `${BASE_URL}/products/:id`,
+    DELETE: `${BASE_URL}/private/products/:id`,
+    PRIVATE: `${BASE_URL}/private/products`,
+  },
   // RFQ endpoints
   RFQ: {
     GET: `${BASE_URL}/private/rfq`,
     GET_BY_ID: `${BASE_URL}/private/rfq/:id`,
   },
-} as const;
+  // Orders endpoints
+  ORDERS: {
+    GET: `${BASE_URL}/private/orders`,
+    GET_BY_ID: `${BASE_URL}/private/orders/:id`,
+  },
+} as const

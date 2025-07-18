@@ -28,3 +28,8 @@ export {
   useRFQs,
   useRFQById,
 } from "./rfqHandler"
+
+export {
+  useOrders,
+  useOrderById,
+} from "./ordersHandler"
