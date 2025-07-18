@@ -7,6 +7,7 @@ export interface RFQItem {
   customerName: string
   customerEmail: string
   customerPhone: string
+  productId: string
   productName: string
   quantity: number
   description: string
@@ -54,11 +55,13 @@ export interface ApiResponse {
   }
 }
 
-// Single RFQ response structure
+// Single RFQ response structure - Updated to match your actual response
 export interface SingleRFQResponse {
   success: boolean
   message: string
-  data: RFQItem
+  data: {
+    rfq: RFQItem
+  }
 }
 
 export const rfqService = {
@@ -106,7 +109,7 @@ export const rfqService = {
     }
   },
 
-  // Get single RFQ by ID
+  // Get single RFQ by ID - Updated to handle data.rfq structure
   getRFQById: async (id: string): Promise<RFQItem> => {
     try {
       const response = await api.get(`${ENDPOINTS.RFQ.GET_BY_ID.replace(":id", id)}`)
@@ -114,9 +117,9 @@ export const rfqService = {
 
       const apiResponse = response.data as SingleRFQResponse
 
-      // Return the RFQ data from the response
-      if (apiResponse.success && apiResponse.data) {
-        return apiResponse.data
+      // Return the RFQ data from the nested structure
+      if (apiResponse.success && apiResponse.data?.rfq) {
+        return apiResponse.data.rfq
       }
 
       throw new Error(apiResponse.message || "Failed to fetch RFQ")
