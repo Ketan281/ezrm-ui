@@ -33,3 +33,10 @@ export {
   useOrders,
   useOrderById,
 } from "./ordersHandler"
+
+export {
+  useCustomerReviews,
+  useCustomerReviewById,
+  useUpdateReviewStatus,
+  useDeleteReview,
+} from "./customerReviewsHandler"

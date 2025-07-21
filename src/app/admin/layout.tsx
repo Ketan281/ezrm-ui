@@ -133,7 +133,7 @@ const sidebarItems: SidebarItem[] = [
       { text: 'Document Tracking', path: '/admin/logistics/document-tracking' },
     ],
   },
-  { text: 'Sales Report', icon: '/sales-report.png', path: '/admin/sales' },
+  // { text: 'Sales Report', icon: '/sales-report.png', path: '/admin/sales' },
   { text: 'Messages', icon: '/customers.png', path: '/admin/messages' },
   { text: 'Settings', icon: '/settings.png', path: '/admin/settings' },
   { text: 'Sign Out', icon: '/sign-out.png', isLogout: true }, // Mark as logout item

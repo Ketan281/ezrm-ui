@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import ClientProvider from './ClientProvider';
 import './globals.css';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer} from 'react-toastify';
 
 export const metadata: Metadata = {
   title: 'EZRM - Home',

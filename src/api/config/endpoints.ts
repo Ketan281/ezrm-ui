@@ -1,5 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007/api/v1"
-
+// const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007/api/v1"
+ const BASE_URL = "http://localhost:5007/api/v1"
 export const ENDPOINTS = {
   BASE_URL,
   // Auth endpoints
@@ -35,5 +35,12 @@ export const ENDPOINTS = {
   ORDERS: {
     GET: `${BASE_URL}/private/orders`,
     GET_BY_ID: `${BASE_URL}/private/orders/:id`,
+  },
+  // Customer Reviews endpoints
+  CUSTOMER_REVIEWS: {
+    GET: `${BASE_URL}/private/customer-reviews`,
+    GET_BY_ID: `${BASE_URL}/private/customer-reviews/:id`,
+    UPDATE: `${BASE_URL}/private/customer-reviews/:id`,
+    DELETE: `${BASE_URL}/private/customer-reviews/:id`,
   },
 } as const

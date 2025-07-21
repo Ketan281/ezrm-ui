@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 import { ENDPOINTS } from './endpoints';
 
@@ -15,7 +16,7 @@ api.interceptors.request.use(
   (config) => {
     // Add auth token if available
     const token = localStorage.getItem('auth-token');
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -48,7 +49,9 @@ api.interceptors.response.use(
           localStorage.setItem('auth-token', token);
 
           // Retry original request
-          originalRequest.headers.Authorization = `Bearer ${token}`;
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+          }
           return api(originalRequest);
         }
       } catch (refreshError) {
