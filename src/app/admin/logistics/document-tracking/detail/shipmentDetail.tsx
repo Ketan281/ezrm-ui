@@ -296,7 +296,7 @@ const ShipmentDetail = () => {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" sx={{ color: "#666", mb: 0.5, fontWeight: 500 }}>
                     Shipment Reference
