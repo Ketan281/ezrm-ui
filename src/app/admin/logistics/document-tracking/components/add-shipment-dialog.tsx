@@ -139,7 +139,7 @@ const FormField = ({
 )
 
 const ToggleSection = ({
-  title,
+  // title,
   value,
   onChange,
   options,
@@ -345,8 +345,8 @@ const FileUploadArea = () => {
 export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogProps) {
   const [importExport, setImportExport] = useState<ImportExportType | "">("")
   const [transportMode, setTransportMode] = useState<TransportModeType | "">("")
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  // const fileInputRef = useRef<HTMLInputElement>(null)
+  // const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const { formData, updateFormField, resetForm } = useFormData()
 
   const isFormValid = () => {
@@ -367,21 +367,21 @@ export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogPr
     }
   }
 
-  const handleFileUpload = () => {
-    fileInputRef.current?.click()
-  }
+  // const handleFileUpload = () => {
+  //   fileInputRef.current?.click()
+  // }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (files) {
-      const newFiles = Array.from(files)
-      setUploadedFiles((prev) => [...prev, ...newFiles])
-    }
-  }
+  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = event.target.files
+  //   if (files) {
+  //     const newFiles = Array.from(files)
+  //     setUploadedFiles((prev) => [...prev, ...newFiles])
+  //   }
+  // }
 
-  const handleRemoveFile = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+  // const handleRemoveFile = (index: number) => {
+  //   setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+  // }
 
   const handleImportExportChange = useCallback((event: React.MouseEvent<HTMLElement>, newValue: string | null) => {
     if (newValue !== null) {
@@ -398,7 +398,7 @@ export default function AddShipmentDialog({ open, onClose }: AddShipmentDialogPr
   const handleClose = useCallback(() => {
     setImportExport("")
     setTransportMode("")
-    setUploadedFiles([]) // Add this line
+    // setUploadedFiles([]) // Add this line
     resetForm()
     onClose()
   }, [resetForm, onClose])

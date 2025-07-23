@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useCallback } from "react"
 import { Container, Box, Button } from "@mui/material"
 import type { SelectChangeEvent } from "@mui/material/Select"
@@ -10,6 +9,7 @@ import AddShipmentDialog from "./components/add-shipment-dialog"
 const ShipmentComp = () => {
   const [filterValue, setFilterValue] = useState("")
   const [dateSort, setDateSort] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
 
@@ -21,9 +21,14 @@ const ShipmentComp = () => {
     setDateSort(event.target.value)
   }, [])
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value)
+  }, [])
+
   const handleReset = () => {
     setFilterValue("")
     setDateSort("")
+    setSearchTerm("")
   }
 
   const handleModalOpen = () => {
@@ -44,16 +49,16 @@ const ShipmentComp = () => {
   return (
     <>
       <Container maxWidth={false} sx={{ px: 3, py: 2 }}>
-         
         <ShipmentHeader
           filterValue={filterValue}
           dateSort={dateSort}
+          searchTerm={searchTerm}
           onFilterChange={handleFilterChange}
           onDateSortChange={handleDateSortChange}
+          onSearchChange={handleSearchChange}
           onReset={handleReset}
           onAddShipment={handleModalOpen}
         />
-
         {showNotification && (
           <Box
             sx={{
@@ -79,9 +84,8 @@ const ShipmentComp = () => {
                 fontFamily: "Poppins, sans-serif",
                 minWidth: "140px",
                 maxWidth: "400px",
-                mt:3,
-                mb:1,
-                // ml:30,
+                mt: 3,
+                mb: 1,
                 "&:hover": {
                   backgroundColor: "rgba(6, 165, 97, 0.9)",
                   boxShadow: "none",
@@ -92,11 +96,9 @@ const ShipmentComp = () => {
             </Button>
           </Box>
         )}
-
-        <ShipmentTable />
+        <ShipmentTable filterValue={filterValue} dateSort={dateSort} searchTerm={searchTerm} />
       </Container>
-
-      <AddShipmentDialog open={isModalOpen} onClose={(success) => handleModalClose(success)} />
+      <AddShipmentDialog open={isModalOpen} onClose={(success: boolean | undefined) => handleModalClose(success)} />
     </>
   )
 }

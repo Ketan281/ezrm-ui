@@ -4,6 +4,7 @@ export { productsService } from "./products"
 export { rfqService } from "./rfq"
 export { ordersService } from "./orders"
 export { customerReviewsService } from "./customerReviews"
+export { shipmentsService } from "./shipments"
 export type { LoginCredentials, RegisterData, User, AuthResponse } from "./authService"
 export type { UpdateProfileData, ChangePasswordData } from "./userService"
 export type {
@@ -34,3 +35,10 @@ export type {
   UpdateReviewRequest,
   ApiResponse as CustomerReviewApiResponse,
 } from "./customerReviews"
+export type {
+  Shipment,
+  TrackingEvent,
+  GetShipmentsParams,
+  ShipmentsResponse,
+  ApiResponse as ShipmentApiResponse,
+} from "./shipments"

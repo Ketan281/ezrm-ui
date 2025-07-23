@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api, ENDPOINTS } from "../config"
 
@@ -24,7 +25,7 @@ export interface CustomerReview {
   title: string
   review: string
   images: string[]
-  status: "approved" | "pending"
+  status: "approved" | "pending" | "published"
   isVerifiedPurchase: boolean
   helpfulVotes: number
   reportCount: number
@@ -69,18 +70,33 @@ export interface ApiResponse {
   }
 }
 
-// Single review response structure
+// Single review response structure - Updated to match actual API
 export interface SingleReviewResponse {
   success: boolean
   message: string
   data: {
-    review: CustomerReview
+    _id: string
+    customer: string // Just ID in update response
+    product: string // Just ID in update response
+    order: string
+    rating: number
+    title: string
+    review: string
+    images: string[]
+    status: "approved" | "pending" | "published"
+    isVerifiedPurchase: boolean
+    helpfulVotes: number
+    reportCount: number
+    createdAt: string
+    updatedAt: string
+    uniqueId: string
+    __v: number
   }
 }
 
 // Update review request to match API expectations
 export interface UpdateReviewRequest {
-  status: "approved" | "pending"
+  status: "approved" | "pending" | "published"
 }
 
 export const customerReviewsService = {
@@ -151,39 +167,39 @@ export const customerReviewsService = {
   },
 
   // Get single review by ID
-  getReviewById: async (id: string): Promise<CustomerReview> => {
-    try {
-      const response = await api.get(`${ENDPOINTS.CUSTOMER_REVIEWS.GET_BY_ID.replace(":id", id)}`)
-      console.log("Single Review API Response:", response.data)
+  // getReviewById: async (id: string): Promise<CustomerReview> => {
+  //   try {
+  //     const response = await api.get(`${ENDPOINTS.CUSTOMER_REVIEWS.GET_BY_ID.replace(":id", id)}`)
+  //     console.log("Single Review API Response:", response.data)
 
-      const apiResponse = response.data as SingleReviewResponse
+  //     const apiResponse = response.data as SingleReviewResponse
 
-      if (apiResponse.success && apiResponse.data?.review) {
-        const review = apiResponse.data.review
-        const createdDate = new Date(review.createdAt)
+  //     if (apiResponse.success && apiResponse.data) {
+  //       const review = apiResponse.data
+  //       const createdDate = new Date(review.createdAt)
 
-        return {
-          ...review,
-          id: review.id || review._id,
-          date: createdDate.toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          }),
-          time: createdDate.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          }),
-        }
-      }
+  //       return {
+  //         ...review,
+  //         id: review._id || review._id,
+  //         date: createdDate.toLocaleDateString("en-GB", {
+  //           day: "numeric",
+  //           month: "long",
+  //           year: "numeric",
+  //         }),
+  //         time: createdDate.toLocaleTimeString("en-US", {
+  //           hour: "2-digit",
+  //           minute: "2-digit",
+  //           hour12: true,
+  //         }),
+  //       }
+  //     }
 
-      throw new Error(apiResponse.message || "Failed to fetch review")
-    } catch (error) {
-      console.error("Error fetching single review:", error)
-      throw error
-    }
-  },
+  //     throw new Error(apiResponse.message || "Failed to fetch review")
+  //   } catch (error) {
+  //     console.error("Error fetching single review:", error)
+  //     throw error
+  //   }
+  // },
 
   // Update other methods similarly...
   updateReviewStatus: async ({
@@ -194,13 +210,37 @@ export const customerReviewsService = {
       const response = await api.put(`${ENDPOINTS.CUSTOMER_REVIEWS.UPDATE.replace(":id", reviewId)}`, data)
       console.log("Update Review API Response:", response.data)
 
-      const review = response.data.data?.review || response.data
-      return {
-        ...review,
-        id: review._id,
-        customerName: review.customer?.name || "Unknown Customer",
-        productName: review.product?.name || "Unknown Product",
+      // Handle the actual API response structure
+      if (response.data.success && response.data.data) {
+        const reviewData = response.data.data
+
+        // Since the update response doesn't include populated customer/product data,
+        // we'll create a minimal review object with the updated status
+        return {
+          ...reviewData,
+          id: reviewData._id,
+          _id: reviewData._id,
+          customer: reviewData.customer, // This will be just the ID
+          product: reviewData.product, // This will be just the ID
+          customerName: "Updated Customer", // Placeholder since we don't have populated data
+          productName: "Updated Product", // Placeholder since we don't have populated data
+          status: reviewData.status,
+          rating: reviewData.rating,
+          title: reviewData.title,
+          review: reviewData.review,
+          images: reviewData.images || [],
+          isVerifiedPurchase: reviewData.isVerifiedPurchase,
+          helpfulVotes: reviewData.helpfulVotes,
+          reportCount: reviewData.reportCount,
+          createdAt: reviewData.createdAt,
+          updatedAt: reviewData.updatedAt,
+          uniqueId: reviewData.uniqueId,
+          __v: reviewData.__v,
+          order: reviewData.order,
+        }
       }
+
+      throw new Error(response.data.message || "Failed to update review")
     } catch (error) {
       console.error("Error updating review:", error)
       throw error
@@ -210,7 +250,6 @@ export const customerReviewsService = {
   // Delete review permanently
   deleteReview: async (reviewId: string): Promise<{ message: string }> => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await api.delete(`${ENDPOINTS.CUSTOMER_REVIEWS.DELETE.replace(":id", reviewId)}`)
       return { message: "Review deleted successfully" }
     } catch (error) {

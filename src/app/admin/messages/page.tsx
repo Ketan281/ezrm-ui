@@ -32,37 +32,8 @@ import { useRouter } from "next/navigation"
 import { useCustomerReviews, useUpdateReviewStatus, useDeleteReview } from "@/api/handlers"
 import { useUIStore } from "@/store/uiStore"
 
-// Define proper types
-interface Review {
-  id: string
-  customerName: string
-  customerAvatar?: string
-  productName: string
-  rating: number
-  review: string
-  date?: string
-  time?: string
-  status: "pending" | "published" | "deleted" | "approved"
-  title?: string
-  isVerifiedPurchase?: boolean
-  helpfulVotes?: number
-}
-
-interface ReviewsResponse {
-  reviews: Review[]
-  totalPages: number
-  currentPage: number
-  totalCount: number
-}
-
-interface Notification {
-  type: "success" | "error" | "warning" | "info"
-  message: string
-  id: string
-}
-
 // Custom styled components
-const StyledTab = styled(Tab)(() => ({
+const StyledTab = styled(Tab)(({}) => ({
   textTransform: "none",
   fontWeight: 600,
   fontSize: "14px",
@@ -75,7 +46,7 @@ const StyledTab = styled(Tab)(() => ({
   },
 }))
 
-const StyledTabs = styled(Tabs)(() => ({
+const StyledTabs = styled(Tabs)(({}) => ({
   "& .MuiTabs-indicator": {
     backgroundColor: "#1976d2",
     height: "3px",
@@ -83,7 +54,7 @@ const StyledTabs = styled(Tabs)(() => ({
   marginBottom: "0px",
 }))
 
-const PublishButton = styled(Button)(() => ({
+const PublishButton = styled(Button)(({}) => ({
   backgroundColor: "#e6f7f1",
   color: "#00a76f",
   textTransform: "none",
@@ -97,7 +68,7 @@ const PublishButton = styled(Button)(() => ({
   minWidth: "80px",
 }))
 
-const DeleteButton = styled(Button)(() => ({
+const DeleteButton = styled(Button)(({}) => ({
   backgroundColor: "#ffe4de",
   color: "#ff5630",
   textTransform: "none",
@@ -111,12 +82,12 @@ const DeleteButton = styled(Button)(() => ({
   minWidth: "80px",
 }))
 
-const StyledTableCell = styled(TableCell)(() => ({
+const StyledTableCell = styled(TableCell)(({}) => ({
   borderBottom: "1px solid #f0f0f0",
   padding: "16px 8px",
 }))
 
-const StyledTableHeadCell = styled(TableCell)(() => ({
+const StyledTableHeadCell = styled(TableCell)(({}) => ({
   borderBottom: "1px solid #f0f0f0",
   padding: "16px 8px",
   color: "#637381",
@@ -156,13 +127,13 @@ export default function CustomerReviews() {
     setMounted(true)
   }, [])
 
-  // Map tab values to status filters - Updated to match API expectations
-  const getStatusFilter = (tabValue: number): "pending" | "published" | "deleted" | "" => {
+  // Map tab values to status filters
+  const getStatusFilter = (tabValue: number) => {
     switch (tabValue) {
       case 0:
         return "" // All reviews
       case 1:
-        return "published" // Changed back to "published" to match API
+        return "published" // Changed from "approved" to "published"
       case 2:
         return "pending" // Pending
       default:
@@ -179,13 +150,8 @@ export default function CustomerReviews() {
   } = useCustomerReviews({
     page,
     pageSize: 10,
-    status: getStatusFilter(tabValue),
-  }) as {
-    data: ReviewsResponse | undefined
-    isLoading: boolean
-    error: any
-    isFetching: boolean
-  }
+    status: getStatusFilter(tabValue) as "pending" | "published" | "deleted" | "",
+  })
 
   // Mutations for updating review status
   const updateReviewStatusMutation = useUpdateReviewStatus()
@@ -204,7 +170,7 @@ export default function CustomerReviews() {
     )
   }
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue)
     setSelectedReviews([])
     setPage(1)
@@ -214,17 +180,17 @@ export default function CustomerReviews() {
     setSelectedReviews((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]))
   }
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
   }
 
-  // Handle publish action - Updated to use "published" status
+  // Handle publish action
   const handlePublish = async (reviewIds: string[]) => {
     try {
       for (const reviewId of reviewIds) {
         await updateReviewStatusMutation.mutateAsync({
           reviewId,
-          data: { status: "pending" }, // Changed back to "published"
+          data: { status: "approved" }, // Changed from "published" to "approved"
         })
       }
       setSelectedReviews([])
@@ -254,10 +220,8 @@ export default function CustomerReviews() {
     }
   }
 
-  // Get the latest notification for display with safe access
-  const latestNotification: Notification | undefined = notifications && notifications.length > 0 
-    ? notifications[notifications.length - 1] 
-    : undefined
+  // Get the latest notification for display
+  const latestNotification = notifications[notifications.length - 1]
 
   // Error message formatting
   const getErrorMessage = (error: any): string => {
@@ -270,7 +234,10 @@ export default function CustomerReviews() {
     return "Failed to load customer reviews. Please try again."
   }
 
-  const filteredReviews: Review[] = reviewsData?.reviews || []
+  // Get all reviews and filter out ones without valid IDs
+  const allReviews = reviewsData?.reviews || []
+  const validReviews = allReviews.filter(review => review.id && typeof review.id === 'string')
+  const validReviewIds = validReviews.map(review => review.id as string)
 
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>
@@ -325,7 +292,7 @@ export default function CustomerReviews() {
           <Box sx={{ borderBottom: 1, borderColor: "divider", bgcolor: "white" }}>
             <StyledTabs value={tabValue} onChange={handleTabChange} TabIndicatorProps={{ style: { height: 3 } }}>
               <StyledTab label="All Reviews" />
-              <StyledTab label="Published" /> {/* Changed back to "Published" */}
+              <StyledTab label="Published" />
               <StyledTab label="Pending" />
             </StyledTabs>
           </Box>
@@ -388,13 +355,13 @@ export default function CustomerReviews() {
                   <TableRow>
                     <StyledTableHeadCell padding="checkbox" sx={{ width: "48px" }}>
                       <Checkbox
-                        indeterminate={selectedReviews.length > 0 && selectedReviews.length < filteredReviews.length}
-                        checked={filteredReviews.length > 0 && selectedReviews.length === filteredReviews.length}
+                        indeterminate={selectedReviews.length > 0 && selectedReviews.length < validReviews.length}
+                        checked={validReviews.length > 0 && selectedReviews.length === validReviews.length}
                         onChange={() => {
-                          if (selectedReviews.length === filteredReviews.length) {
+                          if (selectedReviews.length === validReviews.length) {
                             setSelectedReviews([])
                           } else {
-                            setSelectedReviews(filteredReviews.map((r) => r.id))
+                            setSelectedReviews(validReviewIds)
                           }
                         }}
                         sx={{
@@ -414,122 +381,124 @@ export default function CustomerReviews() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredReviews.length > 0 ? (
-                    filteredReviews.map((review) => (
-                      <TableRow key={review.id}>
-                        <StyledTableCell padding="checkbox">
-                          <Checkbox
-                            checked={selectedReviews.includes(review.id)}
-                            onChange={() => handleCheckboxChange(review.id)}
-                            sx={{
-                              color: "#919EAB",
-                              "&.Mui-checked": {
-                                color: "#2065D1",
-                              },
-                            }}
-                          />
-                        </StyledTableCell>
-                        <StyledTableCell>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Avatar
-                              src={review.customerAvatar}
+                  {validReviews.length > 0 ? (
+                    validReviews.map((review) => {
+                      // Skip if no ID (extra safety check)
+                      if (!review.id) return null;
+                      
+                      return (
+                        <TableRow key={review.id}>
+                          <StyledTableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedReviews.includes(review.id)}
+                              onChange={() => handleCheckboxChange(review.id as string)}
                               sx={{
-                                width: 40,
-                                height: 40,
-                                bgcolor: "#F4F6F8",
-                                mr: 2,
+                                color: "#919EAB",
+                                "&.Mui-checked": {
+                                  color: "#2065D1",
+                                },
                               }}
-                            >
-                              {review.customerName?.charAt(0).toUpperCase() || "?"}
-                            </Avatar>
-                            <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {review.customerName}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {review.date} · {review.time}
-                              </Typography>
-                              {review.isVerifiedPurchase && (
-                                <Typography variant="caption" sx={{ color: "#00a76f", display: "block" }}>
-                                  ✓ Verified Purchase
+                            />
+                          </StyledTableCell>
+                          <StyledTableCell>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Avatar
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: "#F4F6F8",
+                                  mr: 2,
+                                }}
+                              >
+                                {review.customerName?.charAt(0).toUpperCase() || "?"}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                  {review.customerName}
                                 </Typography>
-                              )}
+                                <Typography variant="caption" color="text.secondary">
+                                  {review.date} · {review.time}
+                                </Typography>
+                                {review.isVerifiedPurchase && (
+                                  <Typography variant="caption" sx={{ color: "#00a76f", display: "block" }}>
+                                    ✓ Verified Purchase
+                                  </Typography>
+                                )}
+                              </Box>
                             </Box>
-                          </Box>
-                        </StyledTableCell>
-                        <StyledTableCell>
-                          <Typography variant="body2">{review.productName}</Typography>
-                        </StyledTableCell>
-                        <StyledTableCell sx={{ whiteSpace: "normal" }}>
-                          <Box>
-                            <StarRating rating={review.rating} />
-                            {review.title && (
+                          </StyledTableCell>
+                          <StyledTableCell>
+                            <Typography variant="body2">{review.productName}</Typography>
+                          </StyledTableCell>
+                          <StyledTableCell sx={{ whiteSpace: "normal" }}>
+                            <Box>
+                              <StarRating rating={review.rating || 0} />
                               <Typography variant="body2" sx={{ fontWeight: 600, mt: 1, mb: 0.5 }}>
                                 {review.title}
                               </Typography>
-                            )}
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                fontSize: "13px",
-                                lineHeight: 1.5,
-                                wordBreak: "break-word",
-                              }}
-                            >
-                              {review.review}
-                            </Typography>
-                            {review.helpfulVotes && review.helpfulVotes > 0 && (
-                              <Typography variant="caption" sx={{ color: "#637381", mt: 0.5, display: "block" }}>
-                                {review.helpfulVotes} people found this helpful
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                  fontSize: "13px",
+                                  lineHeight: 1.5,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {review.review}
                               </Typography>
+                              {review.helpfulVotes && review.helpfulVotes > 0 && (
+                                <Typography variant="caption" sx={{ color: "#637381", mt: 0.5, display: "block" }}>
+                                  {review.helpfulVotes} people found this helpful
+                                </Typography>
+                              )}
+                            </Box>
+                          </StyledTableCell>
+                          <StyledTableCell align="right">
+                            {/* All Reviews tab */}
+                            {tabValue === 0 && (
+                              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                                <PublishButton
+                                  sx={{ mr: 1 }}
+                                  onClick={() => handlePublish([review.id as string])}
+                                  disabled={updateReviewStatusMutation.isPending}
+                                >
+                                  Publish
+                                </PublishButton>
+                                <DeleteButton
+                                  onClick={() => handleDelete([review.id as string])}
+                                  disabled={updateReviewStatusMutation.isPending || deleteReviewMutation.isPending}
+                                >
+                                  Delete
+                                </DeleteButton>
+                              </Box>
                             )}
-                          </Box>
-                        </StyledTableCell>
-                        <StyledTableCell align="right">
-                          {/* All Reviews tab */}
-                          {tabValue === 0 && (
-                            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                              <PublishButton
-                                sx={{ mr: 1 }}
-                                onClick={() => handlePublish([review.id])}
-                                disabled={updateReviewStatusMutation.isPending}
-                              >
-                                Publish
-                              </PublishButton>
-                              <DeleteButton
-                                onClick={() => handleDelete([review.id])}
-                                disabled={updateReviewStatusMutation.isPending || deleteReviewMutation.isPending}
-                              >
-                                Delete
-                              </DeleteButton>
-                            </Box>
-                          )}
-                          {/* Published tab */}
-                          {tabValue === 1 && (
-                            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                              <DeleteButton
-                                onClick={() => handleDelete([review.id])}
-                                disabled={updateReviewStatusMutation.isPending || deleteReviewMutation.isPending}
-                              >
-                                Delete
-                              </DeleteButton>
-                            </Box>
-                          )}
-                          {/* Pending tab */}
-                          {tabValue === 2 && (
-                            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                              <DeleteButton
-                                onClick={() => handleDelete([review.id])}
-                                disabled={deleteReviewMutation.isPending}
-                              >
-                                Delete
-                              </DeleteButton>
-                            </Box>
-                          )}
-                        </StyledTableCell>
-                      </TableRow>
-                    ))
+                            {/* Published tab */}
+                            {tabValue === 1 && (
+                              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                                <DeleteButton
+                                  onClick={() => handleDelete([review.id as string])}
+                                  disabled={updateReviewStatusMutation.isPending || deleteReviewMutation.isPending}
+                                >
+                                  Delete
+                                </DeleteButton>
+                              </Box>
+                            )}
+                            {/* Pending tab */}
+                            {tabValue === 2 && (
+                              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                                <DeleteButton
+                                  onClick={() => handleDelete([review.id as string])}
+                                  disabled={deleteReviewMutation.isPending}
+                                >
+                                  Delete
+                                </DeleteButton>
+                              </Box>
+                            )}
+                          </StyledTableCell>
+                        </TableRow>
+                      )
+                    })
                   ) : (
                     <TableRow>
                       <StyledTableCell colSpan={5} align="center" sx={{ py: 4 }}>

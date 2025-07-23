@@ -1,13 +1,26 @@
 "use client"
-import { Box, Typography, Button, Select, MenuItem, FormControl, IconButton } from "@mui/material"
-import { ArrowBack, KeyboardArrowDown, Refresh } from "@mui/icons-material"
+import {
+  Box,
+  Typography,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  IconButton,
+  TextField,
+  InputAdornment,
+} from "@mui/material"
+import { ArrowBack, KeyboardArrowDown, Refresh, Search } from "@mui/icons-material"
 import type { SelectChangeEvent } from "@mui/material/Select"
 import Image from "next/image"
 import React from "react"
 
 const FILTER_OPTIONS = [
-  { value: "Active", label: "Active" },
-  { value: "Completed", label: "Completed" },
+  { value: "", label: "All" },
+  { value: "Delivered", label: "Delivered" },
+  { value: "In Transit", label: "In Transit" },
+  { value: "Pending", label: "Pending" },
+  { value: "Error", label: "Error" },
 ] as const
 
 const DATE_SORT_OPTIONS = [
@@ -18,8 +31,10 @@ const DATE_SORT_OPTIONS = [
 interface ShipmentHeaderProps {
   filterValue: string
   dateSort: string
+  searchTerm: string
   onFilterChange: (event: SelectChangeEvent) => void
   onDateSortChange: (event: SelectChangeEvent) => void
+  onSearchChange: (value: string) => void
   onReset: () => void
   onAddShipment: () => void
 }
@@ -87,7 +102,6 @@ const StyledSelect = ({
 
 const TransportIcons = () => {
   const [transportType, setTransportType] = React.useState("Ship")
-
   const handleTransportChange = (event: SelectChangeEvent) => {
     setTransportType(event.target.value)
   }
@@ -182,8 +196,10 @@ const TransportIcons = () => {
 export default function ShipmentHeader({
   filterValue,
   dateSort,
+  searchTerm,
   onFilterChange,
   onDateSortChange,
+  onSearchChange,
   onReset,
   onAddShipment,
 }: ShipmentHeaderProps) {
@@ -214,7 +230,6 @@ export default function ShipmentHeader({
           back
         </Typography>
       </Box>
-
       {/* Page Title */}
       <Box>
         <Typography
@@ -230,7 +245,6 @@ export default function ShipmentHeader({
           Tracking & Documentation
         </Typography>
       </Box>
-
       {/* Controls Section */}
       <Box
         sx={{
@@ -244,6 +258,40 @@ export default function ShipmentHeader({
           },
         }}
       >
+        {/* Search Field */}
+        <TextField
+          placeholder="Search shipments..."
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          size="small"
+          sx={{
+            minWidth: 200,
+            "& .MuiOutlinedInput-root": {
+              height: 40,
+              borderRadius: "20px",
+              backgroundColor: "white",
+              border: "1px solid #e1e5e9",
+              fontFamily: "Poppins, sans-serif",
+              "& fieldset": {
+                border: "none",
+              },
+              "&:hover": {
+                backgroundColor: "#f8f9fa",
+              },
+              "&.Mui-focused": {
+                backgroundColor: "white",
+              },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ color: "#666", fontSize: 18 }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+
         {/* Filters and Buttons */}
         <Box
           sx={{
@@ -257,16 +305,13 @@ export default function ShipmentHeader({
           }}
         >
           <TransportIcons />
-
           <StyledSelect value={filterValue} onChange={onFilterChange} placeholder="All" options={FILTER_OPTIONS} />
-
           <StyledSelect
             value={dateSort}
             onChange={onDateSortChange}
             placeholder="Date Added"
             options={DATE_SORT_OPTIONS}
           />
-
           <Button
             startIcon={<Refresh sx={{ fontSize: 16 }} />}
             onClick={onReset}
@@ -287,7 +332,6 @@ export default function ShipmentHeader({
           >
             Reset
           </Button>
-
           <Button
             variant="contained"
             onClick={onAddShipment}

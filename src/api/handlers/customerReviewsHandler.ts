@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { customerReviewsService } from "../services"
+import { customerReviewsService } from "../services/customerReviews"
 import { useUIStore } from "@/store/uiStore"
-import type { GetCustomerReviewsParams, UpdateReviewRequest } from "../services"
+import type { GetCustomerReviewsParams, UpdateReviewRequest } from "../services/customerReviews"
 
 export const useCustomerReviews = ({
   page = 1,
@@ -22,16 +22,16 @@ export const useCustomerReviews = ({
   })
 }
 
-export const useCustomerReviewById = (id: string) => {
-  return useQuery({
-    queryKey: ["customerReview", id] as const,
-    queryFn: () => customerReviewsService.getReviewById(id),
-    enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  })
-}
+// export const useCustomerReviewById = (id: string) => {
+//   return useQuery({
+//     queryKey: ["customerReview", id] as const,
+//     queryFn: () => customerReviewsService.getReviewById(id),
+//     enabled: !!id,
+//     staleTime: 5 * 60 * 1000,
+//     retry: 3,
+//     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+//   })
+// }
 
 export const useUpdateReviewStatus = () => {
   const queryClient = useQueryClient()
@@ -47,7 +47,7 @@ export const useUpdateReviewStatus = () => {
       // Show success notification
       addNotification({
         type: "success",
-        message: `Review ${updatedReview.status} successfully!`,
+        message: `Review ${updatedReview.status === "approved" ? "approved" : updatedReview.status} successfully!`,
       })
     },
     onError: (error: any) => {
