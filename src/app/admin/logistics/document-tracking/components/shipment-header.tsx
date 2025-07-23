@@ -60,7 +60,7 @@ const StyledSelect = ({
       disabled={disabled}
       renderValue={(val) => (val === "" ? placeholder : val)}
       sx={{
-        minWidth: 160,
+        minWidth: 100,
         height: 40,
         fontSize: "14px",
         color: "#333",
@@ -265,7 +265,7 @@ export default function ShipmentHeader({
           onChange={(e) => onSearchChange(e.target.value)}
           size="small"
           sx={{
-            minWidth: 200,
+            minWidth: 100,
             "& .MuiOutlinedInput-root": {
               height: 40,
               borderRadius: "20px",
@@ -342,14 +342,14 @@ export default function ShipmentHeader({
               fontWeight: 500,
               textTransform: "none",
               borderRadius: "8px",
-              px: 3,
+              px: 2,
               py: 1.25,
               height: 40,
-              ml: 15,
+              ml: -2,
               boxShadow: "none",
               fontFamily: "Poppins, sans-serif",
-              minWidth: "140px",
-              maxWidth: "200px",
+              minWidth: "120px",
+              maxWidth: "180px",
               "&:hover": {
                 backgroundColor: "#E67A35",
                 boxShadow: "none",
