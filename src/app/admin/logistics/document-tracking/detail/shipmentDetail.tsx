@@ -212,9 +212,9 @@ const ShipmentDetail = () => {
         Shipment Details
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={9}>
         {/* Left Column - Shipment Information */}
-        <Grid item xs={12} md={8}>
+        <Grid>
           {/* Basic Shipment Info */}
           <Paper
             elevation={0}
@@ -269,8 +269,8 @@ const ShipmentDetail = () => {
             <Divider sx={{ mb: 3 }} />
 
             {/* Shipment Details Grid */}
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+            <Grid container spacing={9}>
+              <Grid>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" sx={{ color: "#666", mb: 0.5, fontWeight: 500 }}>
                     Container Number
@@ -398,7 +398,7 @@ const ShipmentDetail = () => {
         </Grid>
 
         {/* Right Column - Additional Information */}
-        <Grid item xs={12} md={4}>
+        <Grid>
           {/* Status Summary */}
           <Card sx={{ mb: 3, border: "1px solid #e0e0e0", boxShadow: "none" }}>
             <CardContent>
