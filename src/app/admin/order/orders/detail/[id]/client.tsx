@@ -13,6 +13,8 @@ import {
   styled,
   Avatar,
   Rating,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { LocalShipping, Receipt } from '@mui/icons-material';
 import {
@@ -20,7 +22,8 @@ import {
   type TableRowData,
   TableComponent,
 } from '../../../../../../components/TableComponent';
-import Image from 'next/image';
+// import Image from 'next/image';
+import { useOrderById } from '@/api/handlers';
 
 const StyledTab = styled(Tab)({
   textTransform: 'none',
@@ -53,6 +56,13 @@ interface OrderTrackingClientProps {
 export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
   const [tabValue, setTabValue] = React.useState(0);
 
+  // Fetch order data using the API
+  const {
+    data: orderData,
+    isLoading,
+    error,
+  } = useOrderById(id);
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -64,6 +74,41 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
     },
   };
 
+  // Helper functions for data formatting
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `₹${amount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
+
+  const getOrderStatusProgress = (status: string) => {
+    const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+    const currentIndex = statuses.indexOf(status.toLowerCase());
+    return currentIndex;
+  };
+
+  const getPaymentMethodDisplay = (method: string) => {
+    const methodMap: Record<string, string> = {
+      upi: 'UPI',
+      credit_card: 'Credit Card',
+      debit_card: 'Debit Card',
+      cod: 'Cash on Delivery',
+      net_banking: 'Net Banking',
+    };
+    return methodMap[method] || method.toUpperCase();
+  };
+
+  // Customer orders columns for the table in customer info tab
   const orderColumns: TableColumn[] = [
     { id: 'order', label: 'Order', width: '25%' },
     { id: 'date', label: 'Date', width: '25%' },
@@ -77,43 +122,47 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
     { id: 'price', label: 'Price', width: '25%', align: 'right' },
   ];
 
-  const orderData: TableRowData[] = [
+  // Mock data for other customer orders (you can replace this with another API call)
+  const customerOrdersData: TableRowData[] = [
     {
       id: '1',
-      order: '#23534D',
-      date: 'May 25, 3:12 PM',
-      status: 'Pending',
-      price: '$29.74',
-    },
-    {
-      id: '2',
-      order: '#125128',
-      date: 'May 10, 2:00 PM',
-      status: 'Completed',
-      price: '$23.06',
-    },
-    {
-      id: '3',
-      order: '#23534D',
-      date: 'April 18, 8:00 AM',
-      status: 'Completed',
-      price: '$29.74',
-    },
-    {
-      id: '4',
-      order: '#76543E',
-      date: 'April 12, 6:00 AM',
-      status: 'Completed',
-      price: '$23.06',
-    },
-    {
-      id: '5',
-      order: '#51323C',
-      date: 'April 10, 4:12 PM',
-      status: 'Completed',
-      price: '$23.06',
+      order: orderData?.uniqueId || '#N/A',
+      date: orderData ? formatDate(orderData.createdAt) : 'N/A',
+      status: orderData?.orderStatus || 'Unknown',
+      price: orderData ? formatCurrency(orderData.totalAmount) : '₹0.00',
     },
   ];
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">
+          Failed to load order details. Please try again.
+        </Alert>
+      </Box>
+    );
+  }
+
+  // No data state
+  if (!orderData) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="warning">
+          Order not found.
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: 950, margin: '0 auto', p: 3, bgcolor: '#f9fafb' }}>
@@ -145,14 +194,14 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                     fontWeight="700"
                     color="#1a365d"
                   >
-                    Order ID: {id}
+                    Order ID: {orderData.uniqueId}
                   </Typography>
                   <Box display="flex" alignItems="center" gap={1} mt={0.5}>
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                       Order date:
                     </Typography>
                     <Typography variant="body2" fontWeight="500">
-                      Feb 16, 2022 |
+                      {formatDate(orderData.createdAt)} |
                     </Typography>
                     <Box display="flex" alignItems="center">
                       <LocalShipping
@@ -163,7 +212,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                         color="#4caf50"
                         fontWeight="500"
                       >
-                        Estimated delivery: May 16, 2022
+                        Estimated delivery: {orderData.estimatedDelivery ? formatDate(orderData.estimatedDelivery) : 'TBD'}
                       </Typography>
                     </Box>
                   </Box>
@@ -195,11 +244,13 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                     '&:hover': { bgcolor: '#e69c1f' },
                   }}
                 >
-                  Track order
+                  Track order {orderData.trackingNumber ? `(${orderData.trackingNumber})` : ''}
                 </Button>
               </Grid>
             </Grid>
           </Paper>
+
+          {/* Order Status Progress */}
           <Paper
             elevation={0}
             sx={{ p: 3, mb: 0, borderRadius: 2, bgcolor: 'transparent' }}
@@ -219,7 +270,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                   sx={{
                     position: 'absolute',
                     left: 0,
-                    width: '16.67%',
+                    width: `${(getOrderStatusProgress(orderData.orderStatus) * 33.33)}%`,
                     height: '1px',
                     backgroundColor: '#667085',
                   }}
@@ -227,7 +278,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                 <Box
                   sx={{
                     position: 'absolute',
-                    left: '16.67%',
+                    left: `${(getOrderStatusProgress(orderData.orderStatus) * 33.33)}%`,
                     right: 0,
                     height: '1px',
                     backgroundColor: '#e0e0e0',
@@ -243,137 +294,47 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                   zIndex: 1,
                 }}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    width: '25%',
-                  }}
-                >
-                  <StatusDot isActive={true} />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 1,
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      color: '#f5a623',
-                      fontSize: '12px',
-                    }}
-                  >
-                    Order Confirmed
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'rgba(102, 112, 133, 1)',
-                      textAlign: 'center',
-                      fontSize: '11px',
-                    }}
-                  >
-                    Wed, 11th Jan
-                  </Typography>
-                </Box>
+                {['confirmed', 'shipped', 'out_for_delivery', 'delivered'].map((status, index) => {
+                  const currentStatusIndex = getOrderStatusProgress(orderData.orderStatus);
+                  const isActive = index === currentStatusIndex;
+                  const isCompleted = index < currentStatusIndex;
 
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    width: '25%',
-                  }}
-                >
-                  <StatusDot />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 1,
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      color: '#667085',
-                      fontSize: '12px',
-                    }}
-                  >
-                    Shipped
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'rgba(102, 112, 133, 1)',
-                      textAlign: 'center',
-                      fontSize: '11px',
-                    }}
-                  >
-                    Wed, 11th Jan
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    width: '25%',
-                  }}
-                >
-                  <StatusDot />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 1,
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      color: '#667085',
-                      fontSize: '12px',
-                    }}
-                  >
-                    Out For Delivery
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'rgba(102, 112, 133, 1)',
-                      textAlign: 'center',
-                      fontSize: '11px',
-                    }}
-                  >
-                    Wed, 11th Jan
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    width: '25%',
-                  }}
-                >
-                  <StatusDot />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 1,
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      color: '#667085',
-                      fontSize: '12px',
-                    }}
-                  >
-                    Delivered
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'rgba(102, 112, 133, 1)',
-                      textAlign: 'center',
-                      fontSize: '11px',
-                    }}
-                  >
-                    Expected by, Mon 16th
-                  </Typography>
-                </Box>
+                  return (
+                    <Box
+                      key={status}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        width: '25%',
+                      }}
+                    >
+                      <StatusDot isActive={isActive} isCompleted={isCompleted} />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          mt: 1,
+                          textAlign: 'center',
+                          fontWeight: 500,
+                          color: isActive ? '#f5a623' : '#667085',
+                          fontSize: '12px',
+                        }}
+                      >
+                        {status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'rgba(102, 112, 133, 1)',
+                          textAlign: 'center',
+                          fontSize: '11px',
+                        }}
+                      >
+                        {formatDate(orderData.updatedAt)}
+                      </Typography>
+                    </Box>
+                  );
+                })}
               </Box>
             </Box>
           </Paper>
@@ -388,40 +349,43 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
           </Typography>
 
           <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-            {[1, 2].map((item, index) => (
-              <React.Fragment key={index}>
+            {orderData.items.map((item, index) => (
+              <React.Fragment key={item._id}>
                 <Grid container spacing={22} alignItems="center">
                   <Grid display="flex" alignItems="center" gap={3}>
                     <Avatar
                       variant="rounded"
                       sx={{ width: 50, height: 50, bgcolor: '#f0f0f0' }}
-                    />
+                    >
+                      {item.product.name.charAt(0)}
+                    </Avatar>
                     <Box>
                       <Typography variant="subtitle2" fontWeight="700">
-                        vitamin
+                        {item.product.name}
                       </Typography>
                       <Typography
                         variant="body2"
                         color="rgba(102, 112, 133, 1)"
                       >
-                        T-floral ipsum
+                        Unit Price: {formatCurrency(item.price)}
                       </Typography>
                     </Box>
                   </Grid>
                   <Grid>
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                      Qty: 234
+                      Qty: {item.quantity}
                     </Typography>
                   </Grid>
                   <Grid>
                     <Typography variant="subtitle2" fontWeight="700">
-                      $1234.89
+                      {formatCurrency(item.total)}
                     </Typography>
                   </Grid>
                 </Grid>
-                {index < 1 && <Divider sx={{ my: 2 }} />}
+                {index < orderData.items.length - 1 && <Divider sx={{ my: 2 }} />}
               </React.Fragment>
             ))}
+
             <Grid container spacing={12} sx={{ mt: 5 }}>
               <Grid>
                 <Box>
@@ -435,14 +399,15 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                   </Typography>
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                      Visa **56
+                      {getPaymentMethodDisplay(orderData.paymentMethod)}
                     </Typography>
-                    <Image
-                      src="/visa.png"
-                      alt="EZRM Logo"
-                      width={30}
-                      height={35}
-                    />
+                    <Typography 
+                      variant="body2" 
+                      color={orderData.paymentStatus === 'completed' ? '#4caf50' : '#f5a623'}
+                      fontWeight="500"
+                    >
+                      ({orderData.paymentStatus.toUpperCase()})
+                    </Typography>
                   </Box>
                 </Box>
               </Grid>
@@ -458,13 +423,16 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                     Delivery
                   </Typography>
                   <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                    Address
+                    Shipping Address
                   </Typography>
                   <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                    847 Jewess Bridge Apt. 174
+                    {orderData.shippingAddress.street}
                   </Typography>
                   <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                    London, UK 474-769-3919
+                    {orderData.shippingAddress.city}, {orderData.shippingAddress.state}
+                  </Typography>
+                  <Typography variant="body2" color="rgba(102, 112, 133, 1)">
+                    {orderData.shippingAddress.country} - {orderData.shippingAddress.zipCode}
                   </Typography>
                 </Box>
               </Grid>
@@ -494,7 +462,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       fontWeight="500"
                       color="rgba(102, 112, 133, 1)"
                     >
-                      $5554
+                      {formatCurrency(orderData.subTotal)}
                     </Typography>
                   </Box>
 
@@ -513,7 +481,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       fontWeight="500"
                       color="#4caf50"
                     >
-                      (20%) - $1109.40
+                      - {formatCurrency(orderData.discount)}
                     </Typography>
                   </Box>
 
@@ -525,14 +493,14 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                     }}
                   >
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
-                      Delivery
+                      Shipping
                     </Typography>
                     <Typography
                       variant="body2"
                       fontWeight="500"
                       color="rgba(102, 112, 133, 1)"
                     >
-                      $0.00
+                      {formatCurrency(orderData.shippingCost)}
                     </Typography>
                   </Box>
 
@@ -551,7 +519,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       fontWeight="500"
                       color="rgba(102, 112, 133, 1)"
                     >
-                      +$221.88
+                      + {formatCurrency(orderData.tax)}
                     </Typography>
                   </Box>
 
@@ -576,7 +544,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       fontWeight="700"
                       color="rgba(102, 112, 133, 1)"
                     >
-                      $4666.48
+                      {formatCurrency(orderData.totalAmount)}
                     </Typography>
                   </Box>
                 </Box>
@@ -587,7 +555,6 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
       ) : (
         // Customer Information Tab Content
         <>
-          {/* Customer Information Tab Content */}
           <Box
             sx={{
               maxWidth: '100%',
@@ -627,17 +594,17 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                         fontSize: '20px',
                       }}
                     >
-                      R
+                      {orderData.customer.name.charAt(0).toUpperCase()}
                     </Avatar>
                     <Box>
                       <Typography variant="h6" fontWeight="700" color="#1a365d">
-                        Randhir Kumar
+                        {orderData.customer.name}
                       </Typography>
                       <Typography
                         variant="body2"
                         color="rgba(102, 112, 133, 1)"
                       >
-                        India
+                        {orderData.shippingAddress.country}
                       </Typography>
                       <Box
                         sx={{
@@ -651,19 +618,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                           variant="body2"
                           color="rgba(102, 112, 133, 1)"
                         >
-                          5 Orders
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="rgba(102, 112, 133, 1)"
-                        >
-                          •
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="rgba(102, 112, 133, 1)"
-                        >
-                          Customer for 2 years
+                          Customer ID: {orderData.customer._id.slice(-8)}
                         </Typography>
                       </Box>
                     </Box>
@@ -686,14 +641,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       color="#1a365d"
                       sx={{ mb: 2 }}
                     >
-                      Customer Notes
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="rgba(102, 112, 133, 1)"
-                      sx={{ mb: 1 }}
-                    >
-                      Notes
+                      Order Notes
                     </Typography>
                     <Paper
                       variant="outlined"
@@ -701,11 +649,11 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                         p: 2,
                         borderColor: '#e0e0e0',
                         borderRadius: 1,
-                        color: 'rgba(102, 112, 133, 0.7)',
+                        color: 'rgba(102, 112, 133, 1)',
                         minHeight: '80px',
                       }}
                     >
-                      Add notes about customer
+                      {orderData.notes || 'No special instructions for this order.'}
                     </Paper>
                   </Box>
                 </Paper>
@@ -723,7 +671,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                     color="#1a365d"
                     sx={{ mb: 3 }}
                   >
-                    Overview
+                    Customer Overview
                   </Typography>
 
                   <Box sx={{ mb: 3 }}>
@@ -732,35 +680,35 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       color="rgba(102, 112, 133, 1)"
                       sx={{ mb: 0.5 }}
                     >
-                      Address
+                      Billing Address
                     </Typography>
                     <Typography
                       variant="body2"
                       fontWeight="500"
                       color="#1a365d"
                     >
-                      Panapur langa
+                      {orderData.billingAddress.street}
                     </Typography>
                     <Typography
                       variant="body2"
                       fontWeight="500"
                       color="#1a365d"
                     >
-                      Hajipur,vaishali
+                      {orderData.billingAddress.city}, {orderData.billingAddress.state}
                     </Typography>
                     <Typography
                       variant="body2"
                       fontWeight="500"
                       color="#1a365d"
                     >
-                      844124
+                      {orderData.billingAddress.zipCode}
                     </Typography>
                     <Typography
                       variant="body2"
                       fontWeight="500"
                       color="#1a365d"
                     >
-                      India
+                      {orderData.billingAddress.country}
                     </Typography>
                   </Box>
 
@@ -777,7 +725,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       fontWeight="500"
                       color="#1a365d"
                     >
-                      randhirpal@gmail.com
+                      {orderData.customer.email}
                     </Typography>
                   </Box>
 
@@ -794,14 +742,14 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       fontWeight="500"
                       color="#1a365d"
                     >
-                      +91 8504789764
+                      {orderData.customer.phone}
                     </Typography>
                   </Box>
                 </Paper>
               </Box>
             </Box>
 
-            {/* Customer Orders (full width) */}
+            {/* Customer Orders (this order) */}
             <Box sx={{ width: '70%' }}>
               <Typography
                 variant="h6"
@@ -813,8 +761,8 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
               </Typography>
               <TableComponent
                 columns={orderColumns}
-                data={orderData}
-                totalResults={orderData.length}
+                data={customerOrdersData}
+                totalResults={customerOrdersData.length}
                 showCheckboxes={false}
                 showHeader={true}
                 rowsPerPage={10}

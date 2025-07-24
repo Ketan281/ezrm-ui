@@ -33,8 +33,8 @@ export const ENDPOINTS = {
   },
   // Orders endpoints
   ORDERS: {
-    GET: `${BASE_URL}/private/orders`,
-    GET_BY_ID: `${BASE_URL}/private/orders/:id`,
+    GET: `${BASE_URL}/private/customer-orders`,
+    GET_BY_ID: `${BASE_URL}/private/customer-orders/:id`,
   },
   // Customer Reviews endpoints
   CUSTOMER_REVIEWS: {

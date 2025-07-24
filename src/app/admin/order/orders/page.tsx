@@ -7,13 +7,13 @@ import { useOrders } from "@/api/handlers"
 import Image from "next/image"
 
 interface OrderRowData extends TableRowData {
-  product: string
+  customer: string
   orderId: string
   orderNumber: string
   status: string
-  quantity: string
-  customerName: string
-  trackOrder: string
+  items: string
+  totalAmount: string
+  paymentStatus: string
 }
 
 export default function OrderList() {
@@ -35,15 +35,17 @@ export default function OrderList() {
     status: statusFilter,
   })
 
-  console.log("Orders Data:", ordersData)
+  console.log("Customer Orders Data:", ordersData)
   console.log("Orders Error:", error)
 
   const statusOptions = [
-    { value: "", label: "Status" },
-    { value: "in_stock", label: "In Stock" },
-    { value: "low_stock", label: "Low Stock" },
-    { value: "out_of_stock", label: "Out of Stock" },
+    { value: "", label: "All Status" },
     { value: "pending", label: "Pending" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "processing", label: "Processing" },
+    { value: "shipped", label: "Shipped" },
+    { value: "delivered", label: "Delivered" },
+    { value: "cancelled", label: "Cancelled" },
   ]
 
   interface TableColumnType {
@@ -55,62 +57,81 @@ export default function OrderList() {
   }
 
   const columns: TableColumnType[] = [
-    { id: "product", label: "Product", width: "18%" },
-    { id: "orderId", label: "Order Id", width: "12%" },
-    { id: "orderNumber", label: "Order Number", width: "16%", align: "center" },
-    { id: "status", label: "Status", width: "165", type: "status", align: "center" },
-    { id: "quantity", label: "Quantity", width: "10%", align: "center" },
-    { id: "customerName", label: "Location", width: "18%", align: "center" },
+    { id: "customer", label: "Customer", width: "20%" },
+    { id: "orderId", label: "Order ID", width: "12%" },
+    { id: "orderNumber", label: "Unique ID", width: "12%", align: "center" },
+    { id: "status", label: "Order Status", width: "12", type: "status", align: "center" },
+    { id: "items", label: "Items", width: "8%", align: "center" },
+    { id: "totalAmount", label: "Total Amount", width: "12%", align: "center" },
+    { id: "paymentStatus", label: "Payment", width: "12%", type: "status", align: "center" },
     {
       id: "trackOrder",
-      label: "Track Order",
-      width: "20%",
+      label: "View Details",
+      width: "12%",
       type: "link",
       align: "center",
     },
   ]
 
-  // Transform API data to table format with error handling
+  // Transform API data to table format
   const transformedData: OrderRowData[] =
     ordersData?.orders?.map((order) => {
       try {
-        // Handle null product case
-        const productName = order.product?.name || "Product Not Found"
-        const productCategory = order.product?.category || "N/A"
+        // Get order status display text
+        const getStatusDisplay = (status: string) => {
+          const statusMap: Record<string, string> = {
+            pending: "Pending",
+            confirmed: "Confirmed",
+            processing: "Processing",
+            shipped: "Shipped",
+            delivered: "Delivered",
+            cancelled: "Cancelled",
+          }
+          return statusMap[status] || status
+        }
 
-        // Format location
-        const location = order.location
-          ? `${order.location.aisle}-${order.location.rack}-${order.location.shelf}`
-          : "N/A"
+        // Get payment status display text
+        const getPaymentStatusDisplay = (status: string) => {
+          const statusMap: Record<string, string> = {
+            pending: "Pending",
+            processing: "Processing",
+            completed: "Completed",
+            failed: "Failed",
+            refunded: "Refunded",
+          }
+          return statusMap[status] || status
+        }
 
-        // Map inventory status to order status
-        const statusMapping: Record<string, string> = {
-          in_stock: "In Stock",
-          low_stock: "Low Stock",
-          out_of_stock: "Out of Stock",
-          pending: "Pending",
+        // Format total amount
+        const formatAmount = (amount: number) => {
+          return `₹${amount.toLocaleString('en-IN', { 
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`
         }
 
         return {
-          id: order.id || order._id,
-          product: `${productName} - ${productCategory}`,
-          orderId: order.uniqueId || order._id.slice(-8),
-          orderNumber: order.batchNumber || order.uniqueId || order._id.slice(-8),
-          status: statusMapping[order.status] || order.status,
-          quantity: order.quantity?.toString() || "0",
-          customerName: location, // Using location as "customer name" since this is inventory
-          trackOrder: order.uniqueId || order._id,
+          id: order._id,
+          customer: `${order.customer.name}\n${order.customer.email}`,
+          orderId: order._id.slice(-8).toUpperCase(),
+          orderNumber: order.uniqueId,
+          status: getStatusDisplay(order.orderStatus),
+          items: order.items.length.toString(),
+          totalAmount: formatAmount(order.totalAmount),
+          paymentStatus: getPaymentStatusDisplay(order.paymentStatus),
+          trackOrder: order._id,
         }
       } catch (err) {
         console.error("Error transforming order data:", err, order)
         return {
           id: order._id || "unknown",
-          product: "Error loading data",
+          customer: "Error loading data",
           orderId: "N/A",
           orderNumber: "N/A",
           status: "error",
-          quantity: "0",
-          customerName: "N/A",
+          items: "0",
+          totalAmount: "₹0.00",
+          paymentStatus: "error",
           trackOrder: "N/A",
         }
       }
@@ -130,12 +151,12 @@ export default function OrderList() {
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue)
-    setPage(1) // Reset to first page when searching
+    setPage(1)
   }
 
   const handleStatusFilterChange = (status: string) => {
     setStatusFilter(status)
-    setPage(1) // Reset to first page when filtering
+    setPage(1)
   }
 
   // Error message formatting
@@ -147,7 +168,7 @@ export default function OrderList() {
     if (error?.message) {
       return error.message
     }
-    return "Failed to load inventory data. Please try again."
+    return "Failed to load customer orders. Please try again."
   }
 
   return (
@@ -171,7 +192,7 @@ export default function OrderList() {
           fontFamily: "Poppins, sans-serif",
         }}
       >
-        Inventory Management
+        Customer Orders Management
       </Typography>
 
       {/* Error State */}
@@ -192,7 +213,7 @@ export default function OrderList() {
       {ordersData && !error && (
         <Box sx={{ mb: 2 }}>
           <Typography sx={{ fontSize: "14px", color: "#737791", fontFamily: "Poppins, sans-serif" }}>
-            Showing {transformedData.length} of {ordersData.total} inventory items
+            Showing {transformedData.length} of {ordersData.total} customer orders
             {searchTerm && ` for "${searchTerm}"`}
             {statusFilter && ` with status "${statusFilter}"`}
             {isFetching && " (Loading...)"}
@@ -205,8 +226,8 @@ export default function OrderList() {
         <Box sx={{ textAlign: "center", py: 8 }}>
           <Typography sx={{ fontSize: "16px", color: "#737791", fontFamily: "Poppins, sans-serif" }}>
             {searchTerm || statusFilter
-              ? "No inventory items found matching your criteria"
-              : "No inventory items available"}
+              ? "No customer orders found matching your criteria"
+              : "No customer orders available"}
           </Typography>
         </Box>
       )}
@@ -227,7 +248,7 @@ export default function OrderList() {
           searchOptions={{
             value: searchTerm,
             onChange: handleSearchChange,
-            placeholder: "Search by Product Name or Unique ID",
+            placeholder: "Search by Customer Name, Email, or Order ID",
           }}
           filterOptions={{
             value: statusFilter,

@@ -22,11 +22,11 @@ export type {
 } from "./rfq"
 export type {
   OrderItem,
-  ProductInfo,
-  LocationInfo,
+  // ProductInfo,
+  // LocationInfo,
   GetOrdersParams,
   OrdersResponse,
-  ApiResponse as OrderApiResponse,
+  // ApiResponse as OrderApiResponse,
 } from "./orders"
 export type {
   CustomerReview,

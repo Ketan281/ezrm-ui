@@ -1,38 +1,57 @@
 import { api, ENDPOINTS } from "../config"
 
-export interface ProductInfo {
-  images: string[]
-  status: string
+// Address interface
+export interface Address {
+  street: string
+  city: string
+  state: string
+  country: string
+  zipCode: string
+}
+
+// Customer interface
+export interface Customer {
   _id: string
   name: string
-  description: string
-  price: number
-  category: string
-  inStock: boolean
-  createdAt: string
-  updatedAt: string
-  uniqueId: string
-  __v: number
+  email: string
+  phone: string
 }
 
-export interface LocationInfo {
-  aisle: string
-  rack: string
-  shelf: string
-}
-
-export interface OrderItem {
-  location: LocationInfo
+// Product info for order items
+export interface OrderProduct {
   _id: string
-  id?: string
-  product: ProductInfo | null
+  name: string
+}
+
+// Order item interface
+export interface OrderItem {
+  product: OrderProduct
   quantity: number
-  minThreshold: number
-  maxThreshold: number
-  status: string
-  lastRestocked: string
-  lastChecked: string
-  batchNumber: string
+  price: number
+  discount: number
+  total: number
+  _id: string
+}
+
+// Main order interface matching your API response
+export interface CustomerOrder {
+  _id: string
+  customer: Customer
+  items: OrderItem[]
+  shippingAddress: Address
+  billingAddress: Address
+  totalAmount: number
+  subTotal: number
+  tax: number
+  shippingCost: number
+  discount: number
+  paymentMethod: string
+  paymentStatus: "pending" | "processing" | "completed" | "failed" | "refunded"
+  orderStatus: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled"
+  trackingNumber?: string
+  estimatedDelivery?: string
+  actualDelivery?: string | null
+  notes?: string
   createdAt: string
   updatedAt: string
   uniqueId: string
@@ -49,24 +68,22 @@ export interface GetOrdersParams {
 }
 
 export interface OrdersResponse {
-  orders: OrderItem[]
+  orders: CustomerOrder[]
   total: number
   page: number
   limit: number
   totalPages: number
 }
 
-// Updated API response structure to match your actual response
-export interface ApiResponse {
+// API response structure matching your actual response
+export interface CustomerOrdersApiResponse {
   success: boolean
-  inventory: OrderItem[]
-  pagination: {
+  data: {
+    orders: CustomerOrder[]
     total: number
     page: number
-    limit: number
     totalPages: number
-    hasNext: boolean
-    hasPrev: boolean
+    limit: number
   }
 }
 
@@ -75,25 +92,26 @@ export interface SingleOrderResponse {
   success: boolean
   message?: string
   data: {
-    order: OrderItem
+    order: CustomerOrder
   }
 }
-
+export interface SingleOrderApiResponse {
+  success: boolean
+  data: CustomerOrder
+}
 export const ordersService = {
-  // Get orders with proper typing and filtering
+  // Get customer orders with proper typing
   getOrders: async ({ queryKey }: { queryKey: [string, GetOrdersParams] }): Promise<OrdersResponse> => {
-    const [, { page = 1, limit = 10, search = "", status = "", sortBy = "createdAt", sortOrder = "desc" }] = queryKey
+    const [, { page = 1, limit = 10, search, status }] = queryKey
 
-    // Build params object, only include non-empty values
+    // Build params object
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       page,
       limit,
-      sortBy,
-      sortOrder,
     }
 
-    if (search) params.q = search
+    if (search) params.search = search
     if (status) params.status = status
 
     try {
@@ -101,53 +119,42 @@ export const ordersService = {
         params,
       })
 
-      console.log("Raw Orders API Response:", data)
+      console.log("Raw Customer Orders API Response:", data)
 
-      // Handle the actual API response structure
-      const apiResponse = data as ApiResponse
+      const apiResponse = data as CustomerOrdersApiResponse
 
-      // Get orders from the inventory array
-      const orders = apiResponse.inventory || []
+      if (!apiResponse.success) {
+        throw new Error("Failed to fetch orders")
+      }
 
-      // Map _id to id for frontend consistency and handle null products
-      const transformedOrders = orders.map((order) => ({
-        ...order,
-        id: order._id, // Map _id to id for frontend use
-        product: order.product || null, // Handle null products gracefully
-      }))
-
-      console.log("Transformed Orders:", transformedOrders)
+      const orders = apiResponse.data.orders || []
 
       return {
-        orders: transformedOrders,
-        total: apiResponse.pagination?.total || orders.length,
-        page: apiResponse.pagination?.page || page,
-        limit: apiResponse.pagination?.limit || limit,
-        totalPages: apiResponse.pagination?.totalPages || Math.ceil(orders.length / limit),
+        orders,
+        total: apiResponse.data.total || 0,
+        page: apiResponse.data.page || page,
+        limit: apiResponse.data.limit || limit,
+        totalPages: apiResponse.data.totalPages || 1,
       }
     } catch (error) {
-      console.error("Error fetching orders:", error)
+      console.error("Error fetching customer orders:", error)
       throw error
     }
   },
 
   // Get single order by ID
-  getOrderById: async (id: string): Promise<OrderItem> => {
+getOrderById: async (id: string): Promise<CustomerOrder> => {
     try {
       const response = await api.get(`${ENDPOINTS.ORDERS.GET_BY_ID.replace(":id", id)}`)
       console.log("Single Order API Response:", response.data)
 
-      const apiResponse = response.data as SingleOrderResponse
+      const apiResponse = response.data as SingleOrderApiResponse
 
-      // Return the order data from the nested structure
-      if (apiResponse.success && apiResponse.data?.order) {
-        return {
-          ...apiResponse.data.order,
-          id: apiResponse.data.order._id,
-        }
+      if (apiResponse.success && apiResponse.data) {
+        return apiResponse.data
       }
 
-      throw new Error(apiResponse.message || "Failed to fetch order")
+      throw new Error("Failed to fetch order details")
     } catch (error) {
       console.error("Error fetching single order:", error)
       throw error

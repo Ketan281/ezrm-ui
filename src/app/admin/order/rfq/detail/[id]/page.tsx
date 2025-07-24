@@ -157,9 +157,9 @@ const RFQDetail = () => {
         </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box display={"flex"} gap={5}>
+        <Grid>
+          <Box sx={{ display: "flex", gap: 2 }}>
             {/* Customer Info and Order Details */}
             <Paper
               elevation={0}
@@ -251,7 +251,7 @@ const RFQDetail = () => {
         </Grid>
 
         {/* Right Column - Company Details */}
-        <Grid item xs={12} md={6}>
+        <Grid>
           <Paper
             elevation={0}
             sx={{
@@ -259,7 +259,7 @@ const RFQDetail = () => {
               borderRadius: 1,
               border: "1px solid #e0e0e0",
               backgroundColor: "#fff",
-              maxHeight: "70%",
+              maxHeight: "100%",
             }}
           >
             <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#333", mb: 2 }}>
@@ -288,7 +288,7 @@ const RFQDetail = () => {
             </Box>
           </Paper>
         </Grid>
-      </Grid>
+      </Box>
 
       {/* Customer Notes Section - Full Width */}
       <Box sx={{ mt: 3 }}>
