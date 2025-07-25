@@ -15,7 +15,7 @@ import {
 } from "@mui/material"
 import { Edit, LocationOn, Phone, Email, ArrowBack } from "@mui/icons-material"
 import { useRFQById } from "@/api/handlers"
-
+import Image from "next/image"
 const RFQDetail = () => {
   const params = useParams()
   const router = useRouter()
@@ -87,6 +87,14 @@ const RFQDetail = () => {
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "0 auto", p: 2, bgcolor: "#f8f9fa" }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                <Box sx={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.back()}>
+                  <Image src="/back.png?height=13&width=13" alt="Back" width={13} height={13} />
+                  <Typography sx={{ ml: 1, color: "#737791", fontSize: "14px", fontFamily: "Poppins, sans-serif" }}>
+                    Back
+                  </Typography>
+                </Box>
+              </Box>
       {/* Header */}
       <Box
         sx={{
