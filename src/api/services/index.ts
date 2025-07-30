@@ -13,6 +13,7 @@ export type {
   GetProductsParams,
   ProductsResponse,
   ApiResponse as ProductApiResponse,
+  CreateProductFormData
 } from "./products"
 export type {
   RFQItem,

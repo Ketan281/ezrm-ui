@@ -7,6 +7,17 @@ export interface CreateProductRequest {
   category: string
   inStock: boolean
 }
+
+export interface CreateProductFormData {
+  name: string
+  description: string
+  price: number
+  category: string
+  inStock: boolean
+  bannerImage?: File
+  images?: File[]
+}
+
 export interface UpdateProductRequest {
   name: string
   description: string
@@ -14,6 +25,7 @@ export interface UpdateProductRequest {
   category: string
   inStock: boolean
 }
+
 export interface Product {
   _id: string // API uses _id instead of id
   id?: string // We'll map _id to id for frontend consistency
@@ -110,9 +122,36 @@ export const productsService = {
     }
   },
 
-  // Add product (using private endpoint)
-  addProduct: async (data: CreateProductRequest): Promise<Product> => {
-    const response = await api.post(ENDPOINTS.PRODUCTS.ADD, data)
+  // Add product with file upload support
+  addProduct: async (data: CreateProductFormData): Promise<Product> => {
+    // Create FormData for file upload
+    const formData = new FormData()
+    
+    // Append basic fields
+    formData.append('name', data.name)
+    formData.append('description', data.description)
+    formData.append('price', data.price.toString())
+    formData.append('category', data.category)
+    formData.append('inStock', data.inStock.toString())
+    
+    // Append banner image if provided
+    if (data.bannerImage) {
+      formData.append('bannerImage', data.bannerImage)
+    }
+    
+    // Append multiple images if provided
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        formData.append('images', image)
+      })
+    }
+
+    const response = await api.post(ENDPOINTS.PRODUCTS.ADD, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    
     const apiResponse = response.data as ApiResponse<Product>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const product = apiResponse.data || (apiResponse as any)

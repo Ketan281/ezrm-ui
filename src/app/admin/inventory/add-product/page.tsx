@@ -22,13 +22,15 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
+  Divider,
 } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAddProduct } from "@/api/handlers"
 import { useUIStore } from "@/store/uiStore"
-import type { CreateProductRequest } from "@/api/services"
+import type { CreateProductFormData } from "@/api/services"
 
 // Create a custom styled Switch component
 const CustomSwitch = styled(Switch)(() => ({
@@ -119,8 +121,9 @@ interface DetailProps {
 export default function Detail({ product }: DetailProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const bannerInputRef = useRef<HTMLInputElement>(null)
 
-  // Hooks - removed authentication check
+  // Hooks
   const { notifications } = useUIStore()
   const addProductMutation = useAddProduct()
 
@@ -130,14 +133,13 @@ export default function Detail({ product }: DetailProps) {
   const [minMaxTags, setMinMaxTags] = useState<string[]>([])
   const [minMaxInput, setMinMaxInput] = useState("")
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [bannerImage, setBannerImage] = useState<File | null>(null)
+  const [bannerPreview, setBannerPreview] = useState<string>("")
   const [inStock, setInStock] = useState(true)
   const [includeTax, setIncludeTax] = useState(true)
 
   // Form validation state
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-
-  // Different Options state
-
 
   // Category state
   const [categories, setCategories] = useState(["Amino Acids", "Vitamins", "Supplements", "Protein", "Pre-workout"])
@@ -178,13 +180,15 @@ export default function Detail({ product }: DetailProps) {
       return
     }
 
-    // Prepare API payload
-    const productPayload: CreateProductRequest = {
+    // Prepare API payload with files
+    const productPayload: CreateProductFormData = {
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: Number(formData.price),
-      category: selectedCategories[0], // Use first selected category
+      category: selectedCategories[0],
       inStock: inStock,
+      bannerImage: bannerImage || undefined,
+      images: uploadedFiles.length > 0 ? uploadedFiles : undefined,
     }
 
     try {
@@ -194,6 +198,8 @@ export default function Detail({ product }: DetailProps) {
       setFormData({ name: "", description: "", price: "" })
       setSelectedCategories([])
       setUploadedFiles([])
+      setBannerImage(null)
+      setBannerPreview("")
       setFormErrors({})
 
       // Navigate back after a short delay
@@ -201,8 +207,30 @@ export default function Detail({ product }: DetailProps) {
         router.back()
       }, 1500)
     } catch (error) {
-      // Error is handled by the mutation's onError callback
       console.error("Form submission error:", error)
+    }
+  }
+
+  // Banner image handlers
+  const handleBannerUpload = () => {
+    bannerInputRef.current?.click()
+  }
+
+  const handleBannerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setBannerImage(file)
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file)
+      setBannerPreview(previewUrl)
+    }
+  }
+
+  const handleRemoveBanner = () => {
+    setBannerImage(null)
+    setBannerPreview("")
+    if (bannerInputRef.current) {
+      bannerInputRef.current.value = ""
     }
   }
 
@@ -215,7 +243,10 @@ export default function Detail({ product }: DetailProps) {
     const files = event.target.files
     if (files) {
       const newFiles = Array.from(files)
-      setUploadedFiles((prev) => [...prev, ...newFiles])
+      // Limit to 5 images maximum
+      const remainingSlots = 5 - uploadedFiles.length
+      const filesToAdd = newFiles.slice(0, remainingSlots)
+      setUploadedFiles((prev) => [...prev, ...filesToAdd])
     }
   }
 
@@ -279,9 +310,6 @@ export default function Detail({ product }: DetailProps) {
       setShowCreateCategory(false)
     }
   }
-
-  // Options handlers
-
 
   // Get the latest notification for display
   const latestNotification = notifications[notifications.length - 1]
@@ -371,7 +399,83 @@ export default function Detail({ product }: DetailProps) {
               <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
                 Images
               </Typography>
+              
+              {/* Banner Image Section */}
               <Paper sx={{ p: 2, mb: 2 }}>
+                <Typography variant="body2" sx={{ mb: 1, color: "#666", fontWeight: 500 }}>
+                  Banner Image
+                </Typography>
+                <Box
+                  sx={{
+                    border: "1px dashed #ccc",
+                    borderRadius: 1,
+                    p: 2,
+                    textAlign: "center",
+                    bgcolor: "#fff",
+                    mb: 2,
+                  }}
+                >
+                  <input
+                    type="file"
+                    ref={bannerInputRef}
+                    onChange={handleBannerChange}
+                    accept="image/*"
+                    style={{ display: "none" }}
+                  />
+                  {bannerPreview ? (
+                    <Box sx={{ position: "relative", display: "inline-block" }}>
+                      <img
+                        src={bannerPreview}
+                        alt="Banner preview"
+                        style={{
+                          width: "200px",
+                          height: "120px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                      />
+                      <Button
+                        onClick={handleRemoveBanner}
+                        sx={{
+                          position: "absolute",
+                          top: -10,
+                          right: -10,
+                          minWidth: "auto",
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          bgcolor: "error.main",
+                          color: "white",
+                          "&:hover": { bgcolor: "error.dark" },
+                        }}
+                      >
+                        <CloseIcon sx={{ fontSize: 14 }} />
+                      </Button>
+                    </Box>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        sx={{ mb: 1, textTransform: "none" }}
+                        onClick={handleBannerUpload}
+                        startIcon={<PhotoCameraIcon />}
+                      >
+                        Upload Banner Image
+                      </Button>
+                      <Typography variant="body2" color="textSecondary">
+                        Recommended size: 800x400px
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Multiple Images Section */}
+                <Typography variant="body2" sx={{ mb: 1, color: "#666", fontWeight: 500 }}>
+                  Product Images (Max 5)
+                </Typography>
                 <Box
                   sx={{
                     border: "1px dashed #ccc",
@@ -394,27 +498,64 @@ export default function Detail({ product }: DetailProps) {
                     color="primary"
                     sx={{ mb: 1, textTransform: "none" }}
                     onClick={handleFileUpload}
+                    disabled={uploadedFiles.length >= 5}
                   >
-                    Add File
+                    Add Images
                   </Button>
                   <Typography variant="body2" color="textSecondary">
-                    Or drag and drop files
+                    Or drag and drop files ({uploadedFiles.length}/5)
                   </Typography>
                 </Box>
+                
                 {uploadedFiles.length > 0 && (
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                      Uploaded Files:
+                      Uploaded Images:
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                       {uploadedFiles.map((file, index) => (
-                        <Chip
-                          key={index}
-                          label={file.name}
-                          onDelete={() => handleRemoveFile(index)}
-                          deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
-                          sx={{ bgcolor: "#f0f0f0" }}
-                        />
+                        <Box key={index} sx={{ position: "relative", display: "inline-block" }}>
+                          <Box
+                            sx={{
+                              width: 80,
+                              height: 80,
+                              borderRadius: 1,
+                              overflow: "hidden",
+                              border: "1px solid #ddd",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              bgcolor: "#f5f5f5",
+                            }}
+                          >
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index + 1}`}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </Box>
+                          <Button
+                            onClick={() => handleRemoveFile(index)}
+                            sx={{
+                              position: "absolute",
+                              top: -8,
+                              right: -8,
+                              minWidth: "auto",
+                              width: 20,
+                              height: 20,
+                              borderRadius: "50%",
+                              bgcolor: "error.main",
+                              color: "white",
+                              "&:hover": { bgcolor: "error.dark" },
+                            }}
+                          >
+                            <CloseIcon sx={{ fontSize: 12 }} />
+                          </Button>
+                        </Box>
                       ))}
                     </Box>
                   </Box>
