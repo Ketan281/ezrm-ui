@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { TableComponent,TableRowData } from '../../../../components/TableComponent';
-
-
+import { useQuery } from '@tanstack/react-query';
+import {
+  TableComponent,
+  TableRowData,
+} from '../../../../components/TableComponent';
+import { purchaseOrderService } from '@/api/services/purchaseOrders';
 
 interface OrderRowData extends TableRowData {
   product: string;
@@ -20,30 +23,76 @@ interface OrderRowData extends TableRowData {
 export default function OrderList() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  const orderData: OrderRowData[] = [
-    { id: '1', product: 'Vitamins', orderId: '12344', orderNumber: '12457', status: 'New Order', quantity: '200', customerName: 'Robin Rosh', trackOrder: '#' },
-    { id: '2', product: 'Vitamins', orderId: '12344', orderNumber: '12457', status: 'Pending', quantity: '200', customerName: 'Robin Rosh', trackOrder: '#' },
-    { id: '3', product: 'Vitamins', orderId: '12344', orderNumber: '12457', status: 'In-process', quantity: '200', customerName: 'Robin Rosh', trackOrder: '#' }, 
-    { id: '4', product: 'Vitamins', orderId: '12344', orderNumber: '12457', status: 'Completed', quantity: '200', customerName: 'Robin Rosh', trackOrder: '#' },
-    { id: '5', product: 'Multivitamins', orderId: '12345', orderNumber: '12458', status: 'New Order', quantity: '150', customerName: 'John Doe', trackOrder: '#' },
-    { id: '6', product: 'Protein Powder', orderId: '12346', orderNumber: '12459', status: 'Pending', quantity: '100', customerName: 'Jane Smith', trackOrder: '#' },
-    { id: '7', product: 'Fish Oil', orderId: '12347', orderNumber: '12460', status: 'In-process', quantity: '300', customerName: 'Mike Johnson', trackOrder: '#' },
-    { id: '8', product: 'Calcium', orderId: '12348', orderNumber: '12461', status: 'Completed', quantity: '250', customerName: 'Sarah Wilson', trackOrder: '#' },
-    { id: '9', product: 'Magnesium', orderId: '12349', orderNumber: '12462', status: 'New Order', quantity: '175', customerName: 'Robert Brown', trackOrder: '#' },
-    { id: '10', product: 'Zinc', orderId: '12350', orderNumber: '12463', status: 'Pending', quantity: '225', customerName: 'Emma Davis', trackOrder: '#' },
-  ];
+  // Debounce search term to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
 
-  const totalResults = orderData.length;
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch purchase orders from API with server-side search and filtering
+  const {
+    data: purchaseOrdersData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: [
+      'purchase-orders',
+      { page, search: debouncedSearchTerm, status: statusFilter },
+    ],
+    queryFn: () =>
+      purchaseOrderService.getPurchaseOrders({
+        page,
+        search: debouncedSearchTerm,
+        status: statusFilter,
+      }),
+  });
+
+  const purchaseOrders = purchaseOrdersData?.data || [];
+
+  // Transform API data to table format
+  const orderData: OrderRowData[] = purchaseOrders.map((order: any) => {
+    // Handle multiple products
+    const products = order.items || order.orderItems || [];
+    const productNames = products
+      .map((item: any) => item.product_name)
+      .filter(Boolean);
+    const displayProduct =
+      productNames.length > 0
+        ? productNames.length === 1
+          ? productNames[0]
+          : `${productNames[0]} +${productNames.length - 1} more`
+        : 'N/A';
+
+    return {
+      id: order._id || order.id,
+      orderId: order.id || order._id,
+      orderNumber: order.id || order._id?.slice(-8) || 'N/A',
+      product: displayProduct,
+      status: order.status || 'pending',
+      quantity:
+        products
+          .reduce((sum: number, item: any) => sum + (item.quantity || 0), 0)
+          .toString() || '0',
+      customerName: order.supplier_id?.name || 'N/A',
+      trackOrder: '#',
+    };
+  });
+
+  const totalResults = purchaseOrders.length;
 
   const statusOptions = [
-    { value: '', label: 'Status' },
-    { value: 'New Order', label: 'New Order' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'In-process', label: 'In-process' },
-    { value: 'Completed', label: 'Completed' },
+    { value: '', label: 'All Status' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'shipped', label: 'Shipped' },
+    { value: 'received', label: 'Received' },
+    { value: 'cancelled', label: 'Cancelled' },
   ];
 
   interface TableColumnType {
@@ -53,20 +102,31 @@ export default function OrderList() {
     align?: 'left' | 'center' | 'right';
     type?: 'status' | 'link' | 'default';
   }
-  
+
   const columns: TableColumnType[] = [
-    { id: 'product', label: 'Product', width: '15%' },
-    { id: 'orderId', label: 'Order Id', width: '12%',  align: 'center' },
-    { id: 'orderNumber', label: 'Order Number', width: '15%',  align: 'center' },
-    { id: 'status', label: 'Status', width: '165', type: 'status',  align: 'center' },
-    { id: 'quantity', label: 'Quantity', width: '10%',align: 'center' },
-    { id: 'customerName', label: 'Customer Name', width: '18%',align:"center" },
-    { 
-      id: 'trackOrder', 
-      label: 'Track Order', 
-      width: '20%', 
+    { id: 'orderId', label: 'Order ID', width: '12%', align: 'center' },
+    { id: 'orderNumber', label: 'Order Number', width: '15%', align: 'center' },
+    {
+      id: 'customerName',
+      label: 'Supplier',
+      width: '18%',
+      align: 'center',
+    },
+    { id: 'product', label: 'Products', width: '15%' },
+    { id: 'quantity', label: 'Quantity', width: '10%', align: 'center' },
+    {
+      id: 'status',
+      label: 'Status',
+      width: '12%',
+      type: 'status',
+      align: 'center',
+    },
+    {
+      id: 'trackOrder',
+      label: 'Track Order',
+      width: '18%',
       type: 'link',
-      align: 'center'
+      align: 'center',
     },
   ];
 
@@ -77,19 +137,67 @@ export default function OrderList() {
   const handleRowClick = (row: TableRowData) => {
     router.push(`/admin/logistics/orders/detail/${row.id}`);
   };
+
   const handleLinkClick = (row: TableRowData) => {
     router.push(`/admin/logistics/orders/detail/${row.id}`);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          p: 3,
+          backgroundColor: '#F9FAFB',
+          minHeight: '85vh',
+          fontFamily: 'Poppins, sans-serif',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Box
+        sx={{
+          p: 3,
+          backgroundColor: '#F9FAFB',
+          minHeight: '85vh',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+      >
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to load purchase orders. Please try again.
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ p: 3, backgroundColor: '#F9FAFB', minHeight: '85vh', fontFamily: 'Poppins, sans-serif' }}>
-      <Typography sx={{ 
-        fontSize: '24px', 
-        fontWeight: 'bold', 
-        color: '#1F2A44', 
-        mb: 3, 
-        fontFamily: 'Poppins, sans-serif' 
-      }}>
-        Order ID
+    <Box
+      sx={{
+        p: 3,
+        backgroundColor: '#F9FAFB',
+        minHeight: '85vh',
+        fontFamily: 'Poppins, sans-serif',
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: '#1F2A44',
+          mb: 3,
+          fontFamily: 'Poppins, sans-serif',
+        }}
+      >
+        Purchase Orders ({totalResults})
       </Typography>
 
       <TableComponent
@@ -106,12 +214,12 @@ export default function OrderList() {
         searchOptions={{
           value: searchTerm,
           onChange: setSearchTerm,
-          placeholder: "Search Order ID"
+          placeholder: 'Search Order ID',
         }}
         filterOptions={{
           value: statusFilter,
           onChange: setStatusFilter,
-          options: statusOptions
+          options: statusOptions,
         }}
       />
     </Box>

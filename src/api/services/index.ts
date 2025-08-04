@@ -1,26 +1,26 @@
-export { authService } from "./authService"
-export { userService } from "./userService"
-export { productsService } from "./products"
-export { rfqService } from "./rfq"
-export { ordersService } from "./orders"
-export { customerReviewsService } from "./customerReviews"
-export { shipmentsService } from "./shipments"
-export type { LoginCredentials, RegisterData, User, AuthResponse } from "./authService"
-export type { UpdateProfileData, ChangePasswordData } from "./userService"
+export { authService } from './authService';
+export { userService } from './userService';
+// export { productsService } from './products';
+export { productService } from './products';
+export { rfqService } from './rfq';
+export { ordersService } from './orders';
+export { customerReviewsService } from './customerReviews';
+export { shipmentsService } from './shipments';
+export { supplierService } from './suppliers';
 export type {
-  CreateProductRequest,
-  Product,
-  GetProductsParams,
-  ProductsResponse,
-  ApiResponse as ProductApiResponse,
-  CreateProductFormData
-} from "./products"
+  LoginCredentials,
+  RegisterData,
+  User,
+  AuthResponse,
+} from './authService';
+export type { UpdateProfileData, ChangePasswordData } from './userService';
+
 export type {
   RFQItem,
   GetRFQParams,
   RFQResponse,
   ApiResponse as RFQApiResponse,
-} from "./rfq"
+} from './rfq';
 export type {
   OrderItem,
   // ProductInfo,
@@ -28,18 +28,35 @@ export type {
   GetOrdersParams,
   OrdersResponse,
   // ApiResponse as OrderApiResponse,
-} from "./orders"
+} from './orders';
 export type {
   CustomerReview,
   GetCustomerReviewsParams,
   CustomerReviewsResponse,
   UpdateReviewRequest,
   ApiResponse as CustomerReviewApiResponse,
-} from "./customerReviews"
+} from './customerReviews';
 export type {
   Shipment,
   TrackingEvent,
   GetShipmentsParams,
   ShipmentsResponse,
   ApiResponse as ShipmentApiResponse,
-} from "./shipments"
+} from './shipments';
+// export type {
+//   Supplier,
+//   CreateSupplierRequest,
+//   SupplierResponse,
+//   SuppliersListResponse,
+// } from './suppliers';
+
+// export type {
+//   CreateProductRequest,
+//   Product,
+//   GetProductsParams,
+//   ProductResponse,
+//   ProductsResponse,
+//   ProductsListResponse,
+//   ApiResponse as ProductApiResponse,
+//   CreateProductFormData,
+// } from './products';

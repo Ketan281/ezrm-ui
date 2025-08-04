@@ -1,0 +1,103 @@
+import { api } from '../config';
+
+export interface Category {
+  id?: string;
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+  status: 'active' | 'inactive';
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+  status: 'active' | 'inactive';
+}
+
+export interface CategoryResponse {
+  success: boolean;
+  data?: Category;
+  message?: string;
+  error?: string;
+}
+
+export interface CategoriesListResponse {
+  success: boolean;
+  data?: Category[];
+  message?: string;
+  error?: string;
+}
+
+class CategoryService {
+  private baseUrl = '/private/categories';
+
+  // Get all categories
+  async getCategories(): Promise<CategoriesListResponse> {
+    try {
+      const response = await api.get(this.baseUrl);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to fetch categories'
+      );
+    }
+  }
+
+  // Get a specific category by ID
+  async getCategoryById(id: string): Promise<CategoryResponse> {
+    try {
+      const response = await api.get(`${this.baseUrl}/${id}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to fetch category'
+      );
+    }
+  }
+
+  // Create a new category
+  async createCategory(data: CreateCategoryRequest): Promise<CategoryResponse> {
+    try {
+      const response = await api.post(this.baseUrl, data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to create category'
+      );
+    }
+  }
+
+  // Update a category
+  async updateCategory(
+    id: string,
+    data: Partial<CreateCategoryRequest>
+  ): Promise<CategoryResponse> {
+    try {
+      const response = await api.put(`${this.baseUrl}/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to update category'
+      );
+    }
+  }
+
+  // Delete a category
+  async deleteCategory(id: string): Promise<CategoryResponse> {
+    try {
+      const response = await api.delete(`${this.baseUrl}/${id}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to delete category'
+      );
+    }
+  }
+}
+
+export const categoryService = new CategoryService();
