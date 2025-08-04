@@ -1,7 +1,6 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState, useRef } from "react"
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -24,41 +23,101 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from "@mui/material"
-import AddIcon from "@mui/icons-material/Add"
-import CloseIcon from "@mui/icons-material/Close"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
+  Grid,
+  Divider,
+  Alert,
+  CircularProgress,
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import ReactSelect from 'react-select';
+import { usePurchaseOrders } from '../../../../../hooks/usePurchaseOrder';
+
+import AddSupplierModal from '../../../../../components/modals/AddSupplierModal';
+import AddProductModal from '../../../../../components/modals/AddProductModal';
+import { productService, supplierService } from '@/api';
+import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
+import {
+  CreatePurchaseOrderRequest,
+  purchaseOrderService,
+} from '@/api/services/purchaseOrders';
+import { toast } from 'react-toastify';
 
 // Create a custom styled Switch component that looks like the first image
 const CustomSwitch = styled(Switch)(() => ({
   width: 42,
   height: 22,
   padding: 0,
-  "& .MuiSwitch-switchBase": {
+  '& .MuiSwitch-switchBase': {
     padding: 2,
-    "&.Mui-checked": {
-      transform: "translateX(20px)",
-      color: "#fff",
-      "& + .MuiSwitch-track": {
+    '&.Mui-checked': {
+      transform: 'translateX(20px)',
+      color: '#fff',
+      '& + .MuiSwitch-track': {
         opacity: 1,
-        backgroundColor: "#073E54", // Dark teal/blue color for ON state
+        backgroundColor: '#073E54', // Dark teal/blue color for ON state
       },
     },
   },
-  "& .MuiSwitch-thumb": {
+  '& .MuiSwitch-thumb': {
     width: 18,
     height: 18,
-    borderRadius: "50%",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 4px 0 rgba(0, 0, 0, 0.1)",
+    borderRadius: '50%',
+    backgroundColor: '#fff',
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
   },
-  "& .MuiSwitch-track": {
+  '& .MuiSwitch-track': {
     opacity: 1,
-    backgroundColor: "rgba(217, 228, 255, 1)", // Light blue color for OFF state
+    backgroundColor: 'rgba(217, 228, 255, 1)', // Light blue color for OFF state
     borderRadius: 32,
   },
-}))
+}));
+
+// React Select custom styles
+const reactSelectStyles = {
+  control: (provided: any, state: any) => ({
+    ...provided,
+    minHeight: '40px',
+    border: state.isFocused ? '2px solid #1976d2' : '1px solid #ccc',
+    borderRadius: '4px',
+    boxShadow: state.isFocused ? '0 0 0 1px #1976d2' : 'none',
+    '&:hover': {
+      border: '1px solid #1976d2',
+    },
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? '#1976d2'
+      : state.isFocused
+        ? '#f5f5f5'
+        : 'white',
+    color: state.isSelected ? 'white' : '#333',
+    padding: '8px 12px',
+    cursor: 'pointer',
+    fontFamily: '"Poppins", sans-serif',
+  }),
+  menu: (provided: any) => ({
+    ...provided,
+    zIndex: 9999,
+    fontFamily: '"Poppins", sans-serif',
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    fontFamily: '"Poppins", sans-serif',
+  }),
+  placeholder: (provided: any) => ({
+    ...provided,
+    fontFamily: '"Poppins", sans-serif',
+    color: '#666',
+  }),
+  input: (provided: any) => ({
+    ...provided,
+    fontFamily: '"Poppins", sans-serif',
+  }),
+};
 
 // Create a theme with Poppins font
 const theme = createTheme({
@@ -71,8 +130,8 @@ const theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
-        "@global": {
-          "*": {
+        '@global': {
+          '*': {
             fontFamily: '"Poppins", sans-serif',
           },
         },
@@ -100,648 +159,1161 @@ const theme = createTheme({
       },
     },
   },
-})
+});
 
-interface Product {
-  id: string
-  name: string
-  description: string
-  inventory: string
-  loreal: string
-  price: string
-  rating: string
+enum PurchaseOrderStatus {
+  PENDING = 'pending',
+  // APPROVED = 'approved',
+  SHIPPED = 'shipped',
+  RECEIVED = 'received',
+  CANCELLED = 'cancelled',
 }
 
-interface DetailProps {
-  product: Product
-}
+export default function AddPurchaseOrder() {
+  const router = useRouter();
+  const {
+    createPurchaseOrder,
+    isCreatingPurchaseOrder,
+    createPurchaseOrderError,
+  } = usePurchaseOrders();
 
-export default function Detail({ product }: DetailProps) {
-  const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const createPurchaseOrderMutation = useMutation({
+    mutationFn: async (data: CreatePurchaseOrderRequest) => {
+      // Validate the data before sending
+      return purchaseOrderService.createPurchaseOrder(data);
+    },
+    onSuccess: (data) => {
+      toast.success('Purchase order created successfully!');
+      // Invalidate and refetch purchase orders list
+      // queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+      return data;
+    },
+    onError: (error: Error) => {
+      console.log(error?.message, 'error');
 
-  // Separate state for tags and min max orders
-  const [tags, setTags] = useState<string[]>(["trend", "instagram"])
-  const [tagInput, setTagInput] = useState("")
-  const [minMaxTags, setMinMaxTags] = useState<string[]>([])
-  const [minMaxInput, setMinMaxInput] = useState("")
+      toast.error(error?.error);
+    },
+  });
 
-  const [hasMultipleOptions, setHasMultipleOptions] = useState(true)
-  const [isDigitalItem, setIsDigitalItem] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const {
+    data: suppliersData,
+    isFetching: isLoadingSuppliers,
+    refetch: refetchSuppliers,
+  } = useQuery({
+    queryKey: ['suppliers', {}],
+    queryFn: () => supplierService.getSuppliers(),
+  });
 
-  // Different Options state
-  const [options, setOptions] = useState([{ id: 1, name: "brand", values: ["1", "2", "3", "4"] }])
-  const [nextOptionId, setNextOptionId] = useState(2)
+  const suppliers: any = suppliersData?.data ?? [];
 
-  // Category state
-  const [categories, setCategories] = useState(["about", "brand", "team", "trend", "xyz"])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [showCreateCategory, setShowCreateCategory] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState("")
+  console.log('Suppliers data:', suppliersData);
+  console.log('Suppliers array:', suppliers);
+
+  const {
+    data: productsData,
+    isFetching: isLoadingProducts,
+    refetch: refetchProducts,
+  } = useQuery({
+    queryKey: ['products', {}],
+    queryFn: () => productService.getProducts(),
+  });
+
+  const products: any = productsData?.products ?? [];
+
+  console.log('Products data:', productsData);
+  console.log('Products array:', products);
+
+  // const { products, isLoadingProducts }: any = useProducts();
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+
+  // Modal states
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: product?.name || "",
-    description: product?.description || "",
-    price: product?.price?.replace("$", "") || "",
-  })
+    supplier_id: '',
+    status: PurchaseOrderStatus.PENDING,
+    total_amount: 0,
+    currency: 'USD',
+    expected_date: new Date().toISOString().split('T')[0], // Set today's date as default
+    items: [
+      {
+        product_id: '',
+        product_name: '',
+        quantity: 0,
+        unit_price: 0,
+        amount: 0,
+        status: PurchaseOrderStatus.PENDING,
+      },
+    ],
+    shipping_address: {
+      street: '',
+      city: '',
+      state: '',
+      country: '',
+      postal_code: '',
+    },
+    shipping_method: '',
+    shipping_cost: 0,
+    tracking_number: '',
+    shipping_date: '',
+    delivery_date: '',
+    shipping_notes: '',
+  });
 
-  // File upload handlers
-  const handleFileUpload = () => {
-    fileInputRef.current?.click()
-  }
+  const [shippingMethods] = useState([
+    'Standard Shipping',
+    'Express Shipping',
+    'Overnight Delivery',
+    'Freight Shipping',
+    'Air Freight',
+    'Sea Freight',
+  ]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (files) {
-      const newFiles = Array.from(files)
-      setUploadedFiles((prev) => [...prev, ...newFiles])
+  const [currencies] = useState([
+    { code: 'USD', name: 'US Dollar' },
+    { code: 'EUR', name: 'Euro' },
+    { code: 'GBP', name: 'British Pound' },
+    { code: 'JPY', name: 'Japanese Yen' },
+    { code: 'CAD', name: 'Canadian Dollar' },
+    { code: 'INR', name: 'Indian Rupee' },
+  ]);
+
+  const handleInputChange = (field: string, value: any) => {
+    console.log('handleInputChange called:', field, value);
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...(prev as any)[parent],
+          [child]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
     }
-  }
+  };
 
-  const handleRemoveFile = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+  const addItem = () => {
+    const newItem = {
+      product_id: '',
+      product_name: '',
+      quantity: 0,
+      unit_price: 0,
+      amount: 0,
+      status: PurchaseOrderStatus.PENDING,
+    };
+    setFormData((prev) => ({
+      ...prev,
+      items: [...prev.items, newItem],
+    }));
+  };
 
-  // Tag handlers
-  const handleAddTag = () => {
-    if (tagInput && !tags.includes(tagInput)) {
-      setTags([...tags, tagInput])
-      setTagInput("")
+  const removeItem = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateItem = (index: number, field: any, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      items: prev.items.map((item, i) => {
+        if (i === index) {
+          const updatedItem = { ...item, [field]: value };
+          // Auto-calculate amount when quantity or unit_price changes
+          if (field === 'quantity' || field === 'unit_price') {
+            updatedItem.amount = updatedItem.quantity * updatedItem.unit_price;
+          }
+          return updatedItem;
+        }
+        return item;
+      }),
+    }));
+  };
+
+  const updateTotalAmount = () => {
+    const itemsTotal = formData.items.reduce(
+      (sum, item) => sum + item.amount,
+      0
+    );
+    setFormData((prev) => ({
+      ...prev,
+      total_amount: itemsTotal,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    console.log(formData, 'formData');
+
+    try {
+      // Clear previous validation errors
+      // setValidationErrors({});
+
+      // Validate form data
+      // await purchaseOrderSchema.validate(formData, { abortEarly: false });
+
+      // Prepare data for API
+      const createData = {
+        order: {
+          supplier_id: formData?.supplier_id,
+          status: formData.status,
+          total_amount: formData.total_amount,
+          currency: formData.currency,
+          expected_date: formData.expected_date,
+          shipping_address: formData.shipping_address,
+          shipping_method: formData.shipping_method,
+          shipping_cost: formData.shipping_cost,
+          tracking_number: formData.tracking_number || '',
+          shipping_date: formData.shipping_date || '',
+          delivery_date: formData.delivery_date || '',
+          shipping_notes: formData.shipping_notes || '',
+        },
+        items: formData.items,
+      };
+
+      // Create purchase order
+      await createPurchaseOrderMutation.mutate(createData);
+
+      // Redirect to purchase orders list or show success message
+      // router.push('/admin/logistics/warehouse');
+    } catch (error: any) {
+      if (error.name === 'ValidationError') {
+        // Handle validation errors
+        const errors: Record<string, string> = {};
+        error.inner.forEach((err: any) => {
+          errors[err.path] = err.message;
+        });
+        setValidationErrors(errors);
+        toast.error('Please fix the validation errors');
+      } else {
+        // Handle API errors
+        toast.error(error.message || 'Failed to create purchase order');
+      }
     }
-  }
+  };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
-  }
+  // Update total amount when items change
+  useEffect(() => {
+    updateTotalAmount();
+  }, [formData.items]);
 
-  const handleTagKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      handleAddTag()
+  // Helper function to get field error
+  const getFieldError = (fieldName: string) => {
+    return validationErrors[fieldName] || '';
+  };
+
+  // Modal handlers
+  const handleSupplierAdded = (newSupplier: any) => {
+    // Refresh suppliers list
+    refetchSuppliers();
+    // Set the newly added supplier as selected
+    if (newSupplier?.id) {
+      handleInputChange('supplier_id', newSupplier.id);
     }
-  }
+    setShowAddSupplierModal(false);
+  };
 
-  // Min Max orders handlers
-  const handleAddMinMaxTag = () => {
-    if (minMaxInput && !minMaxTags.includes(minMaxInput)) {
-      setMinMaxTags([...minMaxTags, minMaxInput])
-      setMinMaxInput("")
-    }
-  }
-
-  const handleRemoveMinMaxTag = (tagToRemove: string) => {
-    setMinMaxTags(minMaxTags.filter((tag) => tag !== tagToRemove))
-  }
-
-  const handleMinMaxKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      handleAddMinMaxTag()
-    }
-  }
-
-  // Category handlers
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-    )
-  }
-
-  const handleCreateCategory = () => {
-    if (newCategoryName && !categories.includes(newCategoryName)) {
-      setCategories([...categories, newCategoryName])
-      setNewCategoryName("")
-      setShowCreateCategory(false)
-    }
-  }
-
-  // Options handlers
-  const handleAddOption = () => {
-    const newOption = {
-      id: nextOptionId,
-      name: "",
-      values: [],
-    }
-    setOptions([...options, newOption])
-    setNextOptionId(nextOptionId + 1)
-  }
-
-  const handleRemoveOption = (optionId: number) => {
-    setOptions(options.filter((option) => option.id !== optionId))
-  }
-
-  const handleOptionNameChange = (optionId: number, name: string) => {
-    setOptions(options.map((option) => (option.id === optionId ? { ...option, name } : option)))
-  }
-
-  const handleClearAllTags = () => {
-    setTags([])
-    setTagInput("")
-  }
-
-  const [includeTax, setIncludeTax] = useState(true)
+  const handleProductAdded = (newProduct: any) => {
+    // Refresh products list
+    refetchProducts();
+    setShowAddProductModal(false);
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.back()}>
-            <Image src="/back.png?height=13&width=13" alt="Back" width={13} height={13} />
-            <Typography sx={{ ml: 1, color: "#737791", fontSize: "14px" }}>Back</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            onClick={() => router.back()}
+          >
+            <Image
+              src="/back.png?height=13&width=13"
+              alt="Back"
+              width={13}
+              height={13}
+            />
+            <Typography sx={{ ml: 1, color: '#737791', fontSize: '14px' }}>
+              Back
+            </Typography>
           </Box>
         </Box>
 
-        <Typography sx={{ fontSize: "24px", fontWeight: "bold", color: "#1F2A44", mb: 2 }}>Add Product</Typography>
+        <Typography
+          sx={{ fontSize: '24px', fontWeight: 'bold', color: '#1F2A44' }}
+        >
+          Create Purchase Order
+        </Typography>
 
-        <Box sx={{ display: "flex", p: 2, minHeight: "100vh", alignItems: "flex-start", gap: 3, mt: -2 }}>
+        <Typography sx={{ fontSize: '12px', color: '#1F2A44', mb: 2 }}>
+          Here you can create a new purchase order from vendor
+        </Typography>
+
+        <Box
+          sx={{
+            display: 'flex',
+            p: 2,
+            minHeight: '100vh',
+            alignItems: 'flex-start',
+            gap: 3,
+            mt: -2,
+          }}
+        >
           {/* Left Section */}
-          <Box sx={{ flex: 1, pr: 2, bgcolor: "#fff", m: 2, p: 6, pt: 2, pb: 2 }}>
-            {/* Information Section */}
+          <Box
+            sx={{ flex: 1, pr: 2, bgcolor: '#fff', m: 2, p: 6, pt: 2, pb: 2 }}
+          >
+            {/* Products Section */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                Information
-              </Typography>
-              <Paper sx={{ p: 2, mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                  Product Name
-                </Typography>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={{ mb: 2 }}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-
-                <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                  Product Description
-                </Typography>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  multiline
-                  rows={4}
-                  placeholder="Product description"
-                  sx={{ mb: 1 }}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </Paper>
-            </Box>
-
-            {/* Images Section */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                Images
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
+                Products
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
                 <Box
                   sx={{
-                    border: "1px dashed #ccc",
-                    borderRadius: 1,
-                    p: 3,
-                    textAlign: "center",
-                    bgcolor: "#fff",
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
                   }}
                 >
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    multiple
-                    accept="image/*"
-                    style={{ display: "none" }}
-                  />
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    Order Items
+                  </Typography>
                   <Button
                     variant="outlined"
-                    color="primary"
-                    sx={{ mb: 1, textTransform: "none" }}
-                    onClick={handleFileUpload}
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={addItem}
+                    sx={{ textTransform: 'none' }}
                   >
-                    Add File
+                    Add Product
                   </Button>
-                  <Typography variant="body2" color="textSecondary">
-                    Or drag and drop files
-                  </Typography>
                 </Box>
 
-                {/* Display uploaded files */}
-                {uploadedFiles.length > 0 && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                      Uploaded Files:
+                {formData.items.length === 0 ? (
+                  <Box sx={{ textAlign: 'center', py: 3, color: '#666' }}>
+                    <Typography variant="body2">
+                      No products added yet. Click "Add Product" to start.
                     </Typography>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                      {uploadedFiles.map((file, index) => (
-                        <Chip
-                          key={index}
-                          label={file.name}
-                          onDelete={() => handleRemoveFile(index)}
-                          deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
-                          sx={{ bgcolor: "#f0f0f0" }}
-                        />
-                      ))}
-                    </Box>
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                  >
+                    {formData.items.map((item, index) => (
+                      <Paper
+                        key={index}
+                        sx={{ p: 2, border: '1px solid #e0e0e0' }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 2,
+                          }}
+                        >
+                          <Typography variant="subtitle2">
+                            Product {index + 1}
+                          </Typography>
+                          <Button
+                            size="small"
+                            onClick={() => removeItem(index)}
+                            sx={{
+                              color: 'error.main',
+                              minWidth: 'auto',
+                              p: 0.5,
+                            }}
+                          >
+                            <CloseIcon sx={{ fontSize: 16 }} />
+                          </Button>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2,
+                          }}
+                        >
+                          <Box
+                            sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}
+                          >
+                            <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                              <Typography
+                                variant="body2"
+                                sx={{ mb: 1, color: '#666' }}
+                              >
+                                Product
+                              </Typography>
+                              <ReactSelect
+                                value={item?.product_option}
+                                options={[
+                                  ...products.map((product: any) => ({
+                                    value: product?._id,
+                                    label: `${product?.name} - ${product?.category}`,
+                                  })),
+                                  {
+                                    value: 'add_new',
+                                    label: '+ Add New Product',
+                                  },
+                                ]}
+                                placeholder="Select Product"
+                                isClearable
+                                styles={reactSelectStyles}
+                                isSearchable
+                                isLoading={isLoadingProducts}
+                                onChange={(selectedOption: any) => {
+                                  if (selectedOption?.value === 'add_new') {
+                                    setShowAddProductModal(true);
+                                  } else {
+                                    const selectedProduct = products.find(
+                                      (p) => p.id === selectedOption?.value
+                                    );
+                                    updateItem(
+                                      index,
+                                      'product_id',
+                                      selectedOption?.value || ''
+                                    );
+                                    updateItem(
+                                      index,
+                                      'product_option',
+                                      selectedOption
+                                    );
+                                    if (selectedProduct) {
+                                      updateItem(
+                                        index,
+                                        'product_name',
+                                        selectedProduct.name
+                                      );
+                                      updateItem(
+                                        index,
+                                        'unit_price',
+                                        selectedProduct.price
+                                      );
+                                    }
+                                  }
+                                }}
+                              />
+                            </Box>
+                            <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+                              <Typography
+                                variant="body2"
+                                sx={{ mb: 1, color: '#666' }}
+                              >
+                                Quantity
+                              </Typography>
+                              <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) =>
+                                  updateItem(
+                                    index,
+                                    'quantity',
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                              />
+                            </Box>
+                            <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+                              <Typography
+                                variant="body2"
+                                sx={{ mb: 1, color: '#666' }}
+                              >
+                                Unit Price
+                              </Typography>
+                              <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                value={item.unit_price}
+                                onChange={(e) =>
+                                  updateItem(
+                                    index,
+                                    'unit_price',
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                            </Box>
+                            <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+                              <Typography
+                                variant="body2"
+                                sx={{ mb: 1, color: '#666' }}
+                              >
+                                Amount
+                              </Typography>
+                              <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                value={item.amount}
+                                disabled
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+                      </Paper>
+                    ))}
                   </Box>
                 )}
               </Paper>
             </Box>
 
-            {/* Price Section */}
+            {/* Supplier Information Section */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                Price
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
+                Supplier Information
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                      Product Price
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                  <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Supplier
+                    </Typography>
+                    <ReactSelect
+                      value={formData?.supplier}
+                      options={[
+                        ...suppliers?.map((supplier: any) => ({
+                          value: supplier?._id,
+                          label: supplier.name,
+                        })),
+                        { value: 'add_new', label: '+ Add New Supplier' },
+                      ]}
+                      placeholder="Select Supplier"
+                      isClearable
+                      styles={reactSelectStyles}
+                      isSearchable
+                      isLoading={isLoadingSuppliers}
+                      onChange={(selectedOption: any) => {
+                        if (selectedOption?.value === 'add_new') {
+                          setShowAddSupplierModal(true);
+                        } else {
+                          setFormData({
+                            ...formData,
+                            supplier: selectedOption,
+                            supplier_id: selectedOption?.value || '',
+                          });
+                        }
+                      }}
+                    />
+                    {getFieldError('supplier_id') && (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ mt: 0.5 }}
+                      >
+                        {getFieldError('supplier_id')}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Status
+                    </Typography>
+                    <ReactSelect
+                      value={formData?.status_option}
+                      options={[
+                        {
+                          value: PurchaseOrderStatus.PENDING,
+                          label: 'pending',
+                        },
+                        {
+                          value: PurchaseOrderStatus.APPROVED,
+                          label: 'Approved',
+                        },
+                        {
+                          value: PurchaseOrderStatus.SHIPPED,
+                          label: 'Shipped',
+                        },
+                        {
+                          value: PurchaseOrderStatus.RECEIVED,
+                          label: 'Received',
+                        },
+                        {
+                          value: PurchaseOrderStatus.CANCELLED,
+                          label: 'Cancelled',
+                        },
+                      ]}
+                      placeholder="Select Status"
+                      styles={reactSelectStyles}
+                      onChange={(selectedOption: any) => {
+                        setFormData({
+                          ...formData,
+                          status_option: selectedOption,
+                          status:
+                            selectedOption?.value ||
+                            PurchaseOrderStatus.PENDING,
+                        });
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Total Amount
                     </Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
                       size="small"
-                      placeholder="0.00"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      type="number"
+                      value={formData.total_amount}
+                      onChange={(e) =>
+                        handleInputChange(
+                          'total_amount',
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
                       InputProps={{
-                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        startAdornment: (
+                          <InputAdornment position="start">$</InputAdornment>
+                        ),
                       }}
                     />
                   </Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                      Discount Price
+                  <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Currency
                     </Typography>
-                    <TextField fullWidth variant="outlined" size="small" placeholder="Price at checkout" />
-                  </Box>
-                </Box>
-                <FormControlLabel
-                  control={<CustomSwitch checked={includeTax} onChange={(e) => setIncludeTax(e.target.checked)} />}
-                  label="Add tax for this product"
-                  sx={{
-                    mt: 1,
-                    "& .MuiFormControlLabel-label": { fontSize: 14 },
-                    "& .MuiSwitch-root": { mr: 2 },
-                  }}
-                />
-              </Paper>
-            </Box>
-
-            {/* Different Options */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                Different Options
-              </Typography>
-              <Paper sx={{ p: 2, mb: 2 }}>
-                <FormControlLabel
-                  control={
-                    <CustomSwitch
-                      checked={hasMultipleOptions}
-                      onChange={(e) => setHasMultipleOptions(e.target.checked)}
-                    />
-                  }
-                  label="This product has multiple options"
-                  sx={{
-                    "& .MuiFormControlLabel-label": { fontSize: 14 },
-                    "& .MuiSwitch-root": { mr: 2 },
-                  }}
-                />
-
-                {hasMultipleOptions && (
-                  <Box sx={{ mt: 2 }}>
-                    {options.map((option, index) => (
-                      <Box key={option.id} sx={{ mb: 3 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-                          <Typography variant="subtitle2">Option {index + 1}</Typography>
-                          {options.length > 1 && (
-                            <Button
-                              size="small"
-                              onClick={() => handleRemoveOption(option.id)}
-                              sx={{ color: "error.main", minWidth: "auto", p: 0.5 }}
-                            >
-                              <CloseIcon sx={{ fontSize: 16 }} />
-                            </Button>
-                          )}
-                        </Box>
-                        <Box sx={{ display: "flex", gap: 2 }}>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                              Name
-                            </Typography>
-                            <FormControl fullWidth size="small">
-                              <Select
-                                value={option.name}
-                                displayEmpty
-                                onChange={(e) => handleOptionNameChange(option.id, e.target.value)}
-                              >
-                                <MenuItem value="">Select option</MenuItem>
-                                <MenuItem value="brand">brand</MenuItem>
-                                <MenuItem value="size">size</MenuItem>
-                                <MenuItem value="color">color</MenuItem>
-                                <MenuItem value="material">material</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Box>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                              Values
-                            </Typography>
-                            <TextField
-                              fullWidth
-                              variant="outlined"
-                              size="small"
-                              //   placeholder="Enter values separated by commas"
-                              InputProps={{
-                                startAdornment: option.values.length > 0 && (
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      gap: 1,
-                                      //   flexWrap: "wrap",
-                                      mr: 1,
-                                      maxWidth: "calc(100% - 100px)", // Leave space for input text
-                                      "& > *": {
-                                        flexBasis: "calc(25% - 8px)", // 4 chips per row with gap
-                                        minWidth: "60px",
-                                        maxWidth: "80px",
-                                      },
-                                    }}
-                                  >
-                                    {option.values.map((value, valueIndex) => (
-                                      <Chip
-                                        key={valueIndex}
-                                        label={value}
-                                        size="small"
-                                        variant="outlined"
-                                        deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
-                                        onDelete={() => {
-                                          // Remove this specific value from the option
-                                          const newValues = option.values.filter((_, i) => i !== valueIndex)
-                                          setOptions(
-                                            options.map((opt) =>
-                                              opt.id === option.id ? { ...opt, values: newValues } : opt,
-                                            ),
-                                          )
-                                        }}
-                                        sx={{
-                                          borderRadius: 0,
-                                          bgcolor: "rgba(217, 228, 255, 1)",
-                                          fontSize: "12px",
-                                          height: "24px",
-                                          "& .MuiChip-label": {
-                                            px: 1,
-                                          },
-                                        }}
-                                      />
-                                    ))}
-                                  </Box>
-                                ),
-                              }}
-                            />
-                          </Box>
-                        </Box>
-                      </Box>
-                    ))}
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={handleAddOption}
-                      sx={{
-                        mt: 1,
-                        color: "primary.main",
-                        textTransform: "none",
-                        p: 0,
+                    <ReactSelect
+                      value={formData?.currency_option}
+                      options={currencies.map((currency) => ({
+                        value: currency.code,
+                        label: `${currency.code} - ${currency.name}`,
+                      }))}
+                      placeholder="Select Currency"
+                      styles={reactSelectStyles}
+                      onChange={(selectedOption: any) => {
+                        setFormData({
+                          ...formData,
+                          currency_option: selectedOption,
+                          currency: selectedOption?.value || 'USD',
+                        });
                       }}
-                    >
-                      Add More
-                    </Button>
+                    />
                   </Box>
-                )}
+                  <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Expected Date
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      type="date"
+                      value={formData.expected_date}
+                      onChange={(e) =>
+                        handleInputChange('expected_date', e.target.value)
+                      }
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Box>
+                </Box>
               </Paper>
             </Box>
 
-            {/* Shipping */}
+            {/* Shipping Information Section */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                Shipping
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
+                Shipping Information
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                      Weight
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ width: '100%' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Street Address
                     </Typography>
-                    <TextField fullWidth variant="outlined" size="small" placeholder="Enter Weight" />
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      value={formData.shipping_address.street}
+                      onChange={(e) =>
+                        handleInputChange(
+                          'shipping_address.street',
+                          e.target.value
+                        )
+                      }
+                    />
                   </Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: "#666" }}>
-                      Country
-                    </Typography>
-                    <FormControl fullWidth size="small">
-                      <Select value="" displayEmpty renderValue={() => "Select Country"}>
-                        <MenuItem value="">Select Country</MenuItem>
-                      </Select>
-                    </FormControl>
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        City
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        value={formData.shipping_address.city}
+                        onChange={(e) =>
+                          handleInputChange(
+                            'shipping_address.city',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </Box>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        State/Province
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        value={formData.shipping_address.state}
+                        onChange={(e) =>
+                          handleInputChange(
+                            'shipping_address.state',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Country
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        value={formData.shipping_address.country}
+                        onChange={(e) =>
+                          handleInputChange(
+                            'shipping_address.country',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </Box>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Postal Code
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        value={formData.shipping_address.postal_code}
+                        onChange={(e) =>
+                          handleInputChange(
+                            'shipping_address.postal_code',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </Box>
                   </Box>
                 </Box>
-                <FormControlLabel
-                  control={
-                    <CustomSwitch checked={isDigitalItem} onChange={(e) => setIsDigitalItem(e.target.checked)} />
-                  }
-                  label="This is digital item"
-                  sx={{
-                    mt: 2,
-                    "& .MuiFormControlLabel-label": { fontSize: 14 },
-                    "& .MuiSwitch-root": { mr: 2 },
-                  }}
-                />
               </Paper>
             </Box>
+
+            {/* Shipping Details Section */}
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+              >
+                Shipping Details
+              </Typography>
+              <Paper sx={{ p: 2, mb: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Shipping Method
+                      </Typography>
+                      <ReactSelect
+                        value={formData?.shipping_method_option}
+                        options={shippingMethods.map((method) => ({
+                          value: method,
+                          label: method,
+                        }))}
+                        placeholder="Select Shipping Method"
+                        isClearable
+                        styles={reactSelectStyles}
+                        isSearchable
+                        onChange={(selectedOption: any) => {
+                          setFormData({
+                            ...formData,
+                            shipping_method_option: selectedOption,
+                            shipping_method: selectedOption?.value || '',
+                          });
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Shipping Cost
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        type="number"
+                        value={formData.shipping_cost}
+                        onChange={(e) =>
+                          handleInputChange(
+                            'shipping_cost',
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">$</InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Tracking Number
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        value={formData.tracking_number}
+                        onChange={(e) =>
+                          handleInputChange('tracking_number', e.target.value)
+                        }
+                        placeholder="Enter tracking number"
+                      />
+                    </Box>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Shipping Date
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        type="date"
+                        value={formData.shipping_date}
+                        onChange={(e) =>
+                          handleInputChange('shipping_date', e.target.value)
+                        }
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Expected Delivery Date
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        type="date"
+                        value={formData.delivery_date}
+                        onChange={(e) =>
+                          handleInputChange('delivery_date', e.target.value)
+                        }
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                  <Box sx={{ width: '100%' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Shipping Notes
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      multiline
+                      rows={3}
+                      value={formData.shipping_notes}
+                      onChange={(e) =>
+                        handleInputChange('shipping_notes', e.target.value)
+                      }
+                      placeholder="Enter any special shipping instructions or notes"
+                    />
+                  </Box>
+                </Box>
+              </Paper>
+            </Box>
+
+            {/* Error Display */}
+            {createPurchaseOrderError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {createPurchaseOrderError.message}
+              </Alert>
+            )}
+
+            {/* Validation Errors */}
+            {Object.keys(validationErrors).length > 0 && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Please fix the following errors:
+                </Typography>
+                <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                  {Object.entries(validationErrors).map(([field, error]) => (
+                    <li key={field}>
+                      <Typography variant="body2">
+                        {field}: {error}
+                      </Typography>
+                    </li>
+                  ))}
+                </ul>
+              </Alert>
+            )}
 
             {/* Action Buttons */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-              <Button variant="text" sx={{ color: "#000" }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}
+            >
+              <Button
+                variant="text"
+                sx={{ color: '#000' }}
+                onClick={() => router.back()}
+                disabled={isCreatingPurchaseOrder}
+              >
                 Cancel
               </Button>
               <Button
                 variant="contained"
+                onClick={handleSubmit}
+                disabled={isCreatingPurchaseOrder}
                 sx={{
-                  bgcolor: "#FFA500",
-                  color: "#fff",
-                  "&:hover": { bgcolor: "#FF8C00" },
+                  bgcolor: '#FFA500',
+                  color: '#fff',
+                  '&:hover': { bgcolor: '#FF8C00' },
                   px: 4,
+                  minWidth: '200px',
                 }}
               >
-                Add
+                {isCreatingPurchaseOrder ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1, color: '#fff' }} />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Purchase Order'
+                )}
               </Button>
             </Box>
           </Box>
 
           {/* Right Section */}
-          <Box sx={{ width: 250 }}>
-            {/* Categories */}
+          <Box sx={{ width: 300 }}>
+            {/* Order Summary */}
             <Box sx={{ mb: 4 }}>
               <Paper sx={{ p: 2, mt: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                  Categories
+                <Typography
+                  variant="subtitle1"
+                  sx={{ mb: 1, fontWeight: 500, color: 'black' }}
+                >
+                  Order Summary
                 </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  {categories.map((category) => (
-                    <Box key={category} sx={{ display: "flex", alignItems: "center" }}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            size="small"
-                            checked={selectedCategories.includes(category)}
-                            onChange={() => handleCategoryChange(category)}
-                          />
-                        }
-                        label=""
-                        sx={{ m: 0, mr: -1 }}
-                      />
-                      <Typography variant="body2">{category}</Typography>
-                    </Box>
-                  ))}
-                  <Button
-                    variant="text"
-                    onClick={() => setShowCreateCategory(true)}
-                    sx={{
-                      color: "#1976d2",
-                      textTransform: "none",
-                      justifyContent: "flex-start",
-                      p: 0,
-                      mt: 1,
-                    }}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between' }}
                   >
-                    Create New
-                  </Button>
+                    <Typography variant="body2" color="textSecondary">
+                      Subtotal:
+                    </Typography>
+                    <Typography variant="body2">
+                      ${formData.total_amount.toFixed(2)}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <Typography variant="body2" color="textSecondary">
+                      Shipping:
+                    </Typography>
+                    <Typography variant="body2">
+                      ${formData.shipping_cost.toFixed(2)}
+                    </Typography>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <Typography variant="body1" fontWeight="bold">
+                      Total:
+                    </Typography>
+                    <Typography variant="body1" fontWeight="bold">
+                      $
+                      {(formData.total_amount + formData.shipping_cost).toFixed(
+                        2
+                      )}
+                    </Typography>
+                  </Box>
                 </Box>
               </Paper>
             </Box>
 
-            {/* Tags */}
+            {/* Status Information */}
             <Box sx={{ mb: 4 }}>
               <Paper sx={{ p: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 500, color: "black" }}>
-                  Tags
-                </Typography>
-                <Button
-                  variant="text"
-                  sx={{
-                    color: "#1976d2",
-                    textTransform: "none",
-                    justifyContent: "flex-start",
-                    p: 0,
-                    mb: 1,
-                  }}
+                <Typography
+                  variant="subtitle1"
+                  sx={{ mb: 1, fontWeight: 500, color: 'black' }}
                 >
-                  Add Tags
-                </Button>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  placeholder="Enter tag name"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={handleTagKeyPress}
-                  sx={{ mb: 2 }}
-                />
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {tags.map((tag) => (
+                  Status Information
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <Typography variant="body2" color="textSecondary">
+                      Current Status:
+                    </Typography>
                     <Chip
-                      key={tag}
-                      label={tag}
+                      label={
+                        formData.status.charAt(0).toUpperCase() +
+                        formData.status.slice(1)
+                      }
                       size="small"
-                      variant="outlined"
-                      onDelete={() => handleRemoveTag(tag)}
-                      deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
-                      sx={{
-                        bgcolor: tag === "trend" ? "#f0f0f0" : "#e6e6fa",
-                        borderRadius: 0,
-                      }}
+                      color={
+                        formData.status === PurchaseOrderStatus.APPROVED
+                          ? 'success'
+                          : formData.status === PurchaseOrderStatus.SHIPPED
+                            ? 'info'
+                            : formData.status === PurchaseOrderStatus.RECEIVED
+                              ? 'success'
+                              : formData.status ===
+                                  PurchaseOrderStatus.CANCELLED
+                                ? 'error'
+                                : 'warning'
+                      }
                     />
-                  ))}
+                  </Box>
+                  {formData.expected_date && (
+                    <Box
+                      sx={{ display: 'flex', justifyContent: 'space-between' }}
+                    >
+                      <Typography variant="body2" color="textSecondary">
+                        Expected Date:
+                      </Typography>
+                      <Typography variant="body2">
+                        {new Date(formData.expected_date).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                  )}
+                  {formData.shipping_date && (
+                    <Box
+                      sx={{ display: 'flex', justifyContent: 'space-between' }}
+                    >
+                      <Typography variant="body2" color="textSecondary">
+                        Shipping Date:
+                      </Typography>
+                      <Typography variant="body2">
+                        {new Date(formData.shipping_date).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               </Paper>
             </Box>
 
-            {/* Min Max Orders */}
+            {/* Quick Actions */}
             <Box>
               <Paper sx={{ p: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: "black" }}>
-                  Min Max orders
-                </Typography>
-                <Button
-                  variant="text"
-                  sx={{
-                    color: "#1976d2",
-                    textTransform: "none",
-                    justifyContent: "flex-start",
-                    p: 0,
-                    mb: 1,
-                  }}
+                <Typography
+                  variant="subtitle1"
+                  sx={{ mb: 1, fontWeight: 500, color: 'black' }}
                 >
-                  Add Orders
-                </Button>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  placeholder="Enter order limit"
-                  value={minMaxInput}
-                  onChange={(e) => setMinMaxInput(e.target.value)}
-                  onKeyPress={handleMinMaxKeyPress}
-                  sx={{ mb: 2 }}
-                />
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {minMaxTags.map((tag) => (
-                    <Chip
-                      key={tag}
-                      label={tag}
-                      size="small"
-                      variant="outlined"
-                      onDelete={() => handleRemoveMinMaxTag(tag)}
-                      deleteIcon={<CloseIcon style={{ fontSize: 14 }} />}
-                      sx={{
-                        bgcolor: "#f0f8ff",
-                        borderRadius: 0,
-                      }}
-                    />
-                  ))}
+                  Quick Actions
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Send to Supplier
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Print Order
+                  </Button>
                 </Box>
               </Paper>
             </Box>
           </Box>
         </Box>
-
-        {/* Create Category Dialog */}
-        <Dialog open={showCreateCategory} onClose={() => setShowCreateCategory(false)}>
-          <DialogTitle>Create New Category</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Category Name"
-              fullWidth
-              variant="outlined"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowCreateCategory(false)}>Cancel</Button>
-            <Button onClick={handleCreateCategory} variant="contained">
-              Create
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Box>
+
+      {/* Modals */}
+      <AddSupplierModal
+        open={showAddSupplierModal}
+        onClose={() => setShowAddSupplierModal(false)}
+        onSupplierAdded={handleSupplierAdded}
+      />
+
+      <AddProductModal
+        open={showAddProductModal}
+        onClose={() => setShowAddProductModal(false)}
+        onProductAdded={handleProductAdded}
+      />
     </ThemeProvider>
-  )
+  );
 }
