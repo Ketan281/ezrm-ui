@@ -23,6 +23,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useLogout } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
+import GlobalSearchModal from '@/components/GlobalSearchModal';
 
 // Define types for our sidebar items with nested dropdowns
 interface NestedDropdownOption {
@@ -165,6 +166,7 @@ export default function AdminLayout({
   // Add mounted state to prevent hydration issues
   const [mounted, setMounted] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
 
   // Create separate state for each dropdown
   const [openDropdowns, setOpenDropdowns] = useState<DropdownState>({
@@ -257,6 +259,19 @@ export default function AdminLayout({
       }
     }
   }, [pathname, router]);
+
+  // Keyboard shortcut for global search
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        setShowGlobalSearch(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const toggleDropdown = (dropdownName: string) => {
     // Close all other dropdowns when opening a new one
@@ -383,15 +398,16 @@ export default function AdminLayout({
               display: 'flex',
               alignItems: 'center',
               pl: 2,
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+              '&:hover': {
+                backgroundColor: '#f0f0f0',
+              },
             }}
+            onClick={() => setShowGlobalSearch(true)}
           >
-            <Image
-              src="/magnifier.svg"
-              alt="Notifications"
-              width={20}
-              height={20}
-            />
-            <Typography variant="body2" sx={{ ml: 1 }}>
+            <Image src="/magnifier.svg" alt="Search" width={20} height={20} />
+            <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>
               Search Here...
             </Typography>
           </Box>
@@ -771,6 +787,12 @@ export default function AdminLayout({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Global Search Modal */}
+      <GlobalSearchModal
+        open={showGlobalSearch}
+        onClose={() => setShowGlobalSearch(false)}
+      />
 
       {/* Main Content */}
       <Box
