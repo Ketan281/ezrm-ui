@@ -32,7 +32,10 @@ export interface ProductResponse {
 
 export interface ProductsListResponse {
   success: boolean;
-  data?: Product[];
+  products?: Product[];
+  total?: number;
+  page?: number;
+  limit?: number;
   message?: string;
   error?: string;
 }
@@ -41,9 +44,19 @@ class ProductService {
   private baseUrl = '/private/products';
 
   // Get all products
-  async getProducts() {
+  async getProducts(params?: { page?: number; search?: string }) {
     try {
-      const response = await api.get(this.baseUrl);
+      const queryParams = new URLSearchParams();
+      if (params?.page) {
+        queryParams.append('page', params.page.toString());
+      }
+      if (params?.search) {
+        queryParams.append('search', params.search);
+      }
+      const url = queryParams.toString()
+        ? `${this.baseUrl}?${queryParams.toString()}`
+        : this.baseUrl;
+      const response = await api.get(url);
       return response.data;
     } catch (error: any) {
       throw new Error(

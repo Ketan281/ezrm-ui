@@ -57,6 +57,7 @@ interface NestedDropdownState {
 
 const sidebarItems: SidebarItem[] = [
   { text: 'Dashboard', icon: '/dashbord (2).png', path: '/admin/dashboard' },
+
   {
     text: 'Inventory',
     icon: '/inventory.png',
@@ -133,6 +134,16 @@ const sidebarItems: SidebarItem[] = [
       { text: 'Document Tracking', path: '/admin/logistics/document-tracking' },
     ],
   },
+  {
+    text: 'Management',
+    icon: '/inventory.png',
+    hasDropdown: true,
+    options: [
+      { text: 'Products Listing', path: '/admin/data-management/products' },
+      { text: 'Categories Listing', path: '/admin/data-management/categories' },
+      { text: 'Warehouse Listing', path: '/admin/data-management/warehouses' },
+    ],
+  },
   // { text: 'Sales Report', icon: '/sales-report.png', path: '/admin/sales' },
   { text: 'Messages', icon: '/customers.png', path: '/admin/messages' },
   { text: 'Settings', icon: '/settings.png', path: '/admin/settings' },
@@ -157,6 +168,7 @@ export default function AdminLayout({
 
   // Create separate state for each dropdown
   const [openDropdowns, setOpenDropdowns] = useState<DropdownState>({
+    Management: false,
     Inventory: false,
     Orders: false,
     Payments: false,
@@ -223,7 +235,9 @@ export default function AdminLayout({
     }
 
     // Auto open appropriate dropdown based on current path
-    if (pathname.startsWith('/admin/inventory/')) {
+    if (pathname.startsWith('/admin/data-management/')) {
+      setOpenDropdowns((prev) => ({ ...prev, Management: true }));
+    } else if (pathname.startsWith('/admin/inventory/')) {
       setOpenDropdowns((prev) => ({ ...prev, Inventory: true }));
     } else if (pathname.startsWith('/admin/orders')) {
       setOpenDropdowns((prev) => ({ ...prev, Orders: true }));
@@ -280,7 +294,9 @@ export default function AdminLayout({
     if (!mounted) return false;
 
     if (item.hasDropdown) {
-      if (item.text === 'Inventory') {
+      if (item.text === 'Management') {
+        return pathname.startsWith('/admin/data-management');
+      } else if (item.text === 'Inventory') {
         return pathname.startsWith('/admin/inventory');
       } else if (item.text === 'Orders') {
         return pathname.startsWith('/admin/orders');
