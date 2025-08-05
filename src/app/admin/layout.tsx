@@ -112,19 +112,19 @@ const sidebarItems: SidebarItem[] = [
         hasNestedDropdown: true,
         nestedOptions: [
           {
-            text: 'Add Product',
-            path: '/admin/logistics/warehouse/add-product',
+            text: 'Add Stock',
+            path: '/admin/logistics/warehouse/add-stock',
           },
           {
-            text: 'Delete Product',
+            text: 'Delete Stock',
             path: '/admin/logistics/warehouse/delete-product',
           },
           {
-            text: 'Update Product',
+            text: 'Update Stock',
             path: '/admin/logistics/warehouse/update-product',
           },
           {
-            text: 'View Products',
+            text: 'View Stock',
             path: '/admin/logistics/warehouse/view-products',
           },
         ],
