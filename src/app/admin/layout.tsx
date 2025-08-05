@@ -129,7 +129,7 @@ const sidebarItems: SidebarItem[] = [
           },
         ],
       },
-      { text: 'Orders', path: '/admin/logistics/orders' },
+      { text: 'Purchase Orders', path: '/admin/logistics/orders' },
       { text: 'Document Tracking', path: '/admin/logistics/document-tracking' },
     ],
   },
