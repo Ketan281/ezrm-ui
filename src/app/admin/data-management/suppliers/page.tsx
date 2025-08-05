@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { warehouseService } from '@/api/services/warehouses';
+import { supplierService } from '@/api/services/suppliers';
 import {
   TableComponent,
   TableRowData,
@@ -32,31 +32,29 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
+import PaymentIcon from '@mui/icons-material/Payment';
 
-interface WarehouseRowData extends TableRowData {
+interface SupplierRowData extends TableRowData {
   id: string;
   name: string;
   uniqueId: string;
-  manager: string;
-  capacity: string;
-  utilization: string;
-  status: string;
-  location: React.ReactNode;
+  country: string;
   contact: React.ReactNode;
+  location: React.ReactNode;
+  payment: string;
   actions: React.ReactNode;
 }
 
-export default function WarehousesListing() {
+export default function SuppliersListing() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [countryFilter, setCountryFilter] = useState('');
+  const [paymentFilter, setPaymentFilter] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [warehouseToDelete, setWarehouseToDelete] = useState<string | null>(
-    null
-  );
+  const [supplierToDelete, setSupplierToDelete] = useState<string | null>(null);
 
   // Debounce search term
   useEffect(() => {
@@ -66,60 +64,65 @@ export default function WarehousesListing() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch warehouses
+  // Fetch suppliers
   const {
-    data: warehousesData,
+    data: suppliersData,
     isLoading,
     error,
   } = useQuery({
     queryKey: [
-      'warehouses',
-      { page, search: debouncedSearchTerm, status: statusFilter },
-    ],
-    queryFn: () =>
-      warehouseService.getWarehouses({
+      'suppliers',
+      {
         page,
         search: debouncedSearchTerm,
-        status: statusFilter,
+        country: countryFilter,
+        payment_method: paymentFilter,
+      },
+    ],
+    queryFn: () =>
+      supplierService.getSuppliers({
+        page,
+        search: debouncedSearchTerm,
+        country: countryFilter,
+        payment_method: paymentFilter,
       }),
   });
 
-  // Delete warehouse mutation
-  const deleteWarehouseMutation = useMutation({
-    mutationFn: async (warehouseId: string) => {
-      return warehouseService.deleteWarehouse(warehouseId);
+  // Delete supplier mutation
+  const deleteSupplierMutation = useMutation({
+    mutationFn: async (supplierId: string) => {
+      return supplierService.deleteSupplier(supplierId);
     },
     onSuccess: () => {
-      toast.success('Warehouse deleted successfully!');
-      queryClient.invalidateQueries({ queryKey: ['warehouses'] });
+      toast.success('Supplier deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       setDeleteDialogOpen(false);
-      setWarehouseToDelete(null);
+      setSupplierToDelete(null);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete warehouse');
+      toast.error(error.message || 'Failed to delete supplier');
     },
   });
 
-  const warehouses = warehousesData?.warehouses || [];
-  const totalResults = warehousesData?.pagination?.total || 0;
+  const suppliers = suppliersData?.data || [];
+  const totalResults = suppliersData?.total || 0;
 
   const handleOpenGoogleMaps = (
     latitude: string,
     longitude: string,
-    address: any
+    address: string
   ) => {
-    const addressString = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
     const url = `https://www.google.com/maps?q=${latitude},${longitude}&z=15`;
     window.open(url, '_blank');
   };
 
-  const renderLocation = (address: any) => {
-    if (!address?.latitude || !address?.longitude) {
+  const renderLocation = (supplier: any) => {
+    if (!supplier?.latitude || !supplier?.longitude) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocationOnIcon sx={{ fontSize: 16, color: '#999' }} />
           <Typography variant="body2" color="text.secondary">
-            {address?.city || 'N/A'}, {address?.state || 'N/A'}
+            {supplier?.address || 'N/A'}
           </Typography>
         </Box>
       );
@@ -130,7 +133,11 @@ export default function WarehousesListing() {
         <IconButton
           size="small"
           onClick={() =>
-            handleOpenGoogleMaps(address.latitude, address.longitude, address)
+            handleOpenGoogleMaps(
+              supplier.latitude,
+              supplier.longitude,
+              supplier.address
+            )
           }
           sx={{
             color: '#1976d2',
@@ -145,21 +152,21 @@ export default function WarehousesListing() {
             variant="body2"
             sx={{ fontWeight: 500, fontSize: '12px' }}
           >
-            {address.city}, {address.state}
+            {supplier.address}
           </Typography>
           <Typography
             variant="caption"
             color="text.secondary"
             sx={{ fontSize: '10px' }}
           >
-            {address.latitude}, {address.longitude}
+            {supplier.latitude}, {supplier.longitude}
           </Typography>
         </Box>
       </Box>
     );
   };
 
-  const renderContact = (contactInfo: any) => {
+  const renderContact = (supplier: any) => {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -168,7 +175,7 @@ export default function WarehousesListing() {
             variant="caption"
             sx={{ fontSize: '10px', color: '#666' }}
           >
-            {contactInfo?.email || 'N/A'}
+            {supplier?.email || 'N/A'}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -177,20 +184,20 @@ export default function WarehousesListing() {
             variant="caption"
             sx={{ fontSize: '10px', color: '#666' }}
           >
-            {contactInfo?.phone || 'N/A'}
+            {supplier?.phone || 'N/A'}
           </Typography>
         </Box>
       </Box>
     );
   };
 
-  const renderActions = (warehouseId: string) => (
+  const renderActions = (supplierId: string) => (
     <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
       <IconButton
         size="small"
         onClick={(e) => {
           e.stopPropagation();
-          handleViewWarehouse(warehouseId);
+          handleViewSupplier(supplierId);
         }}
         sx={{ color: '#1976d2' }}
       >
@@ -200,7 +207,7 @@ export default function WarehousesListing() {
         size="small"
         onClick={(e) => {
           e.stopPropagation();
-          handleEditWarehouse(warehouseId);
+          handleEditSupplier(supplierId);
         }}
         sx={{ color: '#ff9800' }}
       >
@@ -210,7 +217,7 @@ export default function WarehousesListing() {
         size="small"
         onClick={(e) => {
           e.stopPropagation();
-          handleDeleteWarehouse(warehouseId);
+          handleDeleteSupplier(supplierId);
         }}
         sx={{ color: '#f44336' }}
       >
@@ -219,81 +226,78 @@ export default function WarehousesListing() {
     </Box>
   );
 
-  const warehouseData: WarehouseRowData[] = warehouses.map(
-    (warehouse: any) => ({
-      id: warehouse._id,
-      name: warehouse.name,
-      uniqueId: warehouse.uniqueId,
-      manager: warehouse.manager,
-      capacity: warehouse.capacity?.toLocaleString() || '0',
-      utilization: `${warehouse.currentUtilization?.toLocaleString() || 0} / ${warehouse.capacity?.toLocaleString() || 0}`,
-      status: warehouse.status,
-      location: renderLocation(warehouse.address),
-      contact: renderContact(warehouse.contactInfo),
-      actions: renderActions(warehouse._id),
-    })
-  );
+  const supplierData: SupplierRowData[] = suppliers.map((supplier: any) => ({
+    id: supplier._id,
+    name: supplier.name,
+    uniqueId: supplier.uniqueId,
+    country: supplier.country,
+    contact: renderContact(supplier),
+    location: renderLocation(supplier),
+    payment: supplier.payment_method,
+    actions: renderActions(supplier._id),
+  }));
 
   const columns = [
-    { id: 'name', label: 'Warehouse Name', width: '15%' },
+    { id: 'name', label: 'Supplier Name', width: '15%' },
     { id: 'uniqueId', label: 'Unique ID', width: '10%' },
-    { id: 'manager', label: 'Manager', width: '10%' },
+    { id: 'country', label: 'Country', width: '10%' },
+    { id: 'contact', label: 'Contact', width: '15%' },
+    { id: 'location', label: 'Location', width: '20%' },
     {
-      id: 'capacity',
-      label: 'Capacity',
-      width: '8%',
+      id: 'payment',
+      label: 'Payment Method',
+      width: '12%',
       align: 'center' as const,
     },
-    {
-      id: 'utilization',
-      label: 'Utilization',
-      width: '10%',
-      align: 'center' as const,
-    },
-    {
-      id: 'status',
-      label: 'Status',
-      width: '8%',
-      type: 'status' as const,
-      align: 'center' as const,
-    },
-    { id: 'location', label: 'Location', width: '12%' },
-    { id: 'contact', label: 'Contact', width: '10%' },
-    { id: 'actions', label: 'Actions', width: '17%', align: 'center' as const },
+    { id: 'actions', label: 'Actions', width: '18%', align: 'center' as const },
   ];
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
-  const handleAddWarehouse = () => {
-    router.push('/admin/data-management/warehouses/add');
+  const handleAddSupplier = () => {
+    router.push('/admin/data-management/suppliers/add');
   };
 
-  const handleEditWarehouse = (warehouseId: string) => {
-    router.push(`/admin/data-management/warehouses/${warehouseId}/edit`);
+  const handleEditSupplier = (supplierId: string) => {
+    router.push(`/admin/data-management/suppliers/${supplierId}/edit`);
   };
 
-  const handleViewWarehouse = (warehouseId: string) => {
-    router.push(`/admin/data-management/warehouses/${warehouseId}`);
+  const handleViewSupplier = (supplierId: string) => {
+    router.push(`/admin/data-management/suppliers/${supplierId}`);
   };
 
-  const handleDeleteWarehouse = (warehouseId: string) => {
-    setWarehouseToDelete(warehouseId);
+  const handleDeleteSupplier = (supplierId: string) => {
+    setSupplierToDelete(supplierId);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (warehouseToDelete) {
-      deleteWarehouseMutation.mutate(warehouseToDelete);
+    if (supplierToDelete) {
+      deleteSupplierMutation.mutate(supplierToDelete);
     }
   };
 
-  const statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'maintenance', label: 'Maintenance' },
+  const countryOptions = [
+    { value: '', label: 'All Countries' },
+    { value: 'China', label: 'China' },
+    { value: 'Japan', label: 'Japan' },
+    { value: 'Taiwan', label: 'Taiwan' },
+    { value: 'South Korea', label: 'South Korea' },
+    { value: 'Thailand', label: 'Thailand' },
+    { value: 'India', label: 'India' },
+    { value: 'USA', label: 'USA' },
+    { value: 'Germany', label: 'Germany' },
+  ];
+
+  const paymentOptions = [
+    { value: '', label: 'All Payment Methods' },
+    { value: 'Wire Transfer', label: 'Wire Transfer' },
+    { value: 'PayPal', label: 'PayPal' },
+    { value: 'Credit Card', label: 'Credit Card' },
+    { value: 'UPI', label: 'UPI' },
+    { value: 'Bank Transfer', label: 'Bank Transfer' },
   ];
 
   return (
@@ -321,13 +325,13 @@ export default function WarehousesListing() {
             fontFamily: 'Poppins, sans-serif',
           }}
         >
-          Warehouses Listing ({totalResults})
+          Suppliers Listing ({totalResults})
         </Typography>
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
-          onClick={handleAddWarehouse}
+          onClick={handleAddSupplier}
           sx={{
             fontWeight: 600,
             textTransform: 'none',
@@ -335,7 +339,7 @@ export default function WarehousesListing() {
             '&:hover': { backgroundColor: '#1565c0' },
           }}
         >
-          Add Warehouse
+          Add Supplier
         </Button>
       </Box>
 
@@ -347,7 +351,7 @@ export default function WarehousesListing() {
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to load warehouses. Please try again.
+          Failed to load suppliers. Please try again.
         </Alert>
       )}
 
@@ -356,14 +360,30 @@ export default function WarehousesListing() {
         <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
           <FormControl sx={{ minWidth: 200 }} size="small">
             <Select
-              value={statusFilter}
-              onChange={(e: any) => setStatusFilter(e.target.value)}
+              value={countryFilter}
+              onChange={(e: any) => setCountryFilter(e.target.value)}
               displayEmpty
               sx={{
                 '& .MuiSelect-select': { fontFamily: 'Poppins, sans-serif' },
               }}
             >
-              {statusOptions.map((option) => (
+              {countryOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ minWidth: 200 }} size="small">
+            <Select
+              value={paymentFilter}
+              onChange={(e: any) => setPaymentFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                '& .MuiSelect-select': { fontFamily: 'Poppins, sans-serif' },
+              }}
+            >
+              {paymentOptions.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
@@ -376,7 +396,7 @@ export default function WarehousesListing() {
       {!isLoading && !error && (
         <TableComponent
           columns={columns}
-          data={warehouseData}
+          data={supplierData}
           totalResults={totalResults}
           currentPage={page}
           onPageChange={handlePageChange}
@@ -386,7 +406,7 @@ export default function WarehousesListing() {
           searchOptions={{
             value: searchTerm,
             onChange: setSearchTerm,
-            placeholder: 'Search warehouses...',
+            placeholder: 'Search suppliers...',
           }}
         />
       )}
@@ -399,14 +419,14 @@ export default function WarehousesListing() {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete this warehouse? This action cannot
-            be undone.
+            Are you sure you want to delete this supplier? This action cannot be
+            undone.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
-            disabled={deleteWarehouseMutation.isPending}
+            disabled={deleteSupplierMutation.isPending}
           >
             Cancel
           </Button>
@@ -414,14 +434,14 @@ export default function WarehousesListing() {
             onClick={confirmDelete}
             color="error"
             variant="contained"
-            disabled={deleteWarehouseMutation.isPending}
+            disabled={deleteSupplierMutation.isPending}
             startIcon={
-              deleteWarehouseMutation.isPending ? (
+              deleteSupplierMutation.isPending ? (
                 <CircularProgress size={16} />
               ) : null
             }
           >
-            {deleteWarehouseMutation.isPending ? 'Deleting...' : 'Delete'}
+            {deleteSupplierMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,53 +1,126 @@
 import { api } from '../config';
 
-export const supplierService = {
-  async getSuppliers() {
+export interface Supplier {
+  _id: string;
+  uniqueId: string;
+  name: string;
+  country: string;
+  email: string;
+  phone: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  payment_method: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateSupplierRequest {
+  name: string;
+  country: string;
+  email: string;
+  phone: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  payment_method: string;
+}
+
+export interface SupplierResponse {
+  success: boolean;
+  data?: Supplier;
+  message?: string;
+  error?: string;
+}
+
+export interface SuppliersListResponse {
+  success: boolean;
+  data: Supplier[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+class SupplierService {
+  private baseUrl = '/private/suppliers';
+
+  // Get all suppliers
+  async getSuppliers(params?: {
+    page?: number;
+    search?: string;
+    country?: string;
+    payment_method?: string;
+  }): Promise<SuppliersListResponse> {
     try {
-      const response = await api.get('/private/suppliers');
+      const queryParams = new URLSearchParams();
+      if (params?.page) {
+        queryParams.append('page', params.page.toString());
+      }
+      if (params?.search) {
+        queryParams.append('search', params.search);
+      }
+      if (params?.country) {
+        queryParams.append('country', params.country);
+      }
+      if (params?.payment_method) {
+        queryParams.append('payment_method', params.payment_method);
+      }
+      const url = queryParams.toString()
+        ? `${this.baseUrl}?${queryParams.toString()}`
+        : this.baseUrl;
+      const response = await api.get(url);
       return response.data;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || 'Failed to fetch suppliers'
       );
     }
-  },
+  }
 
-  async getSupplierById(id: string) {
+  // Get supplier by ID
+  async getSupplierById(id: string): Promise<SupplierResponse> {
     try {
-      const response = await api.get(`/private/suppliers/${id}`);
+      const response = await api.get(`${this.baseUrl}/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || 'Failed to fetch supplier'
       );
     }
-  },
+  }
 
-  async createSupplier(data: any) {
+  // Create supplier
+  async createSupplier(data: CreateSupplierRequest): Promise<SupplierResponse> {
     try {
-      const response = await api.post('/private/suppliers', data);
+      const response = await api.post(this.baseUrl, data);
       return response.data;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || 'Failed to create supplier'
       );
     }
-  },
+  }
 
-  async updateSupplier(id: string, data: any) {
+  // Update supplier
+  async updateSupplier(
+    id: string,
+    data: Partial<CreateSupplierRequest>
+  ): Promise<SupplierResponse> {
     try {
-      const response = await api.put(`/private/suppliers/${id}`, data);
+      const response = await api.put(`${this.baseUrl}/${id}`, data);
       return response.data;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || 'Failed to update supplier'
       );
     }
-  },
+  }
 
-  async deleteSupplier(id: string) {
+  // Delete supplier
+  async deleteSupplier(id: string): Promise<SupplierResponse> {
     try {
-      const response = await api.delete(`/private/suppliers/${id}`);
+      const response = await api.delete(`${this.baseUrl}/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(
@@ -55,6 +128,6 @@ export const supplierService = {
       );
     }
   }
-};
+}
 
-
+export const supplierService = new SupplierService();

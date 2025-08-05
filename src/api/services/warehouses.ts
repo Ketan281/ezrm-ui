@@ -48,6 +48,7 @@ class WarehouseService {
   async getWarehouses(params?: {
     page?: number;
     search?: string;
+    status?: string;
   }): Promise<WarehousesResponse> {
     try {
       const queryParams = new URLSearchParams();
@@ -56,6 +57,9 @@ class WarehouseService {
       }
       if (params?.search) {
         queryParams.append('search', params.search);
+      }
+      if (params?.status) {
+        queryParams.append('status', params.status);
       }
       const url = queryParams.toString()
         ? `${this.baseUrl}?${queryParams.toString()}`
