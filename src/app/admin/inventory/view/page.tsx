@@ -1,6 +1,6 @@
 'use client';
 import type React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -14,12 +14,29 @@ import {
   Alert,
   CircularProgress,
   Pagination,
+  Chip,
 } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useProducts } from '@/hooks/useProducts';
+import { useQuery } from '@tanstack/react-query';
+import { inventoryService } from '../../../../api/services/inventory';
+import {
+  TableComponent,
+  TableRowData,
+} from '../../../../components/TableComponent';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+
+interface InventoryRowData extends TableRowData {
+  id: string;
+  productName: string;
+  category: string;
+  price: string;
+  quantity: string;
+  location: string;
+  status: string;
+  batchNumber: string;
+}
 
 export default function ViewProductPage() {
   const router = useRouter();
@@ -28,20 +45,67 @@ export default function ViewProductPage() {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState('');
   const [searchValue, setSearchValue] = useState('');
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
 
-  // Use the simplified hook directly
-  const { data, isLoading, error } = useProducts({
-    page,
-    limit: 12,
-    search: filter === '' && searchValue ? searchValue : '',
-    name: filter === 'Product Name' && searchValue ? searchValue : '',
-    category: filter === 'Category' && searchValue ? searchValue : '',
+  // Debounce search value
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchValue(searchValue);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
+  // Fetch inventory data
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['inventory', { page, search: debouncedSearchValue, filter }],
+    queryFn: () =>
+      inventoryService.getInventory({
+        page,
+        search: debouncedSearchValue,
+        status: filter === 'Status' ? searchValue : undefined,
+      }),
   });
 
-  const products = data?.data || [];
+  const inventoryItems = data?.inventory || [];
+  const totalResults = data?.pagination?.total || 0;
 
-  const handleProductClick = (productId: string) => {
-    router.push(`/products/view/detail/${productId}`);
+  // Transform inventory data for table
+  const inventoryTableData: InventoryRowData[] = inventoryItems.map(
+    (item: any) => ({
+      id: item._id,
+      productName: item.product?.name || 'No Product',
+      category: item.product?.category || 'N/A',
+      price: `$${item.product?.price || 0}`,
+      quantity: item.quantity?.toString() || '0',
+      location: `${item.location?.aisle || 'N/A'}-${item.location?.rack || 'N/A'}-${item.location?.shelf || 'N/A'}`,
+      status: item.status || 'unknown',
+      batchNumber: item.batchNumber || 'N/A',
+    })
+  );
+
+  const columns = [
+    { id: 'productName', label: 'Product Name', width: '20%' },
+    { id: 'category', label: 'Category', width: '15%' },
+    { id: 'price', label: 'Price', width: '10%', align: 'center' as const },
+    {
+      id: 'quantity',
+      label: 'Quantity',
+      width: '10%',
+      align: 'center' as const,
+    },
+    { id: 'location', label: 'Location', width: '15%' },
+    {
+      id: 'status',
+      label: 'Status',
+      width: '12%',
+      type: 'status' as const,
+      align: 'center' as const,
+    },
+    { id: 'batchNumber', label: 'Batch Number', width: '18%' },
+  ];
+
+  const handleInventoryClick = (row: TableRowData) => {
+    router.push(`/admin/inventory/view/detail/${row.id}`);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,10 +124,7 @@ export default function ViewProductPage() {
     setPage(1);
   };
 
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number
-  ) => {
+  const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
@@ -110,68 +171,8 @@ export default function ViewProductPage() {
           fontFamily: 'Poppins, sans-serif',
         }}
       >
-        View Products
+        Inventory Management ({totalResults})
       </Typography>
-
-      {/* Search and Filter Section */}
-      <Box sx={{ mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth size="small">
-              <Select
-                value={filter}
-                onChange={(e) => handleFilterChange(e.target.value)}
-                displayEmpty
-                sx={{
-                  '& .MuiSelect-select': {
-                    fontFamily: 'Poppins, sans-serif',
-                  },
-                }}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="Product Name">Product Name</MenuItem>
-                <MenuItem value="Category">Category</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search products..."
-              value={searchValue}
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: searchValue && (
-                  <InputAdornment position="end">
-                    <Box
-                      component="span"
-                      sx={{
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                      onClick={handleSearchClear}
-                    >
-                      <ClearIcon />
-                    </Box>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  fontFamily: 'Poppins, sans-serif',
-                },
-              }}
-            />
-          </Grid>
-        </Grid>
-      </Box>
 
       {/* Loading State */}
       {isLoading && (
@@ -187,137 +188,45 @@ export default function ViewProductPage() {
         </Alert>
       )}
 
-      {/* Products Grid */}
+      {/* Inventory Table */}
       {!isLoading && !error && (
-        <>
-          <Grid container spacing={2}>
-            {products.map((product) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: 3,
-                    },
-                    fontFamily: 'Poppins, sans-serif',
-                  }}
-                  onClick={() => handleProductClick(product.id)}
-                >
-                  <Box sx={{ mb: 2, textAlign: 'center' }}>
-                    {product.bannerImage ? (
-                      <Image
-                        src={product.bannerImage}
-                        alt={product.name}
-                        width={200}
-                        height={150}
-                        style={{ objectFit: 'cover', borderRadius: '8px' }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          width: 200,
-                          height: 150,
-                          bgcolor: '#f5f5f5',
-                          borderRadius: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          mx: 'auto',
-                        }}
-                      >
-                        <Typography color="textSecondary">No Image</Typography>
-                      </Box>
-                    )}
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      fontFamily: 'Poppins, sans-serif',
-                    }}
-                  >
-                    {product.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{
-                      mb: 1,
-                      fontFamily: 'Poppins, sans-serif',
-                    }}
-                  >
-                    {product.description}
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    color="primary"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      fontFamily: 'Poppins, sans-serif',
-                    }}
-                  >
-                    ${product.price}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: product.inStock ? '#4caf50' : '#f44336',
-                        fontWeight: 600,
-                        fontFamily: 'Poppins, sans-serif',
-                      }}
-                    >
-                      {product.inStock ? 'In Stock' : 'Out of Stock'}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{
-                        fontFamily: 'Poppins, sans-serif',
-                      }}
-                    >
-                      {product.category}
-                    </Typography>
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Pagination */}
-          {products.length > 0 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <Pagination
-                count={Math.ceil(products.length / 12)}
-                page={page}
-                onChange={handlePageChange}
-                color="primary"
-              />
-            </Box>
-          )}
-        </>
+        <TableComponent
+          columns={columns}
+          data={inventoryTableData}
+          totalResults={totalResults}
+          currentPage={page}
+          onPageChange={handlePageChange}
+          onRowClick={handleInventoryClick}
+          showCheckboxes={false}
+          showHeader={true}
+          rowsPerPage={10}
+          searchOptions={{
+            value: searchValue,
+            onChange: setSearchValue,
+            placeholder: 'Search inventory...',
+          }}
+          filterOptions={{
+            value: filter,
+            onChange: handleFilterChange,
+            options: [
+              { value: '', label: 'All' },
+              { value: 'Product Name', label: 'Product Name' },
+              { value: 'Category', label: 'Category' },
+              { value: 'Status', label: 'Status' },
+            ],
+          }}
+        />
       )}
 
       {/* Empty State */}
-      {!isLoading && !error && products.length === 0 && (
+      {!isLoading && !error && inventoryItems.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography
             variant="h6"
             color="textSecondary"
             sx={{ fontFamily: 'Poppins, sans-serif' }}
           >
-            No products found
+            No inventory items found
           </Typography>
         </Box>
       )}

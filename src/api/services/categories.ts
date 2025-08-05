@@ -28,7 +28,10 @@ export interface CategoryResponse {
 
 export interface CategoriesListResponse {
   success: boolean;
-  data?: Category[];
+  categories?: Category[];
+  total?: number;
+  page?: number;
+  limit?: number;
   message?: string;
   error?: string;
 }
@@ -37,9 +40,22 @@ class CategoryService {
   private baseUrl = '/private/categories';
 
   // Get all categories
-  async getCategories(): Promise<CategoriesListResponse> {
+  async getCategories(params?: {
+    page?: number;
+    search?: string;
+  }): Promise<CategoriesListResponse> {
     try {
-      const response = await api.get(this.baseUrl);
+      const queryParams = new URLSearchParams();
+      if (params?.page) {
+        queryParams.append('page', params.page.toString());
+      }
+      if (params?.search) {
+        queryParams.append('search', params.search);
+      }
+      const url = queryParams.toString()
+        ? `${this.baseUrl}?${queryParams.toString()}`
+        : this.baseUrl;
+      const response = await api.get(url);
       return response.data;
     } catch (error: any) {
       throw new Error(
