@@ -51,7 +51,12 @@ class ProductService {
   getProductsByStockStatus: any;
 
   // Get all products
-  async getProducts(params?: { page?: number; search?: string }) {
+  async getProducts(params?: {
+    page?: number;
+    search?: string;
+    category?: string;
+    status?: string;
+  }) {
     try {
       const queryParams = new URLSearchParams();
       if (params?.page) {
@@ -59,6 +64,12 @@ class ProductService {
       }
       if (params?.search) {
         queryParams.append('search', params.search);
+      }
+      if (params?.category) {
+        queryParams.append('category', params.category);
+      }
+      if (params?.status) {
+        queryParams.append('status', params.status);
       }
       const url = queryParams.toString()
         ? `${this.baseUrl}?${queryParams.toString()}`

@@ -1,6 +1,6 @@
-"use client"
-import type React from "react"
-import { useState, useEffect } from "react"
+'use client';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -25,57 +25,57 @@ import {
   Button,
   TextField,
   InputAdornment,
-} from "@mui/material"
-import Image from "next/image"
+} from '@mui/material';
+import Image from 'next/image';
 
 export interface TableColumn {
-  id: string
-  label: string
-  width?: string
-  align?: "left" | "center" | "right"
-  type?: "status" | "link" | "default"
+  id: string;
+  label: string;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+  type?: 'status' | 'link' | 'default';
 }
 
 export interface TableRowData {
-  id: string
-  [key: string]: string | number | boolean | null | undefined | React.ReactNode
+  id: string;
+  [key: string]: string | number | boolean | null | undefined | React.ReactNode;
 }
 
 interface TableComponentProps {
-  columns: TableColumn[]
-  data: TableRowData[]
-  totalResults: number
-  currentPage?: number
-  onPageChange?: (page: number) => void
-  onRowClick?: (row: TableRowData) => void
-  onLinkClick?: (row: TableRowData) => void
+  columns: TableColumn[];
+  data: TableRowData[];
+  totalResults: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  onRowClick?: (row: TableRowData) => void;
+  onLinkClick?: (row: TableRowData) => void;
   filterOptions?: {
-    value: string
-    onChange: (value: string) => void
-    options: { value: string; label: string }[]
-    placeholder?: string
-  }
+    value: string;
+    onChange: (value: string) => void;
+    options: { value: string; label: string }[];
+    placeholder?: string;
+  };
   searchOptions?: {
-    value: string
-    onChange: (value: string) => void
-    placeholder?: string
-  }
-  actionButtons?: React.ReactNode
-  showCheckboxes?: boolean
-  showHeader?: boolean
-  rowsPerPage?: number
-  selected?: string[]
-  onSelectionChange?: (selected: string[]) => void
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+  };
+  actionButtons?: React.ReactNode;
+  showCheckboxes?: boolean;
+  showHeader?: boolean;
+  rowsPerPage?: number;
+  selected?: string[];
+  onSelectionChange?: (selected: string[]) => void;
 }
 
 interface ConfirmationDialogProps {
-  open: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title: string
-  content: string
-  confirmButtonText?: string
-  cancelButtonText?: string
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  content: string;
+  confirmButtonText?: string;
+  cancelButtonText?: string;
 }
 
 export const TableComponent: React.FC<TableComponentProps> = ({
@@ -95,160 +95,194 @@ export const TableComponent: React.FC<TableComponentProps> = ({
   selected: externalSelected,
   onSelectionChange,
 }) => {
-  const [internalSelected, setInternalSelected] = useState<string[]>([])
-  const [internalPage, setInternalPage] = useState(1)
+  const [internalSelected, setInternalSelected] = useState<string[]>([]);
+  const [internalPage, setInternalPage] = useState(1);
 
   // Use external selected state if provided, otherwise internal state
-  const selected = onSelectionChange ? externalSelected || [] : internalSelected
-  const setSelected = onSelectionChange || setInternalSelected
+  const selected = onSelectionChange
+    ? externalSelected || []
+    : internalSelected;
+  const setSelected = onSelectionChange || setInternalSelected;
 
   // Calculate the total pages based on the total results
-  const totalPages = Math.ceil(totalResults / rowsPerPage)
-  const showPagination = totalResults > rowsPerPage
+  const totalPages = Math.ceil(totalResults / rowsPerPage);
+  const showPagination = totalResults > rowsPerPage;
 
   // Use the provided currentPage if onPageChange is defined, otherwise use internal state
-  const page = onPageChange ? currentPage : internalPage
-  const handlePageChange = onPageChange || setInternalPage
+  const page = onPageChange ? currentPage : internalPage;
+  const handlePageChange = onPageChange || setInternalPage;
 
   // Reset selection when data changes
   useEffect(() => {
-    setSelected([])
-  }, [data, setSelected])
+    setSelected([]);
+  }, [data, setSelected]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = data.map((row) => row.id)
-      setSelected(newSelecteds)
-      return
+      const newSelecteds = data.map((row) => row.id);
+      setSelected(newSelecteds);
+      return;
     }
-    setSelected([])
-  }
+    setSelected([]);
+  };
 
   const handleClick = (event: React.MouseEvent<unknown>, id: string) => {
-    event.stopPropagation()
-    const selectedIndex = selected.indexOf(id)
-    let newSelected: string[] = []
+    event.stopPropagation();
+    const selectedIndex = selected.indexOf(id);
+    let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id)
+      newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1))
+      newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1))
+      newSelected = newSelected.concat(selected.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
     }
 
-    setSelected(newSelected)
-  }
+    setSelected(newSelected);
+  };
 
-  const isSelected = (id: string) => selected.indexOf(id) !== -1
+  const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
   const renderStatusCell = (value: unknown) => {
-    if (value === null || value === undefined) return null
+    if (value === null || value === undefined) return null;
 
-    const stringValue = String(value)
-    let bgColor = "#E5E7EB"
-    let textColor = "#737791"
+    const stringValue = String(value);
+    let bgColor = '#E5E7EB';
+    let textColor = '#737791';
 
     switch (stringValue.toLowerCase()) {
-      case "completed":
-        bgColor = "rgba(6, 165, 97, 0.09)"
-        textColor = "rgba(6, 165, 97, 1)"
-        break
-      case "pending":
-        bgColor = "rgba(255, 244, 240, 1)"
-        textColor = "rgba(255, 143, 107, 1)"
-        break
-      case "in-process":
-        bgColor = "rgba(255, 247, 225, 1)"
-        textColor = "rgba(255, 195, 39, 1)"
-        break
-      case "declined":
-        bgColor = "rgba(255, 244, 240, 1)"
-        textColor = "rgba(255, 143, 107, 1)"
-        break
-      case "new order":
-        bgColor = "rgba(239, 239, 255, 1)"
-        textColor = "rgba(96, 91, 255, 1)"
-        break
+      case 'completed':
+        bgColor = 'rgba(6, 165, 97, 0.09)';
+        textColor = 'rgba(6, 165, 97, 1)';
+        break;
+      case 'pending':
+        bgColor = 'rgba(255, 244, 240, 1)';
+        textColor = 'rgba(255, 143, 107, 1)';
+        break;
+      case 'in-process':
+        bgColor = 'rgba(255, 247, 225, 1)';
+        textColor = 'rgba(255, 195, 39, 1)';
+        break;
+      case 'declined':
+        bgColor = 'rgba(255, 244, 240, 1)';
+        textColor = 'rgba(255, 143, 107, 1)';
+        break;
+      case 'new order':
+        bgColor = 'rgba(239, 239, 255, 1)';
+        textColor = 'rgba(96, 91, 255, 1)';
+        break;
     }
 
     return (
       <Box
         sx={{
           backgroundColor: bgColor,
-          borderRadius: "10px",
-          padding: "7px 10px",
-          minWidth: "100px",
-          height: "32px",
-          display: "inline-block",
-          fontSize: "12px",
-          fontWeight: "500",
+          borderRadius: '10px',
+          padding: '7px 10px',
+          minWidth: '100px',
+          height: '32px',
+          display: 'inline-block',
+          fontSize: '12px',
+          fontWeight: '500',
           color: textColor,
-          textAlign: "center",
-          maxWidth: "fit-content",
+          textAlign: 'center',
+          maxWidth: 'fit-content',
           border: `1px solid ${textColor}`,
         }}
       >
         {stringValue}
       </Box>
-    )
-  }
+    );
+  };
 
   const renderLinkCell = (value: unknown, row: TableRowData) => {
-    if (typeof value !== "string") return "View"
+    if (typeof value !== 'string') return 'View';
 
     return (
       <Typography
         sx={{
-          color: "#7C3AED",
-          fontWeight: "500",
-          cursor: "pointer",
-          "&:hover": {
-            textDecoration: "underline",
+          color: '#7C3AED',
+          fontWeight: '500',
+          cursor: 'pointer',
+          '&:hover': {
+            textDecoration: 'underline',
           },
         }}
         onClick={(e) => {
-          e.stopPropagation()
+          e.stopPropagation();
           if (onLinkClick) {
-            onLinkClick(row)
+            onLinkClick(row);
           }
         }}
       >
         View
       </Typography>
-    )
-  }
+    );
+  };
 
   return (
-    <Box sx={{ p: 1, backgroundColor: "#F9FAFB", minHeight: "85vh", fontFamily: "Poppins, sans-serif" }}>
-      <TableContainer component={Paper} sx={{ boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)", borderRadius: "10px" }}>
+    <Box
+      sx={{
+        p: 1,
+        backgroundColor: '#F9FAFB',
+        minHeight: '85vh',
+        fontFamily: 'Poppins, sans-serif',
+      }}
+    >
+      <TableContainer
+        component={Paper}
+        sx={{
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '10px',
+        }}
+      >
         <Table>
           {showHeader && (
-            <TableHead sx={{ borderBottom: "2px solid rgba(215, 219, 236, 1)" }}>
+            <TableHead
+              sx={{ borderBottom: '2px solid rgba(215, 219, 236, 1)' }}
+            >
               <TableRow>
-                <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} sx={{ borderBottom: "none", py: 2 }}>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                <TableCell
+                  colSpan={columns.length + (showCheckboxes ? 1 : 0)}
+                  sx={{ borderBottom: 'none', py: 2 }}
+                >
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
                     <Box display="flex" alignItems="center" gap={2}>
                       {searchOptions && (
                         <TextField
-                          placeholder={searchOptions.placeholder || "Search"}
+                          placeholder={searchOptions.placeholder || 'Search'}
                           value={searchOptions.value}
-                          onChange={(e) => searchOptions.onChange(e.target.value)}
+                          onChange={(e) =>
+                            searchOptions.onChange(e.target.value)
+                          }
                           size="small"
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
-                                <Image src="/magnifier.svg" alt="Search" width={16} height={16} />
+                                <Image
+                                  src="/magnifier.svg"
+                                  alt="Search"
+                                  width={16}
+                                  height={16}
+                                />
                               </InputAdornment>
                             ),
                             sx: {
-                              height: "40px",
-                              width: "200px",
-                              fontSize: "14px",
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#E5E7EB",
+                              height: '40px',
+                              width: '200px',
+                              fontSize: '14px',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#E5E7EB',
                               },
                             },
                           }}
@@ -258,24 +292,31 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                         <FormControl sx={{ minWidth: 150 }}>
                           <Select
                             value={filterOptions.value}
-                            onChange={(e) => filterOptions.onChange(e.target.value as string)}
+                            onChange={(e) =>
+                              filterOptions.onChange(e.target.value as string)
+                            }
                             displayEmpty
                             renderValue={(selected) => {
                               if (!selected) {
                                 return (
-                                  <span style={{ color: "#737791", fontSize: "14px" }}>
-                                    {filterOptions.placeholder || "Status"}
+                                  <span
+                                    style={{
+                                      color: '#737791',
+                                      fontSize: '14px',
+                                    }}
+                                  >
+                                    {filterOptions.placeholder || 'Status'}
                                   </span>
-                                )
+                                );
                               }
-                              return selected
+                              return selected;
                             }}
                             sx={{
-                              height: "40px",
-                              fontSize: "14px",
-                              color: "#737791",
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#E5E7EB",
+                              height: '40px',
+                              fontSize: '14px',
+                              color: '#737791',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#E5E7EB',
                               },
                             }}
                           >
@@ -294,12 +335,21 @@ export const TableComponent: React.FC<TableComponentProps> = ({
               <TableRow>
                 {showCheckboxes && (
                   <TableCell
-                    sx={{ fontSize: "14px", color: "#737791", borderBottom: "1px solid #E5E7EB", width: "5%" }}
+                    sx={{
+                      fontSize: '14px',
+                      color: '#737791',
+                      borderBottom: '1px solid #E5E7EB',
+                      width: '5%',
+                    }}
                   >
                     <Checkbox
                       size="small"
-                      indeterminate={selected.length > 0 && selected.length < data.length}
-                      checked={data.length > 0 && selected.length === data.length}
+                      indeterminate={
+                        selected.length > 0 && selected.length < data.length
+                      }
+                      checked={
+                        data.length > 0 && selected.length === data.length
+                      }
                       onChange={handleSelectAllClick}
                     />
                   </TableCell>
@@ -308,12 +358,12 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                   <TableCell
                     key={column.id}
                     sx={{
-                      fontSize: "14px",
-                      color: "#737791",
-                      borderBottom: "1px solid #E5E7EB",
-                      width: column.width || "auto",
-                      textAlign: column.align || "left",
-                      textTransform: "capitalize",
+                      fontSize: '14px',
+                      color: '#737791',
+                      borderBottom: '1px solid #E5E7EB',
+                      width: column.width || 'auto',
+                      textAlign: column.align || 'left',
+                      textTransform: 'capitalize',
                     }}
                   >
                     {column.label}
@@ -325,20 +375,26 @@ export const TableComponent: React.FC<TableComponentProps> = ({
           <TableBody>
             {data.length > 0 ? (
               data.map((row) => {
-                const isItemSelected = isSelected(row.id)
+                const isItemSelected = isSelected(row.id);
                 return (
                   <TableRow
                     hover
                     key={row.id}
                     sx={{
-                      backgroundColor: "#FFFFFF",
-                      cursor: onRowClick ? "pointer" : "default",
-                      "&:hover": { backgroundColor: "#F5F5F5" },
+                      backgroundColor: '#FFFFFF',
+                      cursor: onRowClick ? 'pointer' : 'default',
+                      '&:hover': { backgroundColor: '#F5F5F5' },
                     }}
-                    onClick={onRowClick ? () => onRowClick(row) : onLinkClick ? () => onLinkClick(row) : undefined}
+                    onClick={
+                      onRowClick
+                        ? () => onRowClick(row)
+                        : onLinkClick
+                          ? () => onLinkClick(row)
+                          : undefined
+                    }
                   >
                     {showCheckboxes && (
-                      <TableCell sx={{ borderBottom: "1px solid #E5E7EB" }}>
+                      <TableCell sx={{ borderBottom: '1px solid #E5E7EB' }}>
                         <Checkbox
                           size="small"
                           checked={isItemSelected}
@@ -347,76 +403,95 @@ export const TableComponent: React.FC<TableComponentProps> = ({
                       </TableCell>
                     )}
                     {columns.map((column) => {
-                      const cellValue = row[column.id]
-                      let content: React.ReactNode = null
+                      const cellValue = row[column.id];
+                      let content: React.ReactNode = null;
 
-                      if (column.type === "status" || column.id === "status") {
-                        content = renderStatusCell(cellValue)
-                      } else if (column.type === "link") {
-                        content = renderLinkCell(cellValue, row)
+                      if (column.type === 'status' || column.id === 'status') {
+                        content = renderStatusCell(cellValue);
+                      } else if (column.type === 'link') {
+                        content = renderLinkCell(cellValue, row);
+                      } else if (React.isValidElement(cellValue)) {
+                        content = cellValue;
                       } else {
-                        content = cellValue !== null && cellValue !== undefined ? String(cellValue) : null
+                        content =
+                          cellValue !== null && cellValue !== undefined
+                            ? String(cellValue)
+                            : null;
                       }
 
                       return (
                         <TableCell
                           key={column.id}
                           sx={{
-                            fontSize: "14px",
-                            color: column.id === "name" ? "#1F2A44" : "#737791",
-                            borderBottom: "1px solid #E5E7EB",
-                            fontWeight: column.id === "name" ? "bold" : "normal",
-                            textAlign: column.align || "left",
+                            fontSize: '14px',
+                            color: column.id === 'name' ? '#1F2A44' : '#737791',
+                            borderBottom: '1px solid #E5E7EB',
+                            fontWeight:
+                              column.id === 'name' ? 'bold' : 'normal',
+                            textAlign: column.align || 'left',
                           }}
                         >
                           {content}
                         </TableCell>
-                      )
+                      );
                     })}
                   </TableRow>
-                )
+                );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} align="center" sx={{ py: 3 }}>
+                <TableCell
+                  colSpan={columns.length + (showCheckboxes ? 1 : 0)}
+                  align="center"
+                  sx={{ py: 3 }}
+                >
                   No data found
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
-          <TableFooter sx={{ backgroundColor: "#FFFFFF" }}>
+          <TableFooter sx={{ backgroundColor: '#FFFFFF' }}>
             <TableRow>
-              <TableCell colSpan={columns.length + (showCheckboxes ? 1 : 0)} sx={{ borderBottom: "none", py: 2 }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
+              <TableCell
+                colSpan={columns.length + (showCheckboxes ? 1 : 0)}
+                sx={{ borderBottom: 'none', py: 2 }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   {showPagination && (
                     <Pagination
                       count={totalPages}
                       page={page}
                       onChange={(event, newPage) => {
-                        handlePageChange(newPage)
+                        handlePageChange(newPage);
                       }}
                       siblingCount={1}
                       boundaryCount={1}
                       sx={{
-                        "& .MuiPaginationItem-root": {
-                          fontSize: "12px",
-                          color: "#737791",
-                          minWidth: "24px",
-                          height: "24px",
-                          margin: "0 2px",
-                          padding: "0",
+                        '& .MuiPaginationItem-root': {
+                          fontSize: '12px',
+                          color: '#737791',
+                          minWidth: '24px',
+                          height: '24px',
+                          margin: '0 2px',
+                          padding: '0',
                         },
-                        "& .Mui-selected": {
-                          backgroundColor: "#3B82F6",
-                          color: "#FFFFFF",
-                          "&:hover": {
-                            backgroundColor: "#2563EB",
+                        '& .Mui-selected': {
+                          backgroundColor: '#3B82F6',
+                          color: '#FFFFFF',
+                          '&:hover': {
+                            backgroundColor: '#2563EB',
                           },
                         },
                       }}
                     />
                   )}
-                  <Typography sx={{ fontSize: "14px", color: "#737791" }}>{totalResults} Results</Typography>
+                  <Typography sx={{ fontSize: '14px', color: '#737791' }}>
+                    {totalResults} Results
+                  </Typography>
                 </Box>
               </TableCell>
             </TableRow>
@@ -425,8 +500,8 @@ export const TableComponent: React.FC<TableComponentProps> = ({
       </TableContainer>
       {actionButtons}
     </Box>
-  )
-}
+  );
+};
 
 export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   open,
@@ -434,8 +509,8 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   onConfirm,
   title,
   content,
-  confirmButtonText = "Delete",
-  cancelButtonText = "Cancel",
+  confirmButtonText = 'Delete',
+  cancelButtonText = 'Cancel',
 }) => {
   return (
     <Dialog
@@ -443,44 +518,63 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: "400px",
-          borderRadius: "10px",
-          boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
+          width: '400px',
+          borderRadius: '10px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
           p: 3,
-          minWidth: "35%",
+          minWidth: '35%',
         },
       }}
     >
       <DialogTitle
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           p: 0,
           pb: 1,
-          fontFamily: "Poppins, sans-serif",
+          fontFamily: 'Poppins, sans-serif',
         }}
       >
-        <Typography sx={{ fontSize: "16px", fontWeight: "bold", color: "#1F2A44", fontFamily: "Poppins, sans-serif" }}>
+        <Typography
+          sx={{
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: '#1F2A44',
+            fontFamily: 'Poppins, sans-serif',
+          }}
+        >
           {title}
         </Typography>
         <IconButton onClick={onClose} sx={{ p: 0 }} aria-label="Close dialog">
-          <Image src="/Close.png" alt="Close" width={16} height={16} style={{ color: "#737791" }} />
+          <Image
+            src="/Close.png"
+            alt="Close"
+            width={16}
+            height={16}
+            style={{ color: '#737791' }}
+          />
         </IconButton>
       </DialogTitle>
       <DialogContent sx={{ p: 0, py: 2 }}>
-        <Typography sx={{ fontSize: "16px", color: "rgba(19, 21, 35, 1)", fontFamily: "Poppins, sans-serif" }}>
+        <Typography
+          sx={{
+            fontSize: '16px',
+            color: 'rgba(19, 21, 35, 1)',
+            fontFamily: 'Poppins, sans-serif',
+          }}
+        >
           {content}
         </Typography>
       </DialogContent>
-      <DialogActions sx={{ p: 0, justifyContent: "flex-end", gap: 1 }}>
+      <DialogActions sx={{ p: 0, justifyContent: 'flex-end', gap: 1 }}>
         <Button
           onClick={onClose}
           sx={{
-            fontSize: "16px",
-            color: "rgba(19, 21, 35, 1)",
-            textTransform: "none",
-            fontFamily: "Poppins, sans-serif",
+            fontSize: '16px',
+            color: 'rgba(19, 21, 35, 1)',
+            textTransform: 'none',
+            fontFamily: 'Poppins, sans-serif',
           }}
         >
           {cancelButtonText}
@@ -488,22 +582,22 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         <Button
           onClick={onConfirm}
           sx={{
-            backgroundColor: "#F63918",
-            color: "#FFFFFF",
-            fontSize: "14px",
+            backgroundColor: '#F63918',
+            color: '#FFFFFF',
+            fontSize: '14px',
             px: 3,
             py: 1,
-            borderRadius: "16px",
-            textTransform: "none",
-            "&:hover": {
-              backgroundColor: "#E55050",
+            borderRadius: '16px',
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: '#E55050',
             },
-            fontFamily: "Poppins, sans-serif",
+            fontFamily: 'Poppins, sans-serif',
           }}
         >
           {confirmButtonText}
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};
