@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from '../config';
 
 export interface Product {
@@ -38,7 +39,13 @@ export interface ProductsListResponse {
 }
 
 class ProductService {
+  getProductsByPriceRange(arg0: { minPrice: number; maxPrice: number; page: number; limit: number; }): Promise<unknown> {
+    throw new Error('Method not implemented.');
+  }
   private baseUrl = '/private/products';
+  addProduct: any;
+  searchProducts: any;
+  getProductsByStockStatus: any;
 
   // Get all products
   async getProducts() {
@@ -79,6 +86,7 @@ class ProductService {
       }
 
       if (data.images) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         data.images.forEach((image, index) => {
           formData.append(`images`, image);
         });

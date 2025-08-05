@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-query';
 import { useUIStore } from '@/store/uiStore';
 import { productService } from '../services';
+import { CreateProductRequest } from '../services/products';
 
 export const useProducts = ({
   page = 1,
