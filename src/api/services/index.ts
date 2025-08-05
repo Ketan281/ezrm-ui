@@ -7,6 +7,7 @@ export { ordersService } from './orders';
 export { customerReviewsService } from './customerReviews';
 export { shipmentsService } from './shipments';
 export { supplierService } from './suppliers';
+export { warehouseService } from './warehouses';
 export type {
   LoginCredentials,
   RegisterData,
