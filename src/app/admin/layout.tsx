@@ -24,6 +24,7 @@ import Image from 'next/image';
 import { useLogout } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import GlobalSearchModal from '@/components/GlobalSearchModal';
+import NotificationDropdown from '@/components/NotificationDropdown';
 
 // Define types for our sidebar items with nested dropdowns
 interface NestedDropdownOption {
@@ -143,6 +144,23 @@ const sidebarItems: SidebarItem[] = [
       { text: 'Products Listing', path: '/admin/data-management/products' },
       { text: 'Categories Listing', path: '/admin/data-management/categories' },
       { text: 'Warehouse Listing', path: '/admin/data-management/warehouses' },
+      { text: 'Suppliers Listing', path: '/admin/data-management/suppliers' },
+    ],
+  },
+  {
+    text: 'Customers',
+    icon: '/customers.png',
+    hasDropdown: true,
+    options: [
+      { text: 'Customers Listing', path: '/admin/data-management/customers' },
+    ],
+  },
+  {
+    text: 'Employees',
+    icon: '/user.png',
+    hasDropdown: true,
+    options: [
+      { text: 'Employees Listing', path: '/admin/data-management/employees' },
     ],
   },
   // { text: 'Sales Report', icon: '/sales-report.png', path: '/admin/sales' },
@@ -167,6 +185,8 @@ export default function AdminLayout({
   const [mounted, setMounted] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [notificationAnchorEl, setNotificationAnchorEl] =
+    useState<HTMLElement | null>(null);
 
   // Create separate state for each dropdown
   const [openDropdowns, setOpenDropdowns] = useState<DropdownState>({
@@ -175,6 +195,8 @@ export default function AdminLayout({
     Orders: false,
     Payments: false,
     Logistics: false,
+    Customers: false,
+    Employees: false,
   });
 
   // State for nested dropdowns
@@ -208,6 +230,15 @@ export default function AdminLayout({
       setShowLogoutDialog(false);
       window.location.href = '/login';
     }
+  };
+
+  // Notification handlers
+  const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationClose = () => {
+    setNotificationAnchorEl(null);
   };
 
   // Check authentication on mount and redirect if not authenticated
@@ -421,11 +452,17 @@ export default function AdminLayout({
                 mr: 2,
                 display: 'grid',
                 placeItems: 'center',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+                '&:hover': {
+                  backgroundColor: '#f0f0f0',
+                },
               }}
+              onClick={handleNotificationClick}
             >
               <Image
                 src="/notification.png"
-                alt="User"
+                alt="Notifications"
                 width={21}
                 height={21}
               />
@@ -792,6 +829,12 @@ export default function AdminLayout({
       <GlobalSearchModal
         open={showGlobalSearch}
         onClose={() => setShowGlobalSearch(false)}
+      />
+
+      {/* Notification Dropdown */}
+      <NotificationDropdown
+        anchorEl={notificationAnchorEl}
+        onClose={handleNotificationClose}
       />
 
       {/* Main Content */}

@@ -13,6 +13,10 @@ import {
   DialogActions,
   IconButton,
   Chip,
+  Avatar,
+  FormControl,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,15 +30,19 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
+import Image from 'next/image';
 
 interface ProductRowData extends TableRowData {
   id: string;
   name: string;
+  image: React.ReactNode;
   category: string;
   price: string;
   status: string;
   inStock: string;
-  actions: string;
+  actions: React.ReactNode;
 }
 
 export default function ProductsListing() {
@@ -43,8 +51,66 @@ export default function ProductsListing() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>('');
+
+  const renderImage = (imageUrl: string) => {
+    if (!imageUrl) {
+      return (
+        <Avatar sx={{ width: 40, height: 40, bgcolor: '#f0f0f0' }}>
+          <ImageIcon sx={{ color: '#999' }} />
+        </Avatar>
+      );
+    }
+
+    return (
+      <Box
+        sx={{
+          width: 40,
+          height: 40,
+          borderRadius: 1,
+          overflow: 'hidden',
+          cursor: 'pointer',
+          border: '1px solid #e0e0e0',
+          '&:hover': {
+            transform: 'scale(1.05)',
+            transition: 'transform 0.2s',
+          },
+        }}
+        onClick={(e) => handleImageClick(imageUrl, e)}
+      >
+        <Image
+          src={imageUrl}
+          alt="Product"
+          width={40}
+          height={40}
+          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            target.nextElementSibling?.setAttribute('style', 'display: block');
+          }}
+        />
+        <Avatar
+          sx={{
+            width: 40,
+            height: 40,
+            bgcolor: '#f0f0f0',
+            display: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        >
+          <ImageIcon sx={{ color: '#999' }} />
+        </Avatar>
+      </Box>
+    );
+  };
 
   // Debounce search term
   useEffect(() => {
@@ -60,9 +126,22 @@ export default function ProductsListing() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['products', { page, search: debouncedSearchTerm }],
+    queryKey: [
+      'products',
+      {
+        page,
+        search: debouncedSearchTerm,
+        category: categoryFilter,
+        status: statusFilter,
+      },
+    ],
     queryFn: () =>
-      productService.getProducts({ page, search: debouncedSearchTerm }),
+      productService.getProducts({
+        page,
+        search: debouncedSearchTerm,
+        category: categoryFilter,
+        status: statusFilter,
+      }),
   });
 
   // Delete product mutation
@@ -82,68 +161,7 @@ export default function ProductsListing() {
   });
 
   const products = productsData?.products || [];
-  const totalResults = productsData?.total || 0;
-
-  const productData: ProductRowData[] = products.map((product: any) => ({
-    id: product._id,
-    name: product.name,
-    category: product.category || 'N/A',
-    price: `$${product.price || 0}`,
-    status: product.status || 'inactive',
-    inStock: product.inStock ? 'Yes' : 'No',
-    actions: product._id,
-  }));
-
-  const columns = [
-    { id: 'name', label: 'Product Name', width: '25%' },
-    { id: 'category', label: 'Category', width: '15%' },
-    { id: 'price', label: 'Price', width: '12%', align: 'center' as const },
-    {
-      id: 'status',
-      label: 'Status',
-      width: '12%',
-      type: 'status' as const,
-      align: 'center' as const,
-    },
-    {
-      id: 'inStock',
-      label: 'In Stock',
-      width: '12%',
-      align: 'center' as const,
-    },
-    { id: 'actions', label: 'Actions', width: '24%', align: 'center' as const },
-  ];
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleRowClick = (row: ProductRowData) => {
-    router.push(`/admin/data-management/products/${row.id}`);
-  };
-
-  const handleAddProduct = () => {
-    router.push('/admin/data-management/products/add');
-  };
-
-  const handleEditProduct = (productId: string) => {
-    router.push(`/admin/data-management/products/${productId}/edit`);
-  };
-
-  const handleViewProduct = (productId: string) => {
-    router.push(`/admin/data-management/products/${productId}`);
-  };
-
-  const handleDeleteProduct = (productId: string) => {
-    setProductToDelete(productId);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (productToDelete) {
-      deleteProductMutation.mutate(productToDelete);
-    }
-  };
+  const totalResults = productsData?.pagination?.total || 0;
 
   const renderActions = (productId: string) => (
     <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
@@ -180,10 +198,92 @@ export default function ProductsListing() {
     </Box>
   );
 
+  const productData: ProductRowData[] = products.map((product: any) => ({
+    id: product._id,
+    name: product.name,
+    image: renderImage(product.bannerImage || product.images?.[0] || ''),
+    category: product?.category?.name || 'N/A',
+    price: `$${product.price || 0}`,
+    status: product.status || 'inactive',
+    inStock: product.inStock ? 'Yes' : 'No',
+    actions: renderActions(product?._id),
+  }));
+
+  const columns = [
+    { id: 'image', label: 'Image', width: '10%', align: 'center' as const },
+    { id: 'name', label: 'Product Name', width: '20%' },
+    { id: 'category', label: 'Category', width: '15%' },
+    { id: 'price', label: 'Price', width: '12%', align: 'center' as const },
+    {
+      id: 'status',
+      label: 'Status',
+      width: '12%',
+      type: 'status' as const,
+      align: 'center' as const,
+    },
+    {
+      id: 'inStock',
+      label: 'In Stock',
+      width: '12%',
+      align: 'center' as const,
+    },
+    { id: 'actions', label: 'Actions', width: '19%', align: 'center' as const },
+  ];
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleRowClick = (row: TableRowData) => {
+    const productRow = row as ProductRowData;
+    router.push(`/admin/data-management/products/${productRow.id}`);
+  };
+
+  const handleAddProduct = () => {
+    router.push('/admin/data-management/products/add');
+  };
+
+  const handleEditProduct = (productId: string) => {
+    router.push(`/admin/data-management/products/${productId}/edit`);
+  };
+
+  const handleViewProduct = (productId: string) => {
+    router.push(`/admin/data-management/products/${productId}`);
+  };
+
+  const handleDeleteProduct = (productId: string) => {
+    setProductToDelete(productId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleImageClick = (imageUrl: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (imageUrl) {
+      setSelectedImage(imageUrl);
+      setImageModalOpen(true);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (productToDelete) {
+      deleteProductMutation.mutate(productToDelete);
+    }
+  };
+
   const statusOptions = [
     { value: '', label: 'All Status' },
     { value: 'active', label: 'Active' },
     { value: 'inactive', label: 'Inactive' },
+  ];
+
+  const categoryOptions = [
+    { value: '', label: 'All Categories' },
+    { value: 'Sports Nutrition', label: 'Sports Nutrition' },
+    { value: 'Bioactives', label: 'Bioactives' },
+    { value: 'Nootropics', label: 'Nootropics' },
+    { value: 'Amino Acids', label: 'Amino Acids' },
+    { value: 'Vitamins', label: 'Vitamins' },
+    { value: 'Minerals', label: 'Minerals' },
   ];
 
   return (
@@ -241,6 +341,44 @@ export default function ProductsListing() {
         </Alert>
       )}
 
+      {/* Filters */}
+      {!isLoading && !error && (
+        <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+          <FormControl sx={{ minWidth: 200 }} size="small">
+            <Select
+              value={categoryFilter}
+              onChange={(e: any) => setCategoryFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                '& .MuiSelect-select': { fontFamily: 'Poppins, sans-serif' },
+              }}
+            >
+              {categoryOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ minWidth: 200 }} size="small">
+            <Select
+              value={statusFilter}
+              onChange={(e: any) => setStatusFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                '& .MuiSelect-select': { fontFamily: 'Poppins, sans-serif' },
+              }}
+            >
+              {statusOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      )}
+
       {!isLoading && !error && (
         <TableComponent
           columns={columns}
@@ -256,26 +394,6 @@ export default function ProductsListing() {
             value: searchTerm,
             onChange: setSearchTerm,
             placeholder: 'Search products...',
-          }}
-          filterOptions={{
-            value: '',
-            onChange: () => {},
-            options: statusOptions,
-          }}
-          renderCustomCell={(column, value, row) => {
-            if (column.id === 'actions') {
-              return renderActions(value);
-            }
-            if (column.id === 'status') {
-              return (
-                <Chip
-                  label={value}
-                  size="small"
-                  color={value === 'active' ? 'success' : 'default'}
-                />
-              );
-            }
-            return value;
           }}
         />
       )}
@@ -313,6 +431,75 @@ export default function ProductsListing() {
             {deleteProductMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Image Modal */}
+      <Dialog
+        open={imageModalOpen}
+        onClose={() => setImageModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            overflow: 'hidden',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            pb: 1,
+          }}
+        >
+          <Typography variant="h6">Product Image</Typography>
+          <IconButton onClick={() => setImageModalOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: 400,
+              backgroundColor: '#f5f5f5',
+            }}
+          >
+            {selectedImage ? (
+              <Image
+                src={selectedImage}
+                alt="Product"
+                width={600}
+                height={400}
+                style={{
+                  objectFit: 'contain',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                }}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  color: '#999',
+                }}
+              >
+                <ImageIcon sx={{ fontSize: 64, mb: 2 }} />
+                <Typography>No image available</Typography>
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
       </Dialog>
     </Box>
   );

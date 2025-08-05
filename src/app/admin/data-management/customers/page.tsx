@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { warehouseService } from '@/api/services/warehouses';
+import { customerService } from '@/api/services/customers';
 import {
   TableComponent,
   TableRowData,
@@ -29,34 +29,32 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import BusinessIcon from '@mui/icons-material/Business';
+import PersonIcon from '@mui/icons-material/Person';
 
-interface WarehouseRowData extends TableRowData {
+interface CustomerRowData extends TableRowData {
   id: string;
   name: string;
   uniqueId: string;
-  manager: string;
-  capacity: string;
-  utilization: string;
-  status: string;
-  location: React.ReactNode;
   contact: React.ReactNode;
+  company: React.ReactNode;
+  membershipTier: string;
+  status: string;
   actions: React.ReactNode;
 }
 
-export default function WarehousesListing() {
+export default function CustomersListing() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [membershipFilter, setMembershipFilter] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [warehouseToDelete, setWarehouseToDelete] = useState<string | null>(
-    null
-  );
+  const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
 
   // Debounce search term
   useEffect(() => {
@@ -66,100 +64,50 @@ export default function WarehousesListing() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch warehouses
+  // Fetch customers
   const {
-    data: warehousesData,
+    data: customersData,
     isLoading,
     error,
   } = useQuery({
     queryKey: [
-      'warehouses',
-      { page, search: debouncedSearchTerm, status: statusFilter },
-    ],
-    queryFn: () =>
-      warehouseService.getWarehouses({
+      'customers',
+      {
         page,
         search: debouncedSearchTerm,
         status: statusFilter,
+        membershipTier: membershipFilter,
+      },
+    ],
+    queryFn: () =>
+      customerService.getCustomers({
+        page,
+        search: debouncedSearchTerm,
+        status: statusFilter,
+        membershipTier: membershipFilter,
       }),
   });
 
-  // Delete warehouse mutation
-  const deleteWarehouseMutation = useMutation({
-    mutationFn: async (warehouseId: string) => {
-      return warehouseService.deleteWarehouse(warehouseId);
+  // Delete customer mutation
+  const deleteCustomerMutation = useMutation({
+    mutationFn: async (customerId: string) => {
+      return customerService.deleteCustomer(customerId);
     },
     onSuccess: () => {
-      toast.success('Warehouse deleted successfully!');
-      queryClient.invalidateQueries({ queryKey: ['warehouses'] });
+      toast.success('Customer deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
       setDeleteDialogOpen(false);
-      setWarehouseToDelete(null);
+      setCustomerToDelete(null);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete warehouse');
+      toast.error(error.message || 'Failed to delete customer');
     },
   });
 
-  const warehouses = warehousesData?.warehouses || [];
-  const totalResults = warehousesData?.pagination?.total || 0;
+  const customers = customersData?.data || [];
+  const totalResults = customersData?.total || 0;
 
-  const handleOpenGoogleMaps = (
-    latitude: string,
-    longitude: string,
-    address: any
-  ) => {
-    const addressString = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
-    const url = `https://www.google.com/maps?q=${latitude},${longitude}&z=15`;
-    window.open(url, '_blank');
-  };
-
-  const renderLocation = (address: any) => {
-    if (!address?.latitude || !address?.longitude) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <LocationOnIcon sx={{ fontSize: 16, color: '#999' }} />
-          <Typography variant="body2" color="text.secondary">
-            {address?.city || 'N/A'}, {address?.state || 'N/A'}
-          </Typography>
-        </Box>
-      );
-    }
-
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <IconButton
-          size="small"
-          onClick={() =>
-            handleOpenGoogleMaps(address.latitude, address.longitude, address)
-          }
-          sx={{
-            color: '#1976d2',
-            p: 0.5,
-            '&:hover': { backgroundColor: '#e3f2fd' },
-          }}
-        >
-          <LocationOnIcon sx={{ fontSize: 16 }} />
-        </IconButton>
-        <Box>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 500, fontSize: '12px' }}
-          >
-            {address.city}, {address.state}
-          </Typography>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ fontSize: '10px' }}
-          >
-            {address.latitude}, {address.longitude}
-          </Typography>
-        </Box>
-      </Box>
-    );
-  };
-
-  const renderContact = (contactInfo: any) => {
+  const renderContact = (customer: any) => {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -168,7 +116,7 @@ export default function WarehousesListing() {
             variant="caption"
             sx={{ fontSize: '10px', color: '#666' }}
           >
-            {contactInfo?.email || 'N/A'}
+            {customer?.email || 'N/A'}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -177,20 +125,47 @@ export default function WarehousesListing() {
             variant="caption"
             sx={{ fontSize: '10px', color: '#666' }}
           >
-            {contactInfo?.phone || 'N/A'}
+            {customer?.phone || 'N/A'}
           </Typography>
         </Box>
       </Box>
     );
   };
 
-  const renderActions = (warehouseId: string) => (
+  const renderCompany = (customer: any) => {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <BusinessIcon sx={{ fontSize: 12, color: '#666' }} />
+          <Typography
+            variant="caption"
+            sx={{ fontSize: '10px', color: '#666' }}
+          >
+            {customer?.companyName || customer?.name || 'N/A'}
+          </Typography>
+        </Box>
+        {customer?.industry && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <PersonIcon sx={{ fontSize: 12, color: '#666' }} />
+            <Typography
+              variant="caption"
+              sx={{ fontSize: '10px', color: '#666' }}
+            >
+              {customer.industry}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
+  const renderActions = (customerId: string) => (
     <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
       <IconButton
         size="small"
         onClick={(e) => {
           e.stopPropagation();
-          handleViewWarehouse(warehouseId);
+          handleViewCustomer(customerId);
         }}
         sx={{ color: '#1976d2' }}
       >
@@ -200,7 +175,7 @@ export default function WarehousesListing() {
         size="small"
         onClick={(e) => {
           e.stopPropagation();
-          handleEditWarehouse(warehouseId);
+          handleEditCustomer(customerId);
         }}
         sx={{ color: '#ff9800' }}
       >
@@ -210,7 +185,7 @@ export default function WarehousesListing() {
         size="small"
         onClick={(e) => {
           e.stopPropagation();
-          handleDeleteWarehouse(warehouseId);
+          handleDeleteCustomer(customerId);
         }}
         sx={{ color: '#f44336' }}
       >
@@ -219,73 +194,62 @@ export default function WarehousesListing() {
     </Box>
   );
 
-  const warehouseData: WarehouseRowData[] = warehouses.map(
-    (warehouse: any) => ({
-      id: warehouse._id,
-      name: warehouse.name,
-      uniqueId: warehouse.uniqueId,
-      manager: warehouse.manager,
-      capacity: warehouse.capacity?.toLocaleString() || '0',
-      utilization: `${warehouse.currentUtilization?.toLocaleString() || 0} / ${warehouse.capacity?.toLocaleString() || 0}`,
-      status: warehouse.status,
-      location: renderLocation(warehouse.address),
-      contact: renderContact(warehouse.contactInfo),
-      actions: renderActions(warehouse._id),
-    })
-  );
+  const customerData: CustomerRowData[] = customers.map((customer: any) => ({
+    id: customer._id,
+    name: customer.name,
+    uniqueId: customer.uniqueId,
+    contact: renderContact(customer),
+    company: renderCompany(customer),
+    membershipTier: customer.membershipTier,
+    status: customer.status,
+    actions: renderActions(customer._id),
+  }));
 
   const columns = [
-    { id: 'name', label: 'Warehouse Name', width: '15%' },
-    { id: 'uniqueId', label: 'Unique ID', width: '10%' },
-    { id: 'manager', label: 'Manager', width: '10%' },
+    { id: 'name', label: 'Customer Name', width: '15%' },
+    { id: 'uniqueId', label: 'Unique ID', width: '12%' },
+    { id: 'contact', label: 'Contact', width: '20%' },
+    { id: 'company', label: 'Company', width: '20%' },
     {
-      id: 'capacity',
-      label: 'Capacity',
-      width: '8%',
-      align: 'center' as const,
-    },
-    {
-      id: 'utilization',
-      label: 'Utilization',
-      width: '10%',
+      id: 'membershipTier',
+      label: 'Membership',
+      width: '12%',
       align: 'center' as const,
     },
     {
       id: 'status',
       label: 'Status',
-      width: '8%',
+      width: '10%',
       type: 'status' as const,
       align: 'center' as const,
     },
-    { id: 'location', label: 'Location', width: '12%' },
-    { id: 'contact', label: 'Contact', width: '10%' },
-    { id: 'actions', label: 'Actions', width: '17%', align: 'center' as const },
+    { id: 'actions', label: 'Actions', width: '11%', align: 'center' as const },
   ];
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
-  const handleAddWarehouse = () => {
-    router.push('/admin/data-management/warehouses/add');
+  const handleAddCustomer = () => {
+    router.push('/admin/data-management/customers/add');
   };
 
-  const handleEditWarehouse = (warehouseId: string) => {
-    router.push(`/admin/data-management/warehouses/${warehouseId}/edit`);
+  const handleEditCustomer = (customerId: string) => {
+    router.push(`/admin/data-management/customers/${customerId}/edit`);
   };
 
-  const handleViewWarehouse = (warehouseId: string) => {
-    router.push(`/admin/data-management/warehouses/${warehouseId}`);
+  const handleViewCustomer = (customerId: string) => {
+    router.push(`/admin/data-management/customers/${customerId}`);
   };
 
-  const handleDeleteWarehouse = (warehouseId: string) => {
-    setWarehouseToDelete(warehouseId);
+  const handleDeleteCustomer = (customerId: string) => {
+    setCustomerToDelete(customerId);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (warehouseToDelete) {
-      deleteWarehouseMutation.mutate(warehouseToDelete);
+    if (customerToDelete) {
+      deleteCustomerMutation.mutate(customerToDelete);
     }
   };
 
@@ -293,7 +257,14 @@ export default function WarehousesListing() {
     { value: '', label: 'All Status' },
     { value: 'active', label: 'Active' },
     { value: 'inactive', label: 'Inactive' },
-    { value: 'maintenance', label: 'Maintenance' },
+  ];
+
+  const membershipOptions = [
+    { value: '', label: 'All Memberships' },
+    { value: 'bronze', label: 'Bronze' },
+    { value: 'silver', label: 'Silver' },
+    { value: 'gold', label: 'Gold' },
+    { value: 'platinum', label: 'Platinum' },
   ];
 
   return (
@@ -321,13 +292,13 @@ export default function WarehousesListing() {
             fontFamily: 'Poppins, sans-serif',
           }}
         >
-          Warehouses Listing ({totalResults})
+          Customers Listing ({totalResults})
         </Typography>
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
-          onClick={handleAddWarehouse}
+          onClick={handleAddCustomer}
           sx={{
             fontWeight: 600,
             textTransform: 'none',
@@ -335,7 +306,7 @@ export default function WarehousesListing() {
             '&:hover': { backgroundColor: '#1565c0' },
           }}
         >
-          Add Warehouse
+          Add Customer
         </Button>
       </Box>
 
@@ -347,7 +318,7 @@ export default function WarehousesListing() {
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to load warehouses. Please try again.
+          Failed to load customers. Please try again.
         </Alert>
       )}
 
@@ -370,13 +341,29 @@ export default function WarehousesListing() {
               ))}
             </Select>
           </FormControl>
+          <FormControl sx={{ minWidth: 200 }} size="small">
+            <Select
+              value={membershipFilter}
+              onChange={(e: any) => setMembershipFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                '& .MuiSelect-select': { fontFamily: 'Poppins, sans-serif' },
+              }}
+            >
+              {membershipOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       )}
 
       {!isLoading && !error && (
         <TableComponent
           columns={columns}
-          data={warehouseData}
+          data={customerData}
           totalResults={totalResults}
           currentPage={page}
           onPageChange={handlePageChange}
@@ -386,7 +373,7 @@ export default function WarehousesListing() {
           searchOptions={{
             value: searchTerm,
             onChange: setSearchTerm,
-            placeholder: 'Search warehouses...',
+            placeholder: 'Search customers...',
           }}
         />
       )}
@@ -399,14 +386,14 @@ export default function WarehousesListing() {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete this warehouse? This action cannot
-            be undone.
+            Are you sure you want to delete this customer? This action cannot be
+            undone.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
-            disabled={deleteWarehouseMutation.isPending}
+            disabled={deleteCustomerMutation.isPending}
           >
             Cancel
           </Button>
@@ -414,14 +401,14 @@ export default function WarehousesListing() {
             onClick={confirmDelete}
             color="error"
             variant="contained"
-            disabled={deleteWarehouseMutation.isPending}
+            disabled={deleteCustomerMutation.isPending}
             startIcon={
-              deleteWarehouseMutation.isPending ? (
+              deleteCustomerMutation.isPending ? (
                 <CircularProgress size={16} />
               ) : null
             }
           >
-            {deleteWarehouseMutation.isPending ? 'Deleting...' : 'Delete'}
+            {deleteCustomerMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
