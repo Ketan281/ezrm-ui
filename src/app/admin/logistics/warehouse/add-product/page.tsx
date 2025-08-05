@@ -37,7 +37,8 @@ import { usePurchaseOrders } from '../../../../../hooks/usePurchaseOrder';
 
 import AddSupplierModal from '../../../../../components/modals/AddSupplierModal';
 import AddProductModal from '../../../../../components/modals/AddProductModal';
-import { productService, supplierService } from '@/api';
+import ShippingCalculationModal from '../../../../../components/modals/ShippingCalculationModal';
+import { productService, supplierService, warehouseService } from '@/api';
 import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import {
   CreatePurchaseOrderRequest,
@@ -223,6 +224,13 @@ export default function AddPurchaseOrder() {
   console.log('Products data:', productsData);
   console.log('Products array:', products);
 
+  const { data: warehousesData, isFetching: isLoadingWarehouses } = useQuery({
+    queryKey: ['warehouses', {}],
+    queryFn: () => warehouseService.getWarehouses(),
+  });
+
+  const warehouses: any = warehousesData?.warehouses ?? [];
+
   // const { products, isLoadingProducts }: any = useProducts();
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
@@ -231,6 +239,8 @@ export default function AddPurchaseOrder() {
   // Modal states
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showShippingCalculationModal, setShowShippingCalculationModal] =
+    useState(false);
 
   const [formData, setFormData] = useState({
     supplier_id: '',
@@ -859,6 +869,34 @@ export default function AddPurchaseOrder() {
               </Typography>
               <Paper sx={{ p: 2, mb: 2 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {/* Warehouse Selection */}
+                  <Box sx={{ width: '100%' }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                      Destination Warehouse
+                    </Typography>
+                    <ReactSelect
+                      value={formData?.warehouse_option}
+                      options={[
+                        ...warehouses?.map((warehouse: any) => ({
+                          value: warehouse?._id,
+                          label: `${warehouse?.name} - ${warehouse?.address?.city}, ${warehouse?.address?.state}`,
+                        })),
+                      ]}
+                      placeholder="Select Destination Warehouse"
+                      isClearable
+                      styles={reactSelectStyles}
+                      isSearchable
+                      isLoading={isLoadingWarehouses}
+                      onChange={(selectedOption: any) => {
+                        setFormData({
+                          ...formData,
+                          warehouse_option: selectedOption,
+                          warehouse_id: selectedOption?.value || '',
+                        });
+                      }}
+                    />
+                  </Box>
+
                   <Box sx={{ width: '100%' }}>
                     <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                       Street Address
@@ -990,24 +1028,36 @@ export default function AddPurchaseOrder() {
                       <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
                         Shipping Cost
                       </Typography>
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        type="number"
-                        value={formData.shipping_cost}
-                        onChange={(e) =>
-                          handleInputChange(
-                            'shipping_cost',
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
-                          ),
-                        }}
-                      />
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          size="small"
+                          type="number"
+                          value={formData.shipping_cost}
+                          onChange={(e) =>
+                            handleInputChange(
+                              'shipping_cost',
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                $
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => setShowShippingCalculationModal(true)}
+                          sx={{ minWidth: 'auto', px: 2 }}
+                        >
+                          Calculate
+                        </Button>
+                      </Box>
                     </Box>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -1313,6 +1363,16 @@ export default function AddPurchaseOrder() {
         open={showAddProductModal}
         onClose={() => setShowAddProductModal(false)}
         onProductAdded={handleProductAdded}
+      />
+
+      <ShippingCalculationModal
+        open={showShippingCalculationModal}
+        onClose={() => setShowShippingCalculationModal(false)}
+        supplierCoordinates={formData.supplier_coordinates}
+        warehouseCoordinates={formData.warehouse_coordinates}
+        onCostCalculated={(cost) => {
+          handleInputChange('shipping_cost', cost);
+        }}
       />
     </ThemeProvider>
   );

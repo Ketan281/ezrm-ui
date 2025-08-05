@@ -240,7 +240,7 @@ export default function ProductsListing() {
   };
 
   const handleAddProduct = () => {
-    router.push('/admin/data-management/products/add');
+    router.push('/admin/inventory/add-product');
   };
 
   const handleEditProduct = (productId: string) => {
