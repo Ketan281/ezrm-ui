@@ -9,6 +9,7 @@ import {
   TableRowData,
 } from '../../../../components/TableComponent';
 import { purchaseOrderService } from '@/api/services/purchaseOrders';
+import { Button } from '@mui/material';
 
 interface OrderRowData extends TableRowData {
   product: string;
@@ -188,17 +189,41 @@ export default function OrderList() {
         fontFamily: 'Poppins, sans-serif',
       }}
     >
-      <Typography
+      <Box
         sx={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: '#1F2A44',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           mb: 3,
-          fontFamily: 'Poppins, sans-serif',
         }}
       >
-        Purchase Orders ({totalResults})
-      </Typography>
+        <Typography
+          sx={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#1F2A44',
+            fontFamily: 'Poppins, sans-serif',
+          }}
+        >
+          Purchase Orders ({totalResults})
+        </Typography>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => router.push('/admin/logistics/warehouse/add-product')}
+          sx={{
+            fontWeight: 600,
+            textTransform: 'none',
+            backgroundColor: '#1976d2',
+            '&:hover': {
+              backgroundColor: '#1565c0',
+            },
+          }}
+        >
+          Create Purchase Order
+        </Button>
+      </Box>
 
       <TableComponent
         columns={columns}
