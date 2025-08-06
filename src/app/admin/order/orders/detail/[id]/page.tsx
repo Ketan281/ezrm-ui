@@ -14,5 +14,5 @@ export default async function OrderTrackingPage({
   }
 
   // Pass the id to your client component
-  return <OrderTrackingClient id={params.id} />
+  return <OrderTrackingClient id={params?.id} />
 }

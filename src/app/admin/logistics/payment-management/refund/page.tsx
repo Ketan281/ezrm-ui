@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
-
 import type React from "react"
-import { useState } from "react"
-import { Box, Typography, Button, CardContent, Grid, Card } from "@mui/material"
+import { useState, useMemo, useEffect } from "react"
+import { Box, Typography, Button, CardContent, Grid, Card, CircularProgress, Alert } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { TableComponent, type TableRowData } from "../../../../../components/TableComponent"
+import { useSupplierRefundTransactions } from "@/api/handlers/supplierRefundTransactionsHandler"
+import type { SupplierRefundTransaction } from "@/api/services/supplierRefundTransactions"
 
 interface PaymentRowData extends TableRowData {
   invoiceId: string
@@ -30,129 +32,97 @@ export default function Refunds() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [page, setPage] = useState(1)
+  const [isClient, setIsClient] = useState(false)
+  const rowsPerPage = 9
 
-  // Create more distinct payment data entries for the pending tab
-  const paymentData: PaymentRowData[] = [
-    {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "1",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "in-process",
-      orderDetails: "#",
-      id: "w",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "declined",
-      orderDetails: "#",
-      id: "3",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "4",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "in-process",
-      orderDetails: "#",
-      id: "5",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "6",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "7",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "8",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "9",
-    },
-    // Add more rows to test pagination
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "10",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "11",
-    },
-  {
-      invoiceId: "#123456",
-      date: "April 2, 2025, 3:45PM",
-      customerName: "Robin Rosh",
-      email: "Robin@gmail.com",
-      status: "completed",
-      orderDetails: "#",
-      id: "12",
-    },
-  ]
-  
-  // Make sure to use the full length of the data
-  const pendingTotalResults = paymentData.length;
- 
-  
+  // Fix hydration mismatch by ensuring client-side rendering
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Fetch supplier refund transactions
+  const {
+    data: refundData,
+    isLoading,
+    error,
+    isError,
+  } = useSupplierRefundTransactions({
+    page,
+    limit: rowsPerPage,
+    search: searchTerm,
+    status: statusFilter,
+  })
+
+  // Helper function to format date consistently
+  const formatDate = (dateString: string): string => {
+    if (!isClient) return '' // Return empty string during SSR
+    
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch (error) {
+      return dateString
+    }
+  }
+
+  // Helper function to map API status to display status
+  const getStatusForDisplay = (apiStatus: string): string => {
+    switch (apiStatus.toLowerCase()) {
+      case 'processed':
+        return 'completed'
+      case 'pending':
+        return 'in-process'
+      case 'failed':
+        return 'declined'
+      default:
+        return apiStatus.toLowerCase()
+    }
+  }
+
+  // Transform API data to table format
+  const transformedData: PaymentRowData[] = useMemo(() => {
+    if (!refundData?.data?.transactions || !isClient) return []
+
+    return refundData.data.transactions.map((transaction: SupplierRefundTransaction) => ({
+      id: transaction._id,
+      invoiceId: transaction.uniqueId,
+      date: formatDate(transaction.createdAt),
+      customerName: transaction.customerId,
+      email: `₹${transaction.refundDetails.refundAmount.toLocaleString()}`,
+      status: getStatusForDisplay(transaction.refundDetails.refundStatus),
+      orderDetails: `/admin/logistics/payment-management/refund/detail/${transaction._id}`,
+    }))
+  }, [refundData, isClient])
+
+  // Calculate statistics
+  const statistics = useMemo(() => {
+    if (!refundData?.data?.transactions) {
+      return {
+        total: 0,
+        approved: 0,
+        declined: 0,
+      }
+    }
+
+    const transactions = refundData.data.transactions
+    const total = refundData.data.total
+    const approved = transactions.filter(t => t.refundDetails.refundStatus === 'processed').length
+    const declined = transactions.filter(t => t.refundDetails.refundStatus === 'failed').length
+
+    return { total, approved, declined }
+  }, [refundData])
+
   const columns: TableColumnType[] = [
-    { id: "invoiceId", label: "Invoice ID", width: "12%" },
+    { id: "invoiceId", label: "Transaction ID", width: "12%" },
     { id: "date", label: "Date", width: "25%", align: "center" },
-    { id: "customerName", label: "Customer Name", width: "20%", align: "center" },
-    { id: "email", label: "Email", width: "10%", align: "center" },
+    { id: "customerName", label: "Customer ID", width: "20%", align: "center" },
+    { id: "email", label: "Amount", width: "10%", align: "center" },
     {
       id: "status",
       label: "Status",
@@ -167,37 +137,65 @@ export default function Refunds() {
       align: "center",
     },
   ]
-  
 
-  
-  const handlePageChange = (page: number) => {
-    setPage(page)
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
   }
 
- 
-
-  // Filter reviews based on selected tab
+  // Filter options based on API status values
   const statusOptions = [
     { value: "", label: "Status" },
-   { value: "Completed", label: "Completed" },
-    { value: "In-process", label: "In-process" },
-    { value: "Pending", label: "Pending" },
-    { value: "Declined", label: "Declined" },  
+    { value: "processed", label: "Completed" },
+    { value: "pending", label: "In-process" },
+    { value: "failed", label: "Declined" },
   ]
 
+  const handleRowClickPending = (row: TableRowData) => {
+    router.push(`/admin/logistics/payment-management/refund/detail/${row.id}`)
+  }
 
- const handleRowClickPending = (row: TableRowData) => {
+  const handleLinkClickPending = (row: TableRowData) => {
     router.push(`/admin/logistics/payment-management/refund/detail/${row.id}`)
   }
- const handleLinkClickPending = (row: TableRowData) => {
-    router.push(`/admin/logistics/payment-management/refund/detail/${row.id}`)
+
+  // Show loading during hydration
+  if (!isClient) {
+    return (
+      <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+      </Box>
+    )
   }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>
+        <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+          <Alert severity="error" sx={{ mt: 2 }}>
+            Error loading refund transactions: {error instanceof Error ? error.message : 'Something went wrong'}
+          </Alert>
+        </Box>
+      </Box>
+    )
+  }
+
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", p: 1 }}>
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
         {/* Back button */}
         <Button
           startIcon={<ArrowBackIcon />}
+          onClick={() => router.back()}
           sx={{
             color: "#637381",
             textTransform: "none",
@@ -225,7 +223,7 @@ export default function Refunds() {
           Refund Requests
         </Typography>
 
-        {/* Tabs in separate white container */}
+        {/* Statistics Cards */}
         <Grid container spacing={3} mt={1} mb={1}>
           <Grid display={"flex"} justifyContent={"space-around"} width={"100%"}>
             <Card
@@ -249,13 +247,14 @@ export default function Refunds() {
                 </Box>
                 <Typography variant="h6" fontSize={"11px"} sx={{ textAlign: "left" }}>
                   <Typography component="span" sx={{ fontSize: "15px", fontWeight: "bold" }}>
-                    178+
+                    {statistics.total}+
                   </Typography>
                   <br />
                   Total Requests
                 </Typography>
               </CardContent>
             </Card>
+
             <Card
               sx={{
                 backgroundColor: "#fff",
@@ -277,13 +276,14 @@ export default function Refunds() {
                 </Box>
                 <Typography variant="h6" fontSize={"11px"} sx={{ textAlign: "left" }}>
                   <Typography component="span" sx={{ fontSize: "15px", fontWeight: "bold" }}>
-                    20+
+                    {statistics.approved}+
                   </Typography>
                   <br />
                   Approved Requests
                 </Typography>
               </CardContent>
             </Card>
+
             <Card
               sx={{
                 backgroundColor: "#fff",
@@ -305,7 +305,7 @@ export default function Refunds() {
                 </Box>
                 <Typography variant="h6" fontSize={"10.5px"} sx={{ textAlign: "left" }}>
                   <Typography component="span" sx={{ fontSize: "15px", fontWeight: "bold" }}>
-                    190+
+                    {statistics.declined}+
                   </Typography>
                   <br />
                   Declined Requests
@@ -314,43 +314,43 @@ export default function Refunds() {
             </Card>
           </Grid>
         </Grid>
-            <>
-                     <Typography
+
+        {/* Table Section */}
+        <Typography
           variant="h6"
           sx={{
             fontWeight: 500,
             color: "#212B36",
             mt: 3,
             mb: 1,
-            ml:3
+            ml: 3
           }}
         >
-          Pending payments
+          Supplier Refund Transactions
         </Typography>
-          <TableComponent
-            columns={columns}
-            data={paymentData.slice((page - 1) * 9, page * 9)}
-            totalResults={pendingTotalResults}
-            currentPage={page}
-            onPageChange={handlePageChange}
-            onRowClick={handleRowClickPending}
-            onLinkClick={handleLinkClickPending}
-            showCheckboxes={false}
-            showHeader={true}
-            rowsPerPage={9}
-            searchOptions={{
-              value: searchTerm,
-              onChange: setSearchTerm,
-              placeholder: "Search Order ID",
-            }}
-            filterOptions={{
-              value: statusFilter,
-              onChange: setStatusFilter,
-              options: statusOptions,
-            }}
-          />
-          </>
-    
+
+        <TableComponent
+          columns={columns}
+          data={transformedData}
+          totalResults={refundData?.data?.total || 0}
+          currentPage={page}
+          onPageChange={handlePageChange}
+          onRowClick={handleRowClickPending}
+          onLinkClick={handleLinkClickPending}
+          showCheckboxes={false}
+          showHeader={true}
+          rowsPerPage={rowsPerPage}
+          searchOptions={{
+            value: searchTerm,
+            onChange: setSearchTerm,
+            placeholder: "Search Transaction ID or Order ID",
+          }}
+          filterOptions={{
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: statusOptions,
+          }}
+        />
       </Box>
     </Box>
   )

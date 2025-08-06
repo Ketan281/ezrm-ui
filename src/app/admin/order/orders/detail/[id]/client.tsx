@@ -357,11 +357,11 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                       variant="rounded"
                       sx={{ width: 50, height: 50, bgcolor: '#f0f0f0' }}
                     >
-                      {item.product.name.charAt(0)}
+                      {item.product?.name.charAt(0)}
                     </Avatar>
                     <Box>
                       <Typography variant="subtitle2" fontWeight="700">
-                        {item.product.name}
+                        {item.product?.name}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -594,11 +594,11 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                         fontSize: '20px',
                       }}
                     >
-                      {orderData.customer.name.charAt(0).toUpperCase()}
+                      {orderData.customer?.name.charAt(0).toUpperCase()}
                     </Avatar>
                     <Box>
                       <Typography variant="h6" fontWeight="700" color="#1a365d">
-                        {orderData.customer.name}
+                        {orderData.customer?.name}
                       </Typography>
                       <Typography
                         variant="body2"

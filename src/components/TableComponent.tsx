@@ -149,57 +149,103 @@ export const TableComponent: React.FC<TableComponentProps> = ({
 
   const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
-  const renderStatusCell = (value: unknown) => {
-    if (value === null || value === undefined) return null;
+const renderStatusCell = (value: unknown) => {
+  if (value === null || value === undefined) return null;
 
-    const stringValue = String(value);
-    let bgColor = '#E5E7EB';
-    let textColor = '#737791';
+  const stringValue = String(value).toLowerCase();
+  let bgColor = '#E5E7EB';
+  let textColor = '#737791';
 
-    switch (stringValue.toLowerCase()) {
-      case 'completed':
-        bgColor = 'rgba(6, 165, 97, 0.09)';
-        textColor = 'rgba(6, 165, 97, 1)';
-        break;
-      case 'pending':
-        bgColor = 'rgba(255, 244, 240, 1)';
-        textColor = 'rgba(255, 143, 107, 1)';
-        break;
-      case 'in-process':
-        bgColor = 'rgba(255, 247, 225, 1)';
-        textColor = 'rgba(255, 195, 39, 1)';
-        break;
-      case 'declined':
-        bgColor = 'rgba(255, 244, 240, 1)';
-        textColor = 'rgba(255, 143, 107, 1)';
-        break;
-      case 'new order':
-        bgColor = 'rgba(239, 239, 255, 1)';
-        textColor = 'rgba(96, 91, 255, 1)';
-        break;
-    }
+  // Success/Completed status words
+  const successWords = [
+    'completed', 'success', 'successful', 'done', 'finished', 'approved', 
+    'confirmed', 'processed', 'delivered', 'active', 'resolved', 'accepted',
+    'verified', 'validated', 'cleared', 'finalized', 'accomplished','passed','shipped','refunded'
+  ];
 
-    return (
-      <Box
-        sx={{
-          backgroundColor: bgColor,
-          borderRadius: '10px',
-          padding: '7px 10px',
-          minWidth: '100px',
-          height: '32px',
-          display: 'inline-block',
-          fontSize: '12px',
-          fontWeight: '500',
-          color: textColor,
-          textAlign: 'center',
-          maxWidth: 'fit-content',
-          border: `1px solid ${textColor}`,
-        }}
-      >
-        {stringValue}
-      </Box>
-    );
-  };
+  // Progress/In-process status words
+  const progressWords = [
+    'pending', 'in-process', 'processing', 'in-progress', 'ongoing', 
+    'running', 'active', 'reviewing', 'verifying', 'checking', 'validating',
+    'working', 'executing', 'analyzing', 'evaluating', 'under-review',
+    'in-review', 'waiting', 'queued'
+  ];
+
+  // Failed/Error status words
+  const failedWords = [
+    'declined', 'rejected', 'failed', 'error', 'cancelled', 'canceled',
+    'denied', 'refused', 'invalid', 'expired', 'terminated', 'aborted',
+    'blocked', 'suspended', 'disabled', 'inactive'
+  ];
+
+  // New/Draft status words
+  const newWords = [
+    'new', 'new order', 'draft', 'created', 'initiated', 'started',
+    'submitted', 'received', 'registered', 'scheduled', 'planned'
+  ];
+
+  // Warning status words
+  const warningWords = [
+    'warning', 'caution', 'alert', 'attention', 'delayed', 'overdue',
+    'urgent', 'critical', 'high-priority', 'escalated', 'retry', 'timeout'
+  ];
+
+  // Check which category the status belongs to
+  const isSuccess = successWords.some(word => stringValue.includes(word));
+  const isProgress = progressWords.some(word => stringValue.includes(word));
+  const isFailed = failedWords.some(word => stringValue.includes(word));
+  const isNew = newWords.some(word => stringValue.includes(word));
+  const isWarning = warningWords.some(word => stringValue.includes(word));
+
+  if (isSuccess) {
+    // Green for success/completed
+    bgColor = 'rgba(6, 165, 97, 0.09)';
+    textColor = 'rgba(6, 165, 97, 1)';
+  } else if (isProgress) {
+    // Yellow for in-progress
+    bgColor = 'rgba(255, 247, 225, 1)';
+    textColor = 'rgba(255, 195, 39, 1)';
+  } else if (isFailed) {
+    // Red for failed/declined
+    bgColor = 'rgba(254, 242, 242, 1)';
+    textColor = 'rgba(220, 38, 38, 1)';
+  } else if (isNew) {
+    // Blue for new items
+    bgColor = 'rgba(239, 246, 255, 1)';
+    textColor = 'rgba(59, 130, 246, 1)';
+  } else if (isWarning) {
+    // Orange for warnings
+    bgColor = 'rgba(255, 244, 240, 1)';
+    textColor = 'rgba(255, 143, 107, 1)';
+  } else {
+    // Default gray for unknown statuses
+    bgColor = 'rgba(243, 244, 246, 1)';
+    textColor = 'rgba(107, 114, 128, 1)';
+  }
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: bgColor,
+        borderRadius: '10px',
+        padding: '7px 10px',
+        minWidth: '100px',
+        height: '32px',
+        display: 'inline-block',
+        fontSize: '12px',
+        fontWeight: '500',
+        color: textColor,
+        textAlign: 'center',
+        maxWidth: 'fit-content',
+        border: `1px solid ${textColor}`,
+        textTransform: 'capitalize',
+      }}
+    >
+      {String(value)}
+    </Box>
+  );
+};
+
 
   const renderLinkCell = (value: unknown, row: TableRowData) => {
     if (typeof value !== 'string') return 'View';

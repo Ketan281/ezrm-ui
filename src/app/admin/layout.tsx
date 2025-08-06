@@ -165,7 +165,7 @@ const sidebarItems: SidebarItem[] = [
   },
   // { text: 'Sales Report', icon: '/sales-report.png', path: '/admin/sales' },
   { text: 'Messages', icon: '/customers.png', path: '/admin/messages' },
-  { text: 'Settings', icon: '/settings.png', path: '/admin/settings' },
+  // { text: 'Settings', icon: '/settings.png', path: '/admin/settings' },
   { text: 'Sign Out', icon: '/sign-out.png', isLogout: true }, // Mark as logout item
 ];
 

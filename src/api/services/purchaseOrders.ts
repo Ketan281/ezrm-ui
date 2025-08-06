@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from '../config';
 
 export enum PurchaseOrderStatus {
@@ -123,6 +124,7 @@ class PurchaseOrderService {
     try {
       const response = await api.put(`${this.baseUrl}/${id}`, data);
       return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || 'Failed to update purchase order'
