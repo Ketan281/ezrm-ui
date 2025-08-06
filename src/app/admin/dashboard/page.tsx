@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React from 'react';
@@ -10,19 +11,19 @@ import {
   Alert,
   Chip,
   Avatar,
-  LinearProgress,
+  // LinearProgress,
   Divider,
 } from '@mui/material';
 import { Grid } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { dashboardService } from '@/api/services/dashboard';
 import {
-  LineChart,
-  Line,
+  // LineChart,
+  // Line,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
+  // BarChart,
+  // Bar,
   PieChart,
   Pie,
   Cell,
@@ -30,20 +31,20 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  // Legend,
   ResponsiveContainer,
 } from 'recharts';
-import Image from 'next/image';
+// import Image from 'next/image';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import PeopleIcon from '@mui/icons-material/People';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
-import StarIcon from '@mui/icons-material/Star';
+// import StarIcon from '@mui/icons-material/Star';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+// import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -98,10 +99,10 @@ export default function Dashboard() {
     queryFn: () => dashboardService.getOrderData(),
   });
 
-  const { data: customerData } = useQuery({
-    queryKey: ['customers'],
-    queryFn: () => dashboardService.getCustomerData(),
-  });
+  // const { data: customerData } = useQuery({
+  //   queryKey: ['customers'],
+  //   queryFn: () => dashboardService.getCustomerData(),
+  // });
 
   if (isLoading) {
     return (
@@ -121,7 +122,7 @@ export default function Dashboard() {
 
   const overview = dashboardData?.data?.overview;
   const recentOrders = dashboardData?.data?.recent?.recentOrders || [];
-  const topProducts = dashboardData?.data?.recent?.topProducts || [];
+  // const topProducts = dashboardData?.data?.recent?.topProducts || [];
 
   const statsCards = [
     {
@@ -187,11 +188,11 @@ export default function Dashboard() {
       revenue: item.revenue,
     })) || [];
 
-  const customerStatusData =
-    customerData?.data?.customerByStatus?.map((item) => ({
-      status: item._id,
-      count: item.count,
-    })) || [];
+  // const customerStatusData =
+  //   customerData?.data?.customerByStatus?.map((item) => ({
+  //     status: item._id,
+  //     count: item.count,
+  //   })) || [];
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#F9FAFB', minHeight: '85vh' }}>
@@ -210,7 +211,7 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 4 }}>
         {statsCards.map((card, index) => (
-          <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+          <Grid key={index}>
             <Card
               sx={{
                 backgroundColor: '#fff',
@@ -296,7 +297,7 @@ export default function Dashboard() {
       {/* Charts Section */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Revenue Chart */}
-        <Grid item xs={12} md={6}>
+        <Grid>
           <Card
             sx={{
               backgroundColor: '#fff',
@@ -317,7 +318,7 @@ export default function Dashboard() {
               >
                 Revenue Trend
               </Typography>
-              <Box sx={{ height: 'calc(100% - 60px)' }}>
+              <Box sx={{ height: 'calc(100% - 60px)',width:"40vw" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={revenueChartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -352,7 +353,7 @@ export default function Dashboard() {
         </Grid>
 
         {/* Order Status Chart */}
-        <Grid item xs={12} md={6}>
+        <Grid >
           <Card
             sx={{
               backgroundColor: '#fff',
@@ -373,7 +374,7 @@ export default function Dashboard() {
               >
                 Order Status Distribution
               </Typography>
-              <Box sx={{ height: 'calc(100% - 60px)' }}>
+              <Box sx={{ height: 'calc(100% - 60px)',width:"20vw" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -381,8 +382,8 @@ export default function Dashboard() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) =>
-                        `${name} ${(percent * 100).toFixed(0)}%`
+                      label={({ name }) =>
+                        `${name}`
                       }
                       outerRadius={80}
                       fill="#8884d8"
@@ -410,13 +411,14 @@ export default function Dashboard() {
       {/* Recent Orders - Full Width */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Recent Orders */}
-        <Grid item xs={12}>
+        <Grid >
           <Card
             sx={{
               backgroundColor: '#fff',
               borderRadius: 3,
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
               height: 'fit-content',
+              width:"70vw"
             }}
           >
             <CardContent sx={{ p: 3 }}>

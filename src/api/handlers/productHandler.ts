@@ -24,7 +24,7 @@ export const useProducts = ({
       'products',
       { page, limit, search, name, category, sortBy, sortOrder },
     ] as const,
-    queryFn: productService.getProducts,
+    // queryFn: productService.getProducts,
     staleTime: 5 * 60 * 1000, // 5 minutes
     placeholderData: keepPreviousData, // Updated from keepPreviousData: true
   });
@@ -47,22 +47,22 @@ export const useSearchProducts = () => {
   });
 };
 
-export const useProductsByCategory = () => {
-  return useMutation({
-    mutationFn: ({
-      category,
-      page = 1,
-      limit = 10,
-    }: {
-      category: string;
-      page?: number;
-      limit?: number;
-    }) => productService.getProductsByCategory({ category, page, limit }),
-    onError: (error: any) => {
-      console.error('Get products by category error:', error);
-    },
-  });
-};
+// export const useProductsByCategory = () => {
+//   return useMutation({
+//     mutationFn: ({
+//       category,
+//       page = 1,
+//       limit = 10,
+//     }: {
+//       category: string;
+//       page?: number;
+//       limit?: number;
+//     }) => productService.getProductsByCategory({ category, page, limit }),
+//     onError: (error: any) => {
+//       console.error('Get products by category error:', error);
+//     },
+//   });
+// };
 
 export const useProductsByStockStatus = () => {
   return useMutation({
@@ -134,66 +134,66 @@ export const useAddProduct = () => {
   });
 };
 
-export const useUpdateProduct = () => {
-  const queryClient = useQueryClient();
-  const { addNotification } = useUIStore();
+// export const useUpdateProduct = () => {
+//   const queryClient = useQueryClient();
+//   const { addNotification } = useUIStore();
 
-  return useMutation({
-    mutationFn: ({
-      productId,
-      data,
-    }: {
-      productId: string;
-      data: Partial<CreateProductRequest>;
-    }) => productService.updateProduct({ productId, data }),
-    onError: (error: any) => {
-      console.error('Update product error:', error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to update product';
-      addNotification({
-        type: 'error',
-        message: errorMessage,
-      });
-    },
-    // onError: (error: any) => {
-    //   console.error("Update product error:", error)
+//   return useMutation({
+//     mutationFn: ({
+//       productId,
+//       data,
+//     }: {
+//       productId: string;
+//       data: Partial<CreateProductRequest>;
+//     }) => productService.updateProduct({ productId, data }),
+//     onError: (error: any) => {
+//       console.error('Update product error:', error);
+//       const errorMessage =
+//         error.response?.data?.message ||
+//         error.message ||
+//         'Failed to update product';
+//       addNotification({
+//         type: 'error',
+//         message: errorMessage,
+//       });
+//     },
+//     // onError: (error: any) => {
+//     //   console.error("Update product error:", error)
 
-    //   // Show error notification
-    //   addNotification({
-    //     type: "error",
-    //     message: error?.message || "Failed to update product",
-    //   })
-    // },
-  });
-};
+//     //   // Show error notification
+//     //   addNotification({
+//     //     type: "error",
+//     //     message: error?.message || "Failed to update product",
+//     //   })
+//     // },
+//   });
+// };
 
-export const useDeleteProduct = () => {
-  const queryClient = useQueryClient();
-  const { addNotification } = useUIStore();
+// export const useDeleteProduct = () => {
+//   const queryClient = useQueryClient();
+//   const { addNotification } = useUIStore();
 
-  return useMutation({
-    mutationFn: ({ productId }: { productId: string }) =>
-      productsService.deleteProduct({ productId }),
-    onSuccess: () => {
-      // Invalidate and refetch products
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+//   return useMutation({
+//     mutationFn: ({ productId }: { productId: string }) =>
+//       productsService.deleteProduct({ productId }),
+//     onSuccess: () => {
+//       // Invalidate and refetch products
+//       queryClient.invalidateQueries({ queryKey: ['products'] });
 
-      // Show success notification
-      addNotification({
-        type: 'success',
-        message: 'Product deleted successfully!',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Delete product error:', error);
+//       // Show success notification
+//       addNotification({
+//         type: 'success',
+//         message: 'Product deleted successfully!',
+//       });
+//     },
+//     onError: (error: any) => {
+//       console.error('Delete product error:', error);
 
-      // Show error notification
-      addNotification({
-        type: 'error',
-        message: error?.message || 'Failed to delete product',
-      });
-    },
-  });
-};
+//       // Show error notification
+//       addNotification({
+//         type: 'error',
+//         message: error?.message || 'Failed to delete product',
+//       });
+//     },
+//   });
+// };
