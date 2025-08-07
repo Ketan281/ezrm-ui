@@ -92,7 +92,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
   };
 
   const getOrderStatusProgress = (status: string) => {
-    const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+    const statuses = ['confirmed', 'shipped', 'out_for_delivery', 'delivered'];
     const currentIndex = statuses.indexOf(status.toLowerCase());
     return currentIndex;
   };
@@ -253,47 +253,46 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
           {/* Order Status Progress */}
           <Paper
             elevation={0}
-            sx={{ p: 3, mb: 0, borderRadius: 2, bgcolor: 'transparent' }}
+            sx={{ p: 3, mb: 3, borderRadius: 2, bgcolor: 'transparent' }}
           >
-            <Box sx={{ position: 'relative', width: '100%', mb: 4, px: 2 }}>
+            <Box sx={{ position: 'relative', width: '100%', mb: 4, px: 0 }}>
               <Box
                 sx={{
-                  position: 'absolute',
-                  top: '6px',
-                  left: 'calc(12.5% + 6px)',
-                  right: 'calc(12.5% + 6px)',
-                  height: '1px',
-                  zIndex: 0,
-                }}
-              >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    left: 0,
-                    width: `${(getOrderStatusProgress(orderData.orderStatus) * 33.33)}%`,
-                    height: '1px',
-                    backgroundColor: '#667085',
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    left: `${(getOrderStatusProgress(orderData.orderStatus) * 33.33)}%`,
-                    right: 0,
-                    height: '1px',
-                    backgroundColor: '#e0e0e0',
-                  }}
-                />
-              </Box>
-
-              <Box
-                sx={{
+                  position: 'relative',
                   display: 'flex',
                   justifyContent: 'space-between',
-                  position: 'relative',
-                  zIndex: 1,
+                  alignItems: 'flex-start',
+                  width: '100%',
                 }}
               >
+                {/* Single continuous background line */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '6px',
+                    left: 'calc(12.5% + 6px)', // Start from center of first circle
+                    right: 'calc(12.5% + 6px)', // End at center of last circle
+                    height: '2px',
+                    backgroundColor: '#e0e0e0',
+                    zIndex: 1,
+                  }}
+                />
+
+                {/* Active progress overlay */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '6px',
+                    left: 'calc(12.5% + 6px)',
+                    width: `calc(75% * ${Math.max(0, getOrderStatusProgress(orderData.orderStatus)) / 3})`,
+                    height: '2px',
+                    backgroundColor: '#f5a623',
+                    zIndex: 1,
+                    transition: 'width 0.3s ease',
+                  }}
+                />
+
+                {/* Status circles */}
                 {['confirmed', 'shipped', 'out_for_delivery', 'delivered'].map((status, index) => {
                   const currentStatusIndex = getOrderStatusProgress(orderData.orderStatus);
                   const isActive = index === currentStatusIndex;
@@ -306,6 +305,8 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
+                        position: 'relative',
+                        zIndex: 2,
                         width: '25%',
                       }}
                     >
@@ -316,7 +317,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                           mt: 1,
                           textAlign: 'center',
                           fontWeight: 500,
-                          color: isActive ? '#f5a623' : '#667085',
+                          color: isActive ? '#f5a623' : isCompleted ? '#667085' : '#bdbdbd',
                           fontSize: '12px',
                         }}
                       >
@@ -338,6 +339,9 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
               </Box>
             </Box>
           </Paper>
+
+
+
 
           <Typography
             variant="h6"
@@ -401,8 +405,8 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                     <Typography variant="body2" color="rgba(102, 112, 133, 1)">
                       {getPaymentMethodDisplay(orderData.paymentMethod)}
                     </Typography>
-                    <Typography 
-                      variant="body2" 
+                    <Typography
+                      variant="body2"
                       color={orderData.paymentStatus === 'completed' ? '#4caf50' : '#f5a623'}
                       fontWeight="500"
                     >
@@ -750,7 +754,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
             </Box>
 
             {/* Customer Orders (this order) */}
-            <Box sx={{ width: '70%' }}>
+            <Box sx={{ width: '100%' }}>
               <Typography
                 variant="h6"
                 fontWeight="700"
@@ -767,7 +771,7 @@ export function OrderTrackingClient({ id }: OrderTrackingClientProps) {
                 showHeader={true}
                 rowsPerPage={10}
                 currentPage={1}
-                onPageChange={() => {}}
+                onPageChange={() => { }}
               />
             </Box>
           </Box>
