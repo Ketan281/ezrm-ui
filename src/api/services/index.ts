@@ -44,7 +44,7 @@ export type {
   ShipmentsResponse,
   ApiResponse as ShipmentApiResponse,
 } from './shipments';
-export * from './refundTransactions'
+export * from './refundTransactions';
 // export type {
 //   Supplier,
 //   CreateSupplierRequest,
@@ -62,4 +62,12 @@ export * from './refundTransactions'
 //   ApiResponse as ProductApiResponse,
 //   CreateProductFormData,
 // } from './products';
-export { supplierRefundTransactionsService } from "./supplierRefundTransactions"
+export { supplierRefundTransactionsService } from './supplierRefundTransactions';
+export { customerAddressService } from './customerAddresses';
+export type {
+  CustomerAddress,
+  AddAddressRequest,
+  UpdateAddressRequest,
+  AddressResponse,
+  AddressesListResponse,
+} from './customerAddresses';

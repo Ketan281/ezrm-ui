@@ -156,6 +156,89 @@ class CustomerService {
       );
     }
   }
+
+  // Get customer cart
+  async getCustomerCart(customerId: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      cart: {
+        _id: string;
+        customer: string;
+        items: any[];
+        status: string;
+        totalAmount: number;
+        totalItems: number;
+        createdAt: string;
+        updatedAt: string;
+        expiresAt: string;
+      };
+      totalItems: number;
+      totalAmount: number;
+      itemCount: number;
+    };
+  }> {
+    try {
+      const response = await api.get(`/private/cart?customerId=${customerId}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to fetch customer cart'
+      );
+    }
+  }
+
+  // Get customer wishlist
+  async getCustomerWishlist(customerId: string): Promise<any> {
+    try {
+      const response = await api.get(
+        `/private/wishlist?customerId=${customerId}`
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to fetch customer wishlist'
+      );
+    }
+  }
+
+  // Get customer orders
+  async getCustomerOrders(
+    customerId: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      status?: string;
+    }
+  ): Promise<any> {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append('customerId', customerId);
+      if (params?.page) {
+        queryParams.append('page', params.page.toString());
+      }
+      if (params?.limit) {
+        queryParams.append('limit', params.limit.toString());
+      }
+      if (params?.status) {
+        queryParams.append('status', params.status);
+      }
+
+      const response = await api.get(
+        `/private/customer-orders?${queryParams.toString()}`
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to fetch customer orders'
+      );
+    }
+  }
+
+  // Get customer addresses (from customer data)
+  getCustomerAddresses(customer: Customer): any[] {
+    return customer.addresses || [];
+  }
 }
 
 export const customerService = new CustomerService();
