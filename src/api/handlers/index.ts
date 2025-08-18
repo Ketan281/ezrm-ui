@@ -5,13 +5,13 @@ export {
   useProfile,
   useForgotPassword,
   useResetPassword,
-} from "./authHandler"
+} from './authHandler';
 
 export {
   useUserProfile,
   useUpdateProfile,
   useChangePassword,
-} from "./userHandler"
+} from './userHandler';
 
 export {
   useProducts,
@@ -20,30 +20,21 @@ export {
   useProductsByStockStatus,
   useProductsByPriceRange,
   useAddProduct,
-  // useUpdateProduct,
-  // useDeleteProduct,
-} from "./productHandler"
+  useUpdateProduct,
+  useDeleteProduct,
+} from './productHandler';
 
-export {
-  useRFQs,
-  useRFQById,
-} from "./rfqHandler"
+export { useRFQs, useRFQById } from './rfqHandler';
 
-export {
-  useOrders,
-  useOrderById,
-} from "./ordersHandler"
+export { useOrders, useOrderById } from './ordersHandler';
 
 export {
   useCustomerReviews,
   // useCustomerReviewById,
   useUpdateReviewStatus,
   useDeleteReview,
-} from "./customerReviewsHandler"
+} from './customerReviewsHandler';
 
-export {
-  useShipments,
-  useShipmentById,
-} from "./shipmentsHandler"
-export * from './refundTransactionsHandler'
-export * from './supplierRefundTransactionsHandler'
+export { useShipments, useShipmentById } from './shipmentsHandler';
+export * from './refundTransactionsHandler';
+export * from './supplierRefundTransactionsHandler';
