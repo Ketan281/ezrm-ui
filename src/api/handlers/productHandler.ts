@@ -134,66 +134,67 @@ export const useAddProduct = () => {
   });
 };
 
-// export const useUpdateProduct = () => {
-//   const queryClient = useQueryClient();
-//   const { addNotification } = useUIStore();
+export const useUpdateProduct = () => {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUIStore();
 
-//   return useMutation({
-//     mutationFn: ({
-//       productId,
-//       data,
-//     }: {
-//       productId: string;
-//       data: Partial<CreateProductRequest>;
-//     }) => productService.updateProduct({ productId, data }),
-//     onError: (error: any) => {
-//       console.error('Update product error:', error);
-//       const errorMessage =
-//         error.response?.data?.message ||
-//         error.message ||
-//         'Failed to update product';
-//       addNotification({
-//         type: 'error',
-//         message: errorMessage,
-//       });
-//     },
-//     // onError: (error: any) => {
-//     //   console.error("Update product error:", error)
+  return useMutation({
+    mutationFn: ({
+      productId,
+      data,
+    }: {
+      productId: string;
+      data: Partial<CreateProductRequest>;
+    }) => productService.updateProduct(productId, data),
+    onSuccess: () => {
+      // Invalidate and refetch products
+      queryClient.invalidateQueries({ queryKey: ['products'] });
 
-//     //   // Show error notification
-//     //   addNotification({
-//     //     type: "error",
-//     //     message: error?.message || "Failed to update product",
-//     //   })
-//     // },
-//   });
-// };
+      // Show success notification
+      addNotification({
+        type: 'success',
+        message: 'Product updated successfully!',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Update product error:', error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to update product';
+      addNotification({
+        type: 'error',
+        message: errorMessage,
+      });
+    },
+  });
+};
 
-// export const useDeleteProduct = () => {
-//   const queryClient = useQueryClient();
-//   const { addNotification } = useUIStore();
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUIStore();
 
-//   return useMutation({
-//     mutationFn: ({ productId }: { productId: string }) =>
-//       productsService.deleteProduct({ productId }),
-//     onSuccess: () => {
-//       // Invalidate and refetch products
-//       queryClient.invalidateQueries({ queryKey: ['products'] });
+  return useMutation({
+    mutationFn: ({ productId }: { productId: string }) =>
+      productService.deleteProduct(productId),
+    onSuccess: () => {
+      // Invalidate and refetch products
+      queryClient.invalidateQueries({ queryKey: ['products'] });
 
-//       // Show success notification
-//       addNotification({
-//         type: 'success',
-//         message: 'Product deleted successfully!',
-//       });
-//     },
-//     onError: (error: any) => {
-//       console.error('Delete product error:', error);
+      // Show success notification
+      addNotification({
+        type: 'success',
+        message: 'Product deleted successfully!',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Delete product error:', error);
 
-//       // Show error notification
-//       addNotification({
-//         type: 'error',
-//         message: error?.message || 'Failed to delete product',
-//       });
-//     },
-//   });
-// };
+      // Show error notification
+      addNotification({
+        type: 'error',
+        message: error?.message || 'Failed to delete product',
+      });
+    },
+  });
+};
