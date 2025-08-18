@@ -28,36 +28,17 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
-import { customerService } from '@/api/services/customers';
+import {
+  customerService,
+  WishlistProduct,
+  CustomerWishlistData,
+} from '@/api/services/customers';
 
 interface WishlistTabProps {
   customerId: string;
 }
 
-interface WishlistItem {
-  _id: string;
-  product: {
-    _id: string;
-    name: string;
-    price: number;
-    images?: string[];
-    sku?: string;
-    description?: string;
-    category?: string;
-    inStock?: boolean;
-  };
-  addedAt: string;
-}
-
-// Interface available for future type checking
-// interface WishlistData {
-//   success: boolean;
-//   data: {
-//     items: WishlistItem[];
-//     totalItems: number;
-//     customerId: string;
-//   };
-// }
+// Using WishlistProduct and CustomerWishlistData from customers service
 
 export default function WishlistTab({ customerId }: WishlistTabProps) {
   const {
@@ -69,6 +50,8 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
     queryFn: () => customerService.getCustomerWishlist(customerId),
     enabled: !!customerId,
   });
+
+  console.log(wishlistData, 'wishlistData__wishlistData');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -112,10 +95,10 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
     );
   }
 
-  const wishlist = wishlistData?.data;
-  const wishlistItems = wishlist?.items || [];
+  const wishlist: CustomerWishlistData | undefined = wishlistData?.data;
+  const wishlistProducts: WishlistProduct[] = wishlist?.products || [];
 
-  if (!wishlist || wishlistItems.length === 0) {
+  if (!wishlist || wishlistProducts.length === 0) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <FavoriteIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
@@ -129,8 +112,8 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
     );
   }
 
-  const totalValue = wishlistItems.reduce(
-    (sum, item) => sum + (item.product.price || 0),
+  const totalValue = wishlistProducts.reduce(
+    (sum, product) => sum + (product.price || 0),
     0
   );
 
@@ -142,7 +125,7 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
           <Card elevation={2}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="error.main" gutterBottom>
-                {wishlist.totalItems}
+                {wishlist.totalProducts}
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 Total Items
@@ -166,7 +149,7 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
           <Card elevation={2}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="info.main" gutterBottom>
-                {wishlistItems.filter((item) => item.product.inStock).length}
+                {wishlistProducts.filter((product) => product.inStock).length}
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 In Stock
@@ -197,42 +180,52 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {wishlistItems.map((item) => (
-                  <TableRow key={item._id} hover>
+                {wishlistProducts.map((product) => (
+                  <TableRow key={product.id} hover>
                     <TableCell>
                       <Box
                         sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
                       >
                         <Avatar
-                          src={item.product.images?.[0]}
+                          src={product.bannerImage || product.images?.[0]}
                           sx={{ width: 60, height: 60 }}
                           variant="rounded"
                         >
-                          {item.product.name.charAt(0)}
+                          {product.name.charAt(0)}
                         </Avatar>
                         <Box>
                           <Typography variant="subtitle2" component="div">
-                            {item.product.name}
+                            {product.name}
                           </Typography>
                           <Typography
                             variant="caption"
                             color="text.secondary"
                             display="block"
                           >
-                            SKU: {item.product.sku || 'N/A'}
+                            SKU: {product.uniqueId}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            ID: {item.product._id}
+                            ID: {product.id}
                           </Typography>
-                          {item.product.description && (
+                          {product.description && (
                             <Typography
                               variant="body2"
                               color="text.secondary"
                               sx={{ mt: 0.5, maxWidth: 300 }}
                             >
-                              {item.product.description.length > 100
-                                ? `${item.product.description.substring(0, 100)}...`
-                                : item.product.description}
+                              {product.description.length > 100
+                                ? `${product.description.substring(0, 100)}...`
+                                : product.description}
+                            </Typography>
+                          )}
+                          {product.appearance && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              display="block"
+                              sx={{ mt: 0.5, fontStyle: 'italic' }}
+                            >
+                              Appearance: {product.appearance}
                             </Typography>
                           )}
                         </Box>
@@ -240,7 +233,7 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
                     </TableCell>
                     <TableCell align="center">
                       <Chip
-                        label={item.product.category || 'Uncategorized'}
+                        label={product.category || 'Uncategorized'}
                         size="small"
                         variant="outlined"
                         color="primary"
@@ -248,22 +241,20 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
                     </TableCell>
                     <TableCell align="center">
                       <Typography variant="subtitle2" color="success.main">
-                        {formatCurrency(item.product.price || 0)}
+                        {formatCurrency(product.price || 0)}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Chip
-                        label={
-                          item.product.inStock ? 'In Stock' : 'Out of Stock'
-                        }
+                        label={product.inStock ? 'In Stock' : 'Out of Stock'}
                         size="small"
-                        color={item.product.inStock ? 'success' : 'error'}
-                        variant={item.product.inStock ? 'filled' : 'outlined'}
+                        color={product.inStock ? 'success' : 'error'}
+                        variant={product.inStock ? 'filled' : 'outlined'}
                       />
                     </TableCell>
                     <TableCell align="center">
                       <Typography variant="body2" color="text.secondary">
-                        {formatDate(item.addedAt)}
+                        {formatDate(product.addedAt)}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -285,7 +276,7 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
                           size="small"
                           title="Add to Cart"
                           sx={{ color: 'success.main' }}
-                          disabled={!item.product.inStock}
+                          disabled={!product.inStock}
                         >
                           <CartIcon fontSize="small" />
                         </IconButton>
@@ -316,7 +307,7 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
           >
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Total {wishlistItems.length} items with estimated value of{' '}
+                Total {wishlistProducts.length} items with estimated value of{' '}
                 <Typography
                   component="span"
                   color="success.main"
@@ -332,7 +323,7 @@ export default function WishlistTab({ customerId }: WishlistTabProps) {
                 startIcon={<CartIcon />}
                 size="small"
                 disabled={
-                  wishlistItems.filter((item) => item.product.inStock)
+                  wishlistProducts.filter((product) => product.inStock)
                     .length === 0
                 }
               >

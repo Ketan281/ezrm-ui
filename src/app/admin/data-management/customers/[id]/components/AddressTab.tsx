@@ -18,6 +18,11 @@ import {
   DialogActions,
   MenuItem,
   Menu,
+  Avatar,
+  Divider,
+  Stack,
+  Paper,
+  Fade,
 } from '@mui/material';
 import {
   LocationOn as LocationIcon,
@@ -29,11 +34,17 @@ import {
   Add as AddIcon,
   Star as StarIcon,
   MoreVert as MoreVertIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Person as PersonIcon,
+  Badge as BadgeIcon,
+  CalendarToday as CalendarIcon,
 } from '@mui/icons-material';
 import { Customer } from '@/api/services/customers';
 import {
   CustomerAddress,
   customerAddressService,
+  CustomerAddressData,
 } from '@/api/services/customerAddresses';
 import AddressModal from '@/components/modals/AddressModal';
 
@@ -42,7 +53,9 @@ interface AddressTabProps {
 }
 
 export default function AddressTab({ customer }: AddressTabProps) {
-  const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
+  const [addressData, setAddressData] = useState<CustomerAddressData | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -70,10 +83,10 @@ export default function AddressTab({ customer }: AddressTabProps) {
       const response = await customerAddressService.getCustomerAddresses(
         customer._id
       );
-      setAddresses(response.data || []);
+      setAddressData(response.data);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch addresses');
-      setAddresses([]);
+      setAddressData(null);
     } finally {
       setLoading(false);
     }
@@ -106,9 +119,8 @@ export default function AddressTab({ customer }: AddressTabProps) {
         customer._id,
         addressToDelete._id
       );
-      setAddresses((prev) =>
-        prev.filter((addr) => addr._id !== addressToDelete._id)
-      );
+      // Refresh addresses after deletion
+      fetchAddresses();
       setDeleteDialogOpen(false);
       setAddressToDelete(null);
     } catch (err: any) {
@@ -121,13 +133,8 @@ export default function AddressTab({ customer }: AddressTabProps) {
 
     try {
       await customerAddressService.setDefaultAddress(customer._id, address._id);
-      // Update local state to reflect the change
-      setAddresses((prev) =>
-        prev.map((addr) => ({
-          ...addr,
-          isDefault: addr._id === address._id,
-        }))
-      );
+      // Refresh addresses after setting default
+      fetchAddresses();
       handleMenuClose();
     } catch (err: any) {
       setError(err.message || 'Failed to set default address');
@@ -181,6 +188,14 @@ export default function AddressTab({ customer }: AddressTabProps) {
     return `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
   if (!customer) {
     return (
       <Box sx={{ p: 3 }}>
@@ -199,12 +214,90 @@ export default function AddressTab({ customer }: AddressTabProps) {
     );
   }
 
+  const addresses = addressData?.addresses || [];
+  const customerInfo = addressData?.customer;
+
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 3 }}>
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
+      )}
+
+      {/* Customer Info Card */}
+      {customerInfo && (
+        <Fade in={true}>
+          <Paper
+            elevation={2}
+            sx={{
+              mb: 4,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              borderRadius: 3,
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <Avatar
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    fontSize: '2rem',
+                  }}
+                >
+                  {customerInfo.name.charAt(0)}
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{ fontWeight: 600 }}
+                  >
+                    {customerInfo.name}
+                  </Typography>
+                  <Stack direction="row" spacing={3} sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <EmailIcon fontSize="small" />
+                      <Typography variant="body1">
+                        {customerInfo.email}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <PhoneIcon fontSize="small" />
+                      <Typography variant="body1">
+                        {customerInfo.phone}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <BadgeIcon fontSize="small" />
+                      <Typography variant="body1">
+                        {customerInfo.uniqueId}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Chip
+                    label={customerInfo.membershipTier.toUpperCase()}
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      color: 'white',
+                      fontWeight: 600,
+                    }}
+                  />
+                </Box>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                    {addressData?.totalAddresses || 0}
+                  </Typography>
+                  <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                    Total Addresses
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Paper>
+        </Fade>
       )}
 
       {/* Header with Add Button */}
@@ -216,14 +309,24 @@ export default function AddressTab({ customer }: AddressTabProps) {
           alignItems: 'center',
         }}
       >
-        <Typography variant="h6">
-          Customer Addresses ({addresses.length})
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: 600, color: 'text.primary' }}
+        >
+          <LocationIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+          Address Management ({addresses.length})
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleAddAddress}
-          size="small"
+          sx={{
+            borderRadius: 2,
+            px: 3,
+            py: 1.5,
+            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+            boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+          }}
         >
           Add New Address
         </Button>
@@ -231,88 +334,232 @@ export default function AddressTab({ customer }: AddressTabProps) {
 
       {/* Address Cards */}
       {addresses.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 6 }}>
-          <LocationIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No Addresses Found
-          </Typography>
-          <Typography variant="body2" color="text.secondary" paragraph>
-            This customer has not added any addresses yet.
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddAddress}
+        <Fade in={true}>
+          <Paper
+            elevation={1}
+            sx={{
+              textAlign: 'center',
+              py: 8,
+              px: 4,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+            }}
           >
-            Add First Address
-          </Button>
-        </Box>
+            <LocationIcon
+              sx={{ fontSize: 80, color: 'text.secondary', mb: 3 }}
+            />
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              gutterBottom
+              sx={{ fontWeight: 600 }}
+            >
+              No Addresses Found
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              paragraph
+              sx={{ mb: 4 }}
+            >
+              This customer hasn't added any addresses yet. Get started by
+              adding their first address.
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<AddIcon />}
+              onClick={handleAddAddress}
+              sx={{
+                borderRadius: 2,
+                px: 4,
+                py: 1.5,
+                background: 'linear-gradient(45deg, #FF6B6B 30%, #4ECDC4 90%)',
+                boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+              }}
+            >
+              Add First Address
+            </Button>
+          </Paper>
+        </Fade>
       ) : (
-        <Grid container spacing={3}>
-          {addresses.map((address) => (
-            <Grid item xs={12} md={6} lg={4} key={address._id}>
-              <Card
-                elevation={2}
-                sx={{
-                  height: '100%',
-                  border: address.isDefault ? '2px solid' : 'none',
-                  borderColor: address.isDefault
-                    ? 'primary.main'
-                    : 'transparent',
-                  position: 'relative',
-                }}
-              >
-                <CardContent>
-                  {/* Address Type and Default Badge */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      mb: 2,
-                    }}
-                  >
-                    <Chip
-                      icon={getAddressTypeIcon(address.type)}
-                      label={
-                        address.type.charAt(0).toUpperCase() +
-                        address.type.slice(1)
-                      }
-                      color={getAddressTypeColor(address.type) as any}
-                      size="small"
-                    />
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {address.isDefault && (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(3, 1fr)',
+            },
+            gap: 3,
+          }}
+        >
+          {addresses.map((address, index) => (
+            <Box key={address._id}>
+              <Fade in={true} timeout={500 + index * 100}>
+                <Card
+                  elevation={3}
+                  sx={{
+                    height: '100%',
+                    borderRadius: 3,
+                    border: address.isDefault ? '3px solid' : '1px solid',
+                    borderColor: address.isDefault ? 'primary.main' : 'divider',
+                    position: 'relative',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                    },
+                    background: address.isDefault
+                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      : 'white',
+                    color: address.isDefault ? 'white' : 'inherit',
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    {/* Header with Type and Actions */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        mb: 3,
+                      }}
+                    >
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+                      >
                         <Chip
-                          icon={<StarIcon />}
-                          label="Default"
-                          color="warning"
-                          size="small"
-                          variant="outlined"
+                          icon={getAddressTypeIcon(address.type)}
+                          label={
+                            address.type.charAt(0).toUpperCase() +
+                            address.type.slice(1)
+                          }
+                          color={
+                            address.isDefault
+                              ? 'secondary'
+                              : (getAddressTypeColor(address.type) as any)
+                          }
+                          sx={{
+                            fontWeight: 600,
+                            bgcolor: address.isDefault
+                              ? 'rgba(255,255,255,0.2)'
+                              : undefined,
+                            color: address.isDefault ? 'white' : undefined,
+                          }}
                         />
-                      )}
+                        {address.isDefault && (
+                          <Chip
+                            icon={<StarIcon />}
+                            label="Default"
+                            sx={{
+                              bgcolor: 'rgba(255,215,0,0.9)',
+                              color: 'black',
+                              fontWeight: 600,
+                            }}
+                          />
+                        )}
+                      </Box>
                       <IconButton
                         size="small"
                         onClick={(e) => handleMenuOpen(e, address._id!)}
+                        sx={{
+                          color: address.isDefault ? 'white' : 'text.secondary',
+                          '&:hover': {
+                            bgcolor: address.isDefault
+                              ? 'rgba(255,255,255,0.1)'
+                              : 'rgba(0,0,0,0.04)',
+                          },
+                        }}
                       >
                         <MoreVertIcon />
                       </IconButton>
                     </Box>
-                  </Box>
 
-                  {/* Address Details */}
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ lineHeight: 1.6 }}
-                  >
-                    {formatAddress(address)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                    {/* Address Details */}
+                    <Box sx={{ mb: 3 }}>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          lineHeight: 1.8,
+                          color: address.isDefault
+                            ? 'rgba(255,255,255,0.9)'
+                            : 'text.primary',
+                          fontWeight: 500,
+                        }}
+                      >
+                        {formatAddress(address)}
+                      </Typography>
+                    </Box>
+
+                    <Divider
+                      sx={{
+                        mb: 2,
+                        bgcolor: address.isDefault
+                          ? 'rgba(255,255,255,0.2)'
+                          : undefined,
+                      }}
+                    />
+
+                    {/* Address Meta Info */}
+                    <Stack spacing={1}>
+                      {address.uniqueId && (
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
+                          <BadgeIcon
+                            fontSize="small"
+                            sx={{
+                              color: address.isDefault
+                                ? 'rgba(255,255,255,0.7)'
+                                : 'text.secondary',
+                            }}
+                          />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: address.isDefault
+                                ? 'rgba(255,255,255,0.7)'
+                                : 'text.secondary',
+                              fontWeight: 500,
+                            }}
+                          >
+                            ID: {address.uniqueId}
+                          </Typography>
+                        </Box>
+                      )}
+                      {address.createdAt && (
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
+                          <CalendarIcon
+                            fontSize="small"
+                            sx={{
+                              color: address.isDefault
+                                ? 'rgba(255,255,255,0.7)'
+                                : 'text.secondary',
+                            }}
+                          />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: address.isDefault
+                                ? 'rgba(255,255,255,0.7)'
+                                : 'text.secondary',
+                              fontWeight: 500,
+                            }}
+                          >
+                            Added: {formatDate(address.createdAt)}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Fade>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       )}
 
       {/* Context Menu */}
@@ -320,6 +567,13 @@ export default function AddressTab({ customer }: AddressTabProps) {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            minWidth: 180,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          },
+        }}
       >
         <MenuItem
           onClick={() => {
@@ -328,8 +582,9 @@ export default function AddressTab({ customer }: AddressTabProps) {
             );
             if (address) handleEditAddress(address);
           }}
+          sx={{ py: 1.5, px: 2 }}
         >
-          <EditIcon sx={{ mr: 1 }} fontSize="small" />
+          <EditIcon sx={{ mr: 2 }} fontSize="small" />
           Edit Address
         </MenuItem>
         <MenuItem
@@ -342,10 +597,12 @@ export default function AddressTab({ customer }: AddressTabProps) {
           disabled={
             addresses.find((addr) => addr._id === menuAddressId)?.isDefault
           }
+          sx={{ py: 1.5, px: 2 }}
         >
-          <StarIcon sx={{ mr: 1 }} fontSize="small" />
+          <StarIcon sx={{ mr: 2 }} fontSize="small" />
           Set as Default
         </MenuItem>
+        <Divider />
         <MenuItem
           onClick={() => {
             const address = addresses.find(
@@ -353,9 +610,9 @@ export default function AddressTab({ customer }: AddressTabProps) {
             );
             if (address) handleDeleteAddress(address);
           }}
-          sx={{ color: 'error.main' }}
+          sx={{ py: 1.5, px: 2, color: 'error.main' }}
         >
-          <DeleteIcon sx={{ mr: 1 }} fontSize="small" />
+          <DeleteIcon sx={{ mr: 2 }} fontSize="small" />
           Delete Address
         </MenuItem>
       </Menu>
@@ -376,27 +633,55 @@ export default function AddressTab({ customer }: AddressTabProps) {
         onClose={() => setDeleteDialogOpen(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          },
+        }}
       >
-        <DialogTitle>Delete Address</DialogTitle>
-        <DialogContent>
-          <Typography>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+            Delete Address
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
             Are you sure you want to delete this address? This action cannot be
             undone.
           </Typography>
           {addressToDelete && (
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary">
+            <Paper
+              sx={{
+                p: 2,
+                bgcolor: 'error.50',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'error.200',
+              }}
+            >
+              <Typography
+                variant="body2"
+                color="error.main"
+                sx={{ fontWeight: 500 }}
+              >
                 {formatAddress(addressToDelete)}
               </Typography>
-            </Box>
+            </Paper>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            variant="outlined"
+            sx={{ borderRadius: 2 }}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={confirmDeleteAddress}
             color="error"
             variant="contained"
+            sx={{ borderRadius: 2 }}
           >
             Delete
           </Button>

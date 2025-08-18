@@ -2,6 +2,7 @@ import { api } from '../config';
 
 export interface CustomerAddress {
   _id?: string;
+  customerId?: string;
   type: 'home' | 'work' | 'other';
   street: string;
   city: string;
@@ -9,6 +10,11 @@ export interface CustomerAddress {
   country: string;
   zipCode: string;
   isDefault: boolean;
+  isActive?: boolean;
+  uniqueId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
 }
 
 export interface AddAddressRequest {
@@ -32,11 +38,44 @@ export interface AddressResponse {
   error?: string;
 }
 
+export interface CustomerAddressData {
+  customer: {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    addresses: any[];
+    membershipTier: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    uniqueId: string;
+    __v: number;
+    loginApproval: boolean;
+    signupOtp: string | null;
+    signupOtpExpiry: string | null;
+    signupStep: string;
+    annualRevenue?: string;
+    businessType?: string;
+    companyName?: string;
+    contactPerson?: string;
+    contactPersonEmail?: string;
+    contactPersonPhone?: string;
+    employeeCount?: string;
+    industry?: string;
+    notes?: string;
+    registrationNumber?: string;
+    taxId?: string;
+    website?: string;
+  };
+  addresses: CustomerAddress[];
+  totalAddresses: number;
+}
+
 export interface AddressesListResponse {
   success: boolean;
-  data: CustomerAddress[];
-  message?: string;
-  error?: string;
+  data: CustomerAddressData;
+  message: string;
 }
 
 class CustomerAddressService {
@@ -47,7 +86,7 @@ class CustomerAddressService {
     customerId: string
   ): Promise<AddressesListResponse> {
     try {
-      const response = await api.get(`${this.baseUrl}/${customerId}`);
+      const response = await api.get(`${this.baseUrl}/customer/${customerId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(

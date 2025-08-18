@@ -66,6 +66,38 @@ export interface CustomersListResponse {
   totalPages: number;
 }
 
+export interface WishlistProduct {
+  id: string;
+  uniqueId: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  inStock: boolean;
+  images: string[];
+  bannerImage: string;
+  appearance: string;
+  status: string;
+  addedAt: string;
+}
+
+export interface CustomerWishlistData {
+  customerId: string;
+  customerUniqueId: string;
+  customerName: string;
+  customerEmail: string;
+  totalProducts: number;
+  products: WishlistProduct[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomerWishlistResponse {
+  success: boolean;
+  data: CustomerWishlistData;
+  message: string;
+}
+
 class CustomerService {
   private baseUrl = '/private/customers';
 
@@ -189,10 +221,12 @@ class CustomerService {
   }
 
   // Get customer wishlist
-  async getCustomerWishlist(customerId: string): Promise<any> {
+  async getCustomerWishlist(
+    customerId: string
+  ): Promise<CustomerWishlistResponse> {
     try {
       const response = await api.get(
-        `/private/wishlist?customerId=${customerId}`
+        `/private/wishlists/customer/${customerId}`
       );
       return response.data;
     } catch (error: any) {

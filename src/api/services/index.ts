@@ -70,4 +70,10 @@ export type {
   UpdateAddressRequest,
   AddressResponse,
   AddressesListResponse,
+  CustomerAddressData,
 } from './customerAddresses';
+export type {
+  WishlistProduct,
+  CustomerWishlistData,
+  CustomerWishlistResponse,
+} from './customers';
