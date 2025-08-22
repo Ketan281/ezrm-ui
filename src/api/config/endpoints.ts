@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL|| "http://localhost:5007/api/v1"
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5007/api/v1';
 
 export const ENDPOINTS = {
   BASE_URL,
@@ -51,4 +52,4 @@ export const ENDPOINTS = {
     UPDATE: `${BASE_URL}/private/shipments/:id`,
     DELETE: `${BASE_URL}/private/shipments/:id`,
   },
-} as const
+} as const;

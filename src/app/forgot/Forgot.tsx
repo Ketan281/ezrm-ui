@@ -18,35 +18,36 @@ import {
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { BASE_URL } from '@/api/config/endpoints';
 
 const ForgotPassword = () => {
   const router = useRouter();
-  
+
   // State for step management
   const [currentStep, setCurrentStep] = useState<'forgot' | 'set'>('forgot');
   const [userEmail, setUserEmail] = useState('');
-  
+
   // Forgot password states
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [emailError, setEmailError] = useState('');
-  
+
   // Set password states
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Form validation states for set password
   const [passwordErrors, setPasswordErrors] = useState({
     password: '',
     confirmPassword: '',
     otp: '',
   });
-  
+
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -80,7 +81,8 @@ const ForgotPassword = () => {
     } else if (password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters long';
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+      newErrors.password =
+        'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
 
     if (!confirmPassword) {
@@ -104,7 +106,7 @@ const ForgotPassword = () => {
   // API call function for reset request
   const requestPasswordReset = async (email: string) => {
     try {
-      const response = await fetch('http://localhost:5007/api/v1/auth/password/reset-request', {
+      const response = await fetch(`${BASE_URL}/auth/password/reset-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -118,31 +120,39 @@ const ForgotPassword = () => {
       return response.json();
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || 
-        error.response?.data?.error || 
-        'Failed to send reset request'
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          'Failed to send reset request'
       );
     }
   };
 
   // API call function for password reset verification
-  const verifyPasswordReset = async (email: string, otp: string, newPassword: string) => {
+  const verifyPasswordReset = async (
+    email: string,
+    otp: string,
+    newPassword: string
+  ) => {
     try {
-      const response = await axios.post('http://localhost:5007/api/v1/auth/password/reset-verify', {
-        email: email,
-        otp: otp,
-        newPassword: newPassword,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        `${BASE_URL}/auth/password/reset-verify`,
+        {
+          email: email,
+          otp: otp,
+          newPassword: newPassword,
         },
-      });
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       return response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || 
-        error.response?.data?.error || 
-        'Failed to verify password reset'
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          'Failed to verify password reset'
       );
     }
   };
@@ -161,16 +171,15 @@ const ForgotPassword = () => {
 
     try {
       await requestPasswordReset(email.trim());
-      
+
       setSuccess('Password reset OTP has been sent to your email address.');
       setUserEmail(email.trim());
-      
+
       // Switch to set password step after short delay
       setTimeout(() => {
         setCurrentStep('set');
         setSuccess(''); // Clear success message when switching
       }, 2000);
-      
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -185,7 +194,7 @@ const ForgotPassword = () => {
     setSuccess('');
 
     if (!validatePasswordForm()) return;
-    
+
     if (!userEmail) {
       setError('Email not found. Please restart the password reset process.');
       return;
@@ -195,19 +204,20 @@ const ForgotPassword = () => {
 
     try {
       await verifyPasswordReset(userEmail, otp, password);
-      
-      setSuccess('Password has been reset successfully! Redirecting to login...');
-      
+
+      setSuccess(
+        'Password has been reset successfully! Redirecting to login...'
+      );
+
       // Clear form
       setPassword('');
       setConfirmPassword('');
       setOtp('');
-      
+
       // Redirect to login
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-      
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -229,14 +239,16 @@ const ForgotPassword = () => {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
     if (passwordErrors.password) {
-      setPasswordErrors(prev => ({ ...prev, password: '' }));
+      setPasswordErrors((prev) => ({ ...prev, password: '' }));
     }
   };
 
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConfirmPasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setConfirmPassword(e.target.value);
     if (passwordErrors.confirmPassword) {
-      setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
+      setPasswordErrors((prev) => ({ ...prev, confirmPassword: '' }));
     }
   };
 
@@ -244,7 +256,7 @@ const ForgotPassword = () => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     setOtp(value);
     if (passwordErrors.otp) {
-      setPasswordErrors(prev => ({ ...prev, otp: '' }));
+      setPasswordErrors((prev) => ({ ...prev, otp: '' }));
     }
   };
 
@@ -312,7 +324,12 @@ const ForgotPassword = () => {
               // FORGOT PASSWORD FORM
               <>
                 <Box display={'flex'} alignItems={'center'} mb={2}>
-                  <Image src="/back.png" alt="Back Icon" width={30} height={20} />
+                  <Image
+                    src="/back.png"
+                    alt="Back Icon"
+                    width={30}
+                    height={20}
+                  />
                   <Link
                     href="/login"
                     color="#333"
@@ -323,7 +340,7 @@ const ForgotPassword = () => {
                     Back to login
                   </Link>
                 </Box>
-                
+
                 <Typography
                   variant="h5"
                   gutterBottom
@@ -332,7 +349,7 @@ const ForgotPassword = () => {
                 >
                   Forgot your Password?
                 </Typography>
-                
+
                 <Typography
                   variant="subtitle1"
                   color="#333333"
@@ -404,7 +421,7 @@ const ForgotPassword = () => {
                       },
                     }}
                   />
-                  
+
                   <Box
                     sx={{
                       display: 'flex',
@@ -423,9 +440,9 @@ const ForgotPassword = () => {
                         p: 2,
                         backgroundColor: '#F9A922',
                         '&:hover': { backgroundColor: '#E6951D' },
-                        '&:disabled': { 
+                        '&:disabled': {
                           backgroundColor: '#cccccc',
-                          color: '#666666'
+                          color: '#666666',
                         },
                         borderRadius: '30px',
                         fontWeight: 700,
@@ -447,7 +464,11 @@ const ForgotPassword = () => {
                           }}
                         />
                       )}
-                      {isLoading ? 'Sending...' : success ? 'Redirecting...' : 'Submit'}
+                      {isLoading
+                        ? 'Sending...'
+                        : success
+                          ? 'Redirecting...'
+                          : 'Submit'}
                     </Button>
                   </Box>
                 </form>
@@ -456,11 +477,11 @@ const ForgotPassword = () => {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ 
-                      display: 'block', 
-                      textAlign: 'center', 
+                    sx={{
+                      display: 'block',
+                      textAlign: 'center',
                       mt: 1,
-                      fontSize: '12px'
+                      fontSize: '12px',
                     }}
                   >
                     Please wait while we prepare the password reset form...
@@ -471,14 +492,15 @@ const ForgotPassword = () => {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ 
-                      display: 'block', 
-                      textAlign: 'center', 
+                    sx={{
+                      display: 'block',
+                      textAlign: 'center',
                       mt: 1,
-                      fontSize: '12px'
+                      fontSize: '12px',
                     }}
                   >
-                    After submitting, you will receive an OTP to reset your password.
+                    After submitting, you will receive an OTP to reset your
+                    password.
                   </Typography>
                 )}
               </>
@@ -486,11 +508,16 @@ const ForgotPassword = () => {
               // SET PASSWORD FORM
               <>
                 <Box display={'flex'} alignItems={'center'} mb={2}>
-                  <Image src="/back.png" alt="Back Icon" width={30} height={20} />
+                  <Image
+                    src="/back.png"
+                    alt="Back Icon"
+                    width={30}
+                    height={20}
+                  />
                   <Button
                     onClick={handleBackToForgot}
-                    sx={{ 
-                      color: "#333",
+                    sx={{
+                      color: '#333',
                       textDecoration: 'none',
                       ml: 0.5,
                       fontWeight: 600,
@@ -499,8 +526,8 @@ const ForgotPassword = () => {
                       padding: 0,
                       '&:hover': {
                         backgroundColor: 'transparent',
-                        textDecoration: 'underline'
-                      }
+                        textDecoration: 'underline',
+                      },
                     }}
                   >
                     Back to email entry
@@ -515,7 +542,7 @@ const ForgotPassword = () => {
                 >
                   Set a password
                 </Typography>
-                
+
                 <Typography
                   variant="subtitle1"
                   color="#333333"
@@ -524,7 +551,8 @@ const ForgotPassword = () => {
                   fontSize="14px"
                   width="100%"
                 >
-                  Enter the OTP sent to your email and set a new password for your account.
+                  Enter the OTP sent to your email and set a new password for
+                  your account.
                 </Typography>
 
                 {error && (
@@ -619,7 +647,9 @@ const ForgotPassword = () => {
                       sx: {
                         borderRadius: '30px',
                         '& fieldset': {
-                          borderColor: passwordErrors.otp ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.otp
+                            ? '#f44336'
+                            : '#e0e0e0',
                           borderRadius: '30px',
                         },
                       },
@@ -628,13 +658,19 @@ const ForgotPassword = () => {
                       '& .MuiOutlinedInput-root': {
                         borderRadius: '30px',
                         '& fieldset': {
-                          borderColor: passwordErrors.otp ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.otp
+                            ? '#f44336'
+                            : '#e0e0e0',
                         },
                         '&:hover fieldset': {
-                          borderColor: passwordErrors.otp ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.otp
+                            ? '#f44336'
+                            : '#e0e0e0',
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: passwordErrors.otp ? '#f44336' : '#1976d2',
+                          borderColor: passwordErrors.otp
+                            ? '#f44336'
+                            : '#1976d2',
                         },
                       },
                     }}
@@ -675,7 +711,9 @@ const ForgotPassword = () => {
                           >
                             <Image
                               src="/eye.png"
-                              alt={showPassword ? 'Hide password' : 'Show password'}
+                              alt={
+                                showPassword ? 'Hide password' : 'Show password'
+                              }
                               width={20}
                               height={20}
                             />
@@ -685,7 +723,9 @@ const ForgotPassword = () => {
                       sx: {
                         borderRadius: '30px',
                         '& fieldset': {
-                          borderColor: passwordErrors.password ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.password
+                            ? '#f44336'
+                            : '#e0e0e0',
                           borderRadius: '30px',
                         },
                       },
@@ -694,13 +734,19 @@ const ForgotPassword = () => {
                       '& .MuiOutlinedInput-root': {
                         borderRadius: '30px',
                         '& fieldset': {
-                          borderColor: passwordErrors.password ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.password
+                            ? '#f44336'
+                            : '#e0e0e0',
                         },
                         '&:hover fieldset': {
-                          borderColor: passwordErrors.password ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.password
+                            ? '#f44336'
+                            : '#e0e0e0',
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: passwordErrors.password ? '#f44336' : '#1976d2',
+                          borderColor: passwordErrors.password
+                            ? '#f44336'
+                            : '#1976d2',
                         },
                       },
                     }}
@@ -733,7 +779,9 @@ const ForgotPassword = () => {
                         <InputAdornment position="end">
                           <IconButton
                             aria-label={
-                              showConfirmPassword ? 'Hide password' : 'Show password'
+                              showConfirmPassword
+                                ? 'Hide password'
+                                : 'Show password'
                             }
                             onClick={handleToggleConfirmPasswordVisibility}
                             edge="end"
@@ -741,7 +789,11 @@ const ForgotPassword = () => {
                           >
                             <Image
                               src="/eye.png"
-                              alt={showConfirmPassword ? 'Hide password' : 'Show password'}
+                              alt={
+                                showConfirmPassword
+                                  ? 'Hide password'
+                                  : 'Show password'
+                              }
                               width={20}
                               height={20}
                             />
@@ -751,7 +803,9 @@ const ForgotPassword = () => {
                       sx: {
                         borderRadius: '30px',
                         '& fieldset': {
-                          borderColor: passwordErrors.confirmPassword ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.confirmPassword
+                            ? '#f44336'
+                            : '#e0e0e0',
                           borderRadius: '30px',
                         },
                       },
@@ -760,13 +814,19 @@ const ForgotPassword = () => {
                       '& .MuiOutlinedInput-root': {
                         borderRadius: '30px',
                         '& fieldset': {
-                          borderColor: passwordErrors.confirmPassword ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.confirmPassword
+                            ? '#f44336'
+                            : '#e0e0e0',
                         },
                         '&:hover fieldset': {
-                          borderColor: passwordErrors.confirmPassword ? '#f44336' : '#e0e0e0',
+                          borderColor: passwordErrors.confirmPassword
+                            ? '#f44336'
+                            : '#e0e0e0',
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: passwordErrors.confirmPassword ? '#f44336' : '#1976d2',
+                          borderColor: passwordErrors.confirmPassword
+                            ? '#f44336'
+                            : '#1976d2',
                         },
                       },
                     }}
@@ -819,11 +879,11 @@ const ForgotPassword = () => {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ 
-                    display: 'block', 
-                    textAlign: 'center', 
+                  sx={{
+                    display: 'block',
+                    textAlign: 'center',
                     mt: 1,
-                    fontSize: '12px'
+                    fontSize: '12px',
                   }}
                 >
                   Enter the 6-digit OTP sent to: {userEmail}
