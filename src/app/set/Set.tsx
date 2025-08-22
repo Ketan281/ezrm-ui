@@ -17,10 +17,11 @@ import {
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { BASE_URL } from '@/api/config/endpoints';
 
 const Set = () => {
   const router = useRouter();
-  
+
   const [userEmail, setUserEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -50,24 +51,28 @@ const Set = () => {
       try {
         if (typeof window !== 'undefined') {
           const resetData = sessionStorage.getItem('resetData');
-          
+
           if (resetData) {
             const data = JSON.parse(resetData);
-            
+
             // Check if data is recent (within 15 minutes)
             if (Date.now() - data.timestamp < 15 * 60 * 1000) {
               setUserEmail(data.email);
               console.log('Email loaded from sessionStorage:', data.email);
             } else {
               // Data expired, redirect back
-              setError('Session expired. Please restart the password reset process.');
+              setError(
+                'Session expired. Please restart the password reset process.'
+              );
               setTimeout(() => {
                 router.push('/forgot');
               }, 3000);
             }
           } else {
             // No reset data found
-            setError('No reset session found. Please restart the password reset process.');
+            setError(
+              'No reset session found. Please restart the password reset process.'
+            );
             setTimeout(() => {
               router.push('/forgot');
             }, 3000);
@@ -98,7 +103,8 @@ const Set = () => {
     } else if (password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters long';
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+      newErrors.password =
+        'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
 
     if (!confirmPassword) {
@@ -120,23 +126,31 @@ const Set = () => {
   };
 
   // API call function for password reset verification
-  const verifyPasswordReset = async (email: string, otp: string, newPassword: string) => {
+  const verifyPasswordReset = async (
+    email: string,
+    otp: string,
+    newPassword: string
+  ) => {
     try {
-      const response = await axios.post('http://localhost:5007/api/v1/auth/password/reset-verify', {
-        email: email,
-        otp: otp,
-        newPassword: newPassword,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        `${BASE_URL}/auth/password/reset-verify`,
+        {
+          email: email,
+          otp: otp,
+          newPassword: newPassword,
         },
-      });
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       return response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || 
-        error.response?.data?.error || 
-        'Failed to verify password reset'
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          'Failed to verify password reset'
       );
     }
   };
@@ -147,7 +161,7 @@ const Set = () => {
     setSuccess('');
 
     if (!validateForm()) return;
-    
+
     if (!userEmail) {
       setError('Email not found. Please restart the password reset process.');
       return;
@@ -157,24 +171,25 @@ const Set = () => {
 
     try {
       await verifyPasswordReset(userEmail, otp, password);
-      
-      setSuccess('Password has been reset successfully! Redirecting to login...');
-      
+
+      setSuccess(
+        'Password has been reset successfully! Redirecting to login...'
+      );
+
       // Clear stored reset data
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('resetData');
       }
-      
+
       // Clear form
       setPassword('');
       setConfirmPassword('');
       setOtp('');
-      
+
       // Redirect to login
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-      
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -185,14 +200,16 @@ const Set = () => {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
     if (errors.password) {
-      setErrors(prev => ({ ...prev, password: '' }));
+      setErrors((prev) => ({ ...prev, password: '' }));
     }
   };
 
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConfirmPasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setConfirmPassword(e.target.value);
     if (errors.confirmPassword) {
-      setErrors(prev => ({ ...prev, confirmPassword: '' }));
+      setErrors((prev) => ({ ...prev, confirmPassword: '' }));
     }
   };
 
@@ -200,7 +217,7 @@ const Set = () => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     setOtp(value);
     if (errors.otp) {
-      setErrors(prev => ({ ...prev, otp: '' }));
+      setErrors((prev) => ({ ...prev, otp: '' }));
     }
   };
 
@@ -214,7 +231,15 @@ const Set = () => {
 
   if (!isClient) {
     return (
-      <Container maxWidth="lg" sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <CircularProgress />
       </Container>
     );
@@ -271,7 +296,8 @@ const Set = () => {
               fontSize="14px"
               width="100%"
             >
-              Enter the OTP sent to your email and set a new password for your account.
+              Enter the OTP sent to your email and set a new password for your
+              account.
             </Typography>
 
             {error && (
@@ -480,7 +506,9 @@ const Set = () => {
                     <InputAdornment position="end">
                       <IconButton
                         aria-label={
-                          showConfirmPassword ? 'Hide password' : 'Show password'
+                          showConfirmPassword
+                            ? 'Hide password'
+                            : 'Show password'
                         }
                         onClick={handleToggleConfirmPasswordVisibility}
                         edge="end"
@@ -488,7 +516,11 @@ const Set = () => {
                       >
                         <Image
                           src="/eye.png"
-                          alt={showConfirmPassword ? 'Hide password' : 'Show password'}
+                          alt={
+                            showConfirmPassword
+                              ? 'Hide password'
+                              : 'Show password'
+                          }
                           width={20}
                           height={20}
                         />
@@ -498,7 +530,9 @@ const Set = () => {
                   sx: {
                     borderRadius: '30px',
                     '& fieldset': {
-                      borderColor: errors.confirmPassword ? '#f44336' : '#e0e0e0',
+                      borderColor: errors.confirmPassword
+                        ? '#f44336'
+                        : '#e0e0e0',
                       borderRadius: '30px',
                     },
                   },
@@ -507,13 +541,19 @@ const Set = () => {
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '30px',
                     '& fieldset': {
-                      borderColor: errors.confirmPassword ? '#f44336' : '#e0e0e0',
+                      borderColor: errors.confirmPassword
+                        ? '#f44336'
+                        : '#e0e0e0',
                     },
                     '&:hover fieldset': {
-                      borderColor: errors.confirmPassword ? '#f44336' : '#e0e0e0',
+                      borderColor: errors.confirmPassword
+                        ? '#f44336'
+                        : '#e0e0e0',
                     },
                     '&.Mui-focused fieldset': {
-                      borderColor: errors.confirmPassword ? '#f44336' : '#1976d2',
+                      borderColor: errors.confirmPassword
+                        ? '#f44336'
+                        : '#1976d2',
                     },
                   },
                 }}
@@ -566,11 +606,11 @@ const Set = () => {
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{ 
-                display: 'block', 
-                textAlign: 'center', 
+              sx={{
+                display: 'block',
+                textAlign: 'center',
                 mt: 1,
-                fontSize: '12px'
+                fontSize: '12px',
               }}
             >
               Enter the 6-digit OTP sent to your email address.
@@ -578,9 +618,10 @@ const Set = () => {
 
             {!userEmail && !isLoading && (
               <Alert severity="warning" sx={{ mt: 2 }}>
-                No email found. Please restart the password reset process from the forgot password page.
-                <Button 
-                  onClick={() => router.push('/forgot')} 
+                No email found. Please restart the password reset process from
+                the forgot password page.
+                <Button
+                  onClick={() => router.push('/forgot')}
                   sx={{ ml: 1, textTransform: 'none' }}
                   size="small"
                 >
