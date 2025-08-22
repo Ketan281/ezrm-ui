@@ -111,6 +111,12 @@ const LoginPage = () => {
 
   const isFormValid = email.length > 0 && password.length > 0;
 
+  console.log(
+    'hellooo',
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+    'NEXT_PUBLIC_API_BASE_URL'
+  );
+
   return (
     <Container
       maxWidth="lg"
